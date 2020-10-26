@@ -1,0 +1,164 @@
+[ parameter_optimization ]
+; NTORS:
+;   0: No optimization of dihedral parameters.
+;   1: Optimize dihedral parameters.
+;
+; NLJ:
+;   0: No optimization of LJ parameters (CS6 and CS12 values from topology are used).
+;   1: Optimize LJ parameters.
+;
+; FTORS:
+;   1: Sum of standard periodic dihedrals.
+;   2: Ryckaert-Bellemanns dihedral.
+;
+; TORSNT[I], I=1..6
+;   0: Set I-th term of the torsional potential to zero.
+;   1: Use I-th term of the torsional.
+; For FTORS = 1, the I-th term is a standard periodic dihedral with multiplicity I.
+; For FTORS = 2, the I-th term is the (I-1)-th order term of the Ryckaert-Bellemanns potential.
+;
+; LJNT[I], I=1,2
+;   0: Read/derive I-th term of the Lennard-Jones potential from topology.
+;   1: Optimize I-th term of the Lennard-Jones potential.
+; I=1: CS6
+; I=2: CS12
+;
+; WTEMP:
+;   0: Uniform weights (equivalent to infinitely large WTEMP).
+;  >0: Boltzmann weights with temperature WTEMP (in K).
+; 
+; NTORS   NLJ    FTORS
+      1     1        1
+; TORSNT[I]
+; I=  1     2     3     4     5     6
+      1     1     1     1     1     1
+; LJNT[I]
+; I=  1     2
+;   CS6  CS12
+      1     1
+; WTEMP
+      0
+
+[ parameter_randomization ]
+; PINV:
+;       0: Do not invert sign of torsional terms.
+;   1-100: (Integer) Invert sign of value with probability PINV/100.
+;
+; DIST[I], I=1..3:
+;   1: Uniform distribution between MIN and MAX (MEAN and STDDEV are ignored). 
+;   2: Lognormal distribution with mean MEAN and std. dev. STDDEV.
+;   3: Gaussian distribution with mean MEAN and std. dev. STDDEV.
+;   4: Loguniform distribution between MIN and MAX (MEAN and STDDEV are ignored).
+;
+; MIN[I]:
+;      (Float) Lower bound for the randomized values. If value < MIN, it is discarded.
+;
+; MAX[I]:
+;      (Float) Upper bound for the randomized values. If value > MAX, it is discarded.
+;
+; MEAN[I]:
+;      (Float) Mean of the distribution.
+;
+; STDDEV:
+;      (Float) Standard deviation of the distribution.
+;
+; I=1: Torsional barriers (units: kJ/mol/rad**2) / Ryckaert-Bellemanns constants C0..C5 (units: kJ/mol).
+; I=2: CS6 (units: kJ/(mol nm**6)).
+; I=3: CS12 (units: kJ/(mol nm**12)).
+;
+; PINV
+    50
+; DIST[I]  MIN[I]    MAX[I]     MEAN[I]  STDDEV[I]
+        1       0        80         6.0       50.0
+        1    5e-4      1e-2        8e-3      50e-3
+        1    5e-7      1e-5        8e-6      50e-6
+
+[ genetic_algorithm ]
+; POPSIZE:
+;   >0: (Integer) Population size.
+;
+; NGENS:
+;   >=0: (Integer) Number of generations.
+;
+; SELTYPE
+;   1: Roulette selection.
+;   2: Rank selection.
+;   3: Tournament selection.
+;
+; MUTRATE:
+;   0-100: (Integer) Probability of mutation.
+;
+; CRATE:
+;   0-100: (Integer) Probability of crossover.
+;
+; NTEL:
+;   0: Do not apply elitism.
+;  >0: Apply elitism with NTEL best individuals conserved.
+;
+; CRTYPE: 
+;   1: Arithmetic crossover.
+;   2: Heuristic crossover.
+;
+; POPSIZE    NGENS
+       64      100
+; SELTYPE     NTEL
+        1        4
+;  CRTYPE   CRRATE    MUT
+        2      100     20
+
+[ writetraj ]
+; NSTE:
+;   >0: (Integer) Frequency (in number of generations) to write to energy trajectory.
+;
+; NSTP:
+;   >0: (Integer) Frequency (in number of generations) to write to parameters trajectory.
+;
+; NSTE   NSTP
+    10     10
+
+[ minimization ]
+; MALG[I]:
+;   0: No minimization.
+;   1: Steepest-descents (SDEM).
+;   2: Conjugate-gradients (CGEM).
+;
+; DX0[I]:
+;   (Float) Value of DX0 in minimization algorithm.
+;
+; DXM[I]:
+;   (Float) Max value of DX.
+;
+; NMAX[I]:
+;   >0: (Integer) Maximum number of iterations.
+;
+; DELE[I]:
+;   (Float) Desired precision in final energy (kJ/mol), minimization stops if |DE| < DELE.
+;
+; I=1: For each individual, right after generation.
+; I=2: For best individual at the end of program execution.
+;
+; MALG[I]    DX0[I]  DXM[I]  NMAX[I]     DELE[I]
+        2      0.01     0.1      100        1e-3
+        2      0.01     0.1     5000        1e-6
+
+[ torsional_scan ]
+; RFRST:
+;   (Float) Dihedral-scan starting angle (deg).
+.
+; RSTEP:
+;   (Float) Dihedral-scan step angle (deg).
+;
+; RLST:
+;   (Float) Dihedral-scan stop/last angle (deg, inclusive).
+;
+; RFCT:
+;   (Float) Force constant of dihedral restraints.
+;
+; RFRST  RSTEP  RLST   RFCT
+      0     10   360   5000
+
+[ seed ]
+; SEED:
+;    -1: use Python default
+;   >=0: (Integer) Integer seed for RNG
+12705

@@ -1,0 +1,124 @@
+# Description
+
+`gromos_top_to_stp` is a C program to convert GROMOS topology files to .stp files supported in `profilerTools`.
+It is intended to facilitate the use of `profilerTools` to GROMOS software users.
+
+# Installation
+
+To install, follow the usual routine for Linux programs. We suggest the following.
+
+1. Create a build directory and go into it:
+
+		mkdir build
+		cd build
+
+2. Configure the Makefile to install the program at /usr/local with
+
+		../configure
+
+	or at another path with
+
+		../configure --prefix=/path/of/prefix
+
+3. Compile:
+
+		make
+
+4. Install (sudo may be required depending on the chosen installation path):
+
+		(sudo) make install
+
+# Usage
+
+The program converts each file of a list of input GROMOS topology files to a corresponding .stp file. Its usage is as follows:
+
+    gromos_top_to_stp
+
+    -t LIST_OF_TOPOLOGIES
+		List of input topology files with extension '.top' separated by
+		spaces. Each file NAME.top is converted to NAME.stp. The '.top'
+		extension is enforced to avoid renaming problems.
+
+    [-a ATOMTYPE]	
+		Atomtype under optimization. All its occurrences will be listed
+		in the [ optatoms ] block.
+
+    [-p PAIR_REGEX_STRING]
+		Regular expression describing the 1-4 pairs to list in the
+		[ optpairs ] block. Each pair of atoms A-B in the topology is
+		represented as the strings "A-B" and "B-A", which are matched
+		against the given regular expression. If one of them matches,
+		the pair is listed in the [ optpairs ] block.
+
+    [-d DIH_REGEX_STRING]
+		Regular expression describing the dihedral angles to list in the [
+		optdihedrals ] block.  Each dihedral angle A-B-C-D in the topology is
+		represented as the strings "A-B-C-D" and "D-C-B-A", which are matched
+		against the given regular expression. If one of them matches, the
+		dihedral angle is listed in the [ optdihedrals ] block.
+
+    [-r LIST_OF_REFIDX]
+		List of indexes (one-based) of the reference dihedral corresponding
+		to each input topology. 
+
+    [-inter]
+		Force the use of the interactive interface.
+
+When only the `-t` option is used, the program will not write any of the blocks `[ refdihedral ]`, `[ optdihedrals ]`, `[ optpairs ]` or `[ optatoms ]`. If you want any of them, either force a call to the interactive interface with the `-inter` option or use the options `-a`, `-p`, `-d` or `-r` (in which case the interactive interface will also be called if the program needs information that was not given by the user). Note that the options `-p` and `-a` are mutually exclusive.
+
+# Examples
+
+Assume that the files `pentane.top` and `hexane.top` are GROMOS topologies for the pentane (CH3-CH2-CH2-CH2-CH3) and hexane (CH3-CH2-CH2-CH2-CH2-CH3) molecules, respectively.
+Consider the following possible uses of `gromos_top_to_stp`:
+
+* 
+
+		gromos_top_to_stp -t pentane.top hexane.top
+		
+	The .stp output files will be written without any of the blocks `[ refdihedral ]`, `[ optdihedrals ]`, `[ optpairs ]` or `[ optatoms ]`. The interactive interface will not be invoked.
+
+
+* 
+
+		gromos_top_to_stp -t pentane.top hexane.top -inter
+		
+	A user-friendly interactive interface will obtain the information necessary to the blocks `[ refdihedral ]`, `[ optdihedrals ]`, `[ optpairs ]` and `[ optatoms ]`. The appropriate blocks will be written in the .stp output files.
+
+* 
+
+		gromos_top_to_stp -t pentane.top hexane.top -p "CH3-CH2" -d "CH3-.*-.*-CH2"
+	
+	The value of the `-p` option will cause every 1,4 nonbonded pair of the type CH3-CH2 (or CH2-CH3) to be listed in the `[ optpairs ]` blocks of the .stp files. 
+	The value of the `-d` option will cause every dihedral angle that starts (ends) with CH3 and ends (starts) with CH2 to be listed in the `[ optdihedrals ]` blocks of the .stp files.
+	On account of the lack of the `-r` option, the reference dihedrals will be obtained by a user-friendly interactive interface that will be called automatically.
+	
+* 
+
+		gromos_top_to_stp -t pentane.top hexane.top -p "CH3-CH2" -d "CH3-.*-.*-CH2" -r 1 2
+
+	The value of the `-p` option will cause every 1,4 nonbonded pair of the type CH3-CH2 (or CH2-CH3) to be listed in the `[ optpairs ]` blocks of the .stp files. 
+	The value of the `-d` option will cause every dihedral angle that starts (ends) with CH3 and ends (starts) with CH2 to be listed in the `[ optdihedrals ]` blocks of the .stp files.
+	The value of the `-r` option will cause different effects on the .stp file of each system.
+	For pentane, the proper dihedral angle of which the index equals 1 (the first) will be listed in the `[ refdihedral ]` block of the corresponding .stp file.
+	For hexane, the proper dihedral angle of which the index equals 2 (the second) will be listed in the `[ refdihedral ]` block of the corresponding .stp file.
+
+# Hard-coded Limits
+
+The code of `gromos_top_to_stp` relies heavily on static arrays.
+Their sizes depend on the values of several pre-processing macros, which are listed below together with their meaning and the source file of origin:
+
+	src/forcefield.h:#define  FF_N_ATOMTYPES_MAX_SIZE   500    // Maximum number of atom types in force field
+	src/forcefield.h:#define  FF_N_PAIRTYPES_MAX_SIZE   125000 // Maximum number of pair types in force field
+	src/forcefield.h:#define  FF_N_BONDS_MAX_SIZE   5000       // Maximum number of bond types in force field
+	src/forcefield.h:#define  FF_N_ANGLES_MAX_SIZE  5000       // Maximum number of angle types in force field
+	src/forcefield.h:#define  FF_N_DIH_MAX_SIZE     5000       // Maximum number of proper-dihedral types in force field
+	src/forcefield.h:#define  FF_N_IDIH_MAX_SIZE    5000       // Maximum number of improper-dihedral types in force field
+	src/topo.h:#define  N_ATOMS_MAX_SIZE   100                 // Maximum number of atoms in a topology
+	src/topo.h:#define  N_BONDS_MAX_SIZE   400                 // Maximum number of bonds in a topology
+	src/topo.h:#define  N_ANGLES_MAX_SIZE  400                 // Maximum number of angles in a topology
+	src/topo.h:#define  N_DIH_MAX_SIZE     100                 // Maximum number of proper dihedrals in a topology
+	src/topo.h:#define  N_IDIH_MAX_SIZE    100                 // Maximum number of improper dihedrals in a topology
+	src/topo.h:#define  N_EXCL_MAX_SIZE   1000                 // Maximum number of exclusions in a topology
+	src/topo.h:#define  N_PAIRS_MAX_SIZE   1000                // Maximum number of nonbonded pairs in a topology
+	
+If you are having errors and find out that one or more of these limits is too small for your needs, you are most likely dealing with a system that is too big to be used in `profilerTools` efficiently.

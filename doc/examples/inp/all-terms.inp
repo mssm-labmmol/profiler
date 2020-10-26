@@ -1,0 +1,48 @@
+[ parameter_optimization ]
+; NTORS   NLJ   FTORS
+      1     1       1
+; TORSNT[I]
+; I=  1     2     3     4     5     6
+      1     1     1     1     1     1
+; LJNT[I]
+; I=  1     2
+;   CS6  CS12
+      1     1
+; WTEMP
+      0
+
+[ seed ]
+;   SEED
+   19804
+     
+[ parameter_randomization ]
+;    PINV
+       50
+; DIST[I]  MIN[I]    MAX[I]     MEAN[I]  STDDEV[I]
+; Torsional
+        2       0        30        10.0        5.0
+; CS6	
+        2       0         1        8e-3      24e-3
+; CS12	
+        2       0         1        8e-6      24e-6
+
+[ genetic_algorithm ]
+; POPSIZE    NGENS
+      128     50
+; SELTYPE     NTEL
+        4        2
+;  CRTYPE   CRRATE MUTRATE
+        2      100      40
+
+[ writetraj ]
+; NSTE   NSTP
+     5      5
+
+[ minimization ]
+; MALG[I]    DX0[I]  DXM[I]  NMAX[I]     DELE[I]
+        1      0.02     0.2       20        1e-2
+        1      0.02     0.2   500000        1e-9
+
+[ torsional_scan ]
+;   RFRST  RSTEP  RLST   RFCT
+        0     10   360   5000
