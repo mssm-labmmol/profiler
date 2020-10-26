@@ -1,0 +1,382 @@
+[ defaults ]
+; nbfunc comb-rule gen-pairs fudgeLJ fudgeQQ
+       1         1    atomic  1.0000  1.0000
+
+[ atoms ]
+NL        2.4364096e-03     2.3195290e-06     2.4364096e-03     1.6926010e-06       1.29000e-01 ; N 
+H         0.0000000e+00     0.0000000e+00     0.0000000e+00     0.0000000e+00       2.48000e-01 ; H1 
+H         0.0000000e+00     0.0000000e+00     0.0000000e+00     0.0000000e+00       2.48000e-01 ; H2 
+H         0.0000000e+00     0.0000000e+00     0.0000000e+00     0.0000000e+00       2.48000e-01 ; H3 
+CH1       6.0684100e-03     9.7022500e-05     2.9116816e-03     3.7364890e-06       1.27000e-01 ; CA 
+CH2       7.4684164e-03     3.3965584e-05     4.7238129e-03     4.7419261e-06       1.00000e-01 ; CB 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06      -1.00000e-01 ; CG 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06      -1.29800e-01 ; CD1 
+HC        8.4640000e-05     1.5129000e-08     8.4640000e-05     1.5129000e-08       1.29800e-01 ; HD1 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06      -1.29800e-01 ; CD2 
+HC        8.4640000e-05     1.5129000e-08     8.4640000e-05     1.5129000e-08       1.29800e-01 ; HD2 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06      -1.29800e-01 ; CE1 
+HC        8.4640000e-05     1.5129000e-08     8.4640000e-05     1.5129000e-08       1.29800e-01 ; HE1 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06      -1.29800e-01 ; CE2 
+HC        8.4640000e-05     1.5129000e-08     8.4640000e-05     1.5129000e-08       1.29800e-01 ; HE2 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06      -1.29800e-01 ; CZ 
+HC        8.4640000e-05     1.5129000e-08     8.4640000e-05     1.5129000e-08       1.29800e-01 ; HZ 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06       5.40000e-01 ; C 
+O         1.7106496e-03     9.9002500e-07     2.2619536e-03     7.4149321e-07      -5.40000e-01 ; O 
+N         2.3040000e-03     2.8900000e-06     2.4364096e-03     1.6926010e-06      -5.00000e-01 ; N 
+H         0.0000000e+00     0.0000000e+00     0.0000000e+00     0.0000000e+00       3.10000e-01 ; H 
+CH1       6.0684100e-03     9.7022500e-05     2.9116816e-03     3.7364890e-06       1.90000e-01 ; CA 
+CH3       9.6138025e-03     2.6646244e-05     6.8525284e-03     6.0308652e-06       0.00000e+00 ; CB 
+C         2.3406244e-03     4.9372840e-06     2.3406244e-03     3.3745690e-06       2.70000e-01 ; C 
+OM        2.2619536e-03     7.4149321e-07     2.2619536e-03     7.4149321e-07      -6.35000e-01 ; O1 
+OM        2.2619536e-03     7.4149321e-07     2.2619536e-03     7.4149321e-07      -6.35000e-01 ; O2 
+
+[ nbpairs ]
+    1    8     1    2.38803680e-03    3.38410600e-06 ; 1 -> standard pair NL - C
+    1    9     1    4.54112000e-04    1.87329000e-07 ; 2 -> standard pair NL - HC
+    1   10     1    2.38803680e-03    3.38410600e-06 ; 3 -> standard pair NL - C
+    1   11     1    4.54112000e-04    1.87329000e-07 ; 4 -> standard pair NL - HC
+    1   12     1    2.38803680e-03    3.38410600e-06 ; 5 -> standard pair NL - C
+    1   13     1    4.54112000e-04    1.87329000e-07 ; 6 -> standard pair NL - HC
+    1   14     1    2.38803680e-03    3.38410600e-06 ; 7 -> standard pair NL - C
+    1   15     1    4.54112000e-04    1.87329000e-07 ; 8 -> standard pair NL - HC
+    1   16     1    2.38803680e-03    3.38410600e-06 ; 9 -> standard pair NL - C
+    1   17     1    4.54112000e-04    1.87329000e-07 ; 10 -> standard pair NL - HC
+    1   21     1    0.00000000e+00    0.00000000e+00 ; 11 -> standard pair NL - H
+    1   22     1    3.84514400e-03    1.50015500e-05 ; 12 -> standard pair NL - CH1
+    1   23     1    4.83974800e-03    7.86172600e-06 ; 13 -> standard pair NL - CH3
+    1   24     1    2.38803680e-03    3.38410600e-06 ; 14 -> standard pair NL - C
+    1   25     1    2.34756160e-03    9.41262400e-06 ; 15 -> standard pair NL - OM
+    1   26     1    2.34756160e-03    9.41262400e-06 ; 16 -> standard pair NL - OM
+    2    7     1    0.00000000e+00    0.00000000e+00 ; 17 -> standard pair H - C
+    2    8     1    0.00000000e+00    0.00000000e+00 ; 18 -> standard pair H - C
+    2    9     1    0.00000000e+00    0.00000000e+00 ; 19 -> standard pair H - HC
+    2   10     1    0.00000000e+00    0.00000000e+00 ; 20 -> standard pair H - C
+    2   11     1    0.00000000e+00    0.00000000e+00 ; 21 -> standard pair H - HC
+    2   12     1    0.00000000e+00    0.00000000e+00 ; 22 -> standard pair H - C
+    2   13     1    0.00000000e+00    0.00000000e+00 ; 23 -> standard pair H - HC
+    2   14     1    0.00000000e+00    0.00000000e+00 ; 24 -> standard pair H - C
+    2   15     1    0.00000000e+00    0.00000000e+00 ; 25 -> standard pair H - HC
+    2   16     1    0.00000000e+00    0.00000000e+00 ; 26 -> standard pair H - C
+    2   17     1    0.00000000e+00    0.00000000e+00 ; 27 -> standard pair H - HC
+    2   19     1    0.00000000e+00    0.00000000e+00 ; 28 -> standard pair H - O
+    2   20     1    0.00000000e+00    0.00000000e+00 ; 29 -> standard pair H - N
+    2   21     1    0.00000000e+00    0.00000000e+00 ; 30 -> standard pair H - H
+    2   22     1    0.00000000e+00    0.00000000e+00 ; 31 -> standard pair H - CH1
+    2   23     1    0.00000000e+00    0.00000000e+00 ; 32 -> standard pair H - CH3
+    2   24     1    0.00000000e+00    0.00000000e+00 ; 33 -> standard pair H - C
+    2   25     1    0.00000000e+00    0.00000000e+00 ; 34 -> standard pair H - OM
+    2   26     1    0.00000000e+00    0.00000000e+00 ; 35 -> standard pair H - OM
+    3    7     1    0.00000000e+00    0.00000000e+00 ; 36 -> standard pair H - C
+    3    8     1    0.00000000e+00    0.00000000e+00 ; 37 -> standard pair H - C
+    3    9     1    0.00000000e+00    0.00000000e+00 ; 38 -> standard pair H - HC
+    3   10     1    0.00000000e+00    0.00000000e+00 ; 39 -> standard pair H - C
+    3   11     1    0.00000000e+00    0.00000000e+00 ; 40 -> standard pair H - HC
+    3   12     1    0.00000000e+00    0.00000000e+00 ; 41 -> standard pair H - C
+    3   13     1    0.00000000e+00    0.00000000e+00 ; 42 -> standard pair H - HC
+    3   14     1    0.00000000e+00    0.00000000e+00 ; 43 -> standard pair H - C
+    3   15     1    0.00000000e+00    0.00000000e+00 ; 44 -> standard pair H - HC
+    3   16     1    0.00000000e+00    0.00000000e+00 ; 45 -> standard pair H - C
+    3   17     1    0.00000000e+00    0.00000000e+00 ; 46 -> standard pair H - HC
+    3   19     1    0.00000000e+00    0.00000000e+00 ; 47 -> standard pair H - O
+    3   20     1    0.00000000e+00    0.00000000e+00 ; 48 -> standard pair H - N
+    3   21     1    0.00000000e+00    0.00000000e+00 ; 49 -> standard pair H - H
+    3   22     1    0.00000000e+00    0.00000000e+00 ; 50 -> standard pair H - CH1
+    3   23     1    0.00000000e+00    0.00000000e+00 ; 51 -> standard pair H - CH3
+    3   24     1    0.00000000e+00    0.00000000e+00 ; 52 -> standard pair H - C
+    3   25     1    0.00000000e+00    0.00000000e+00 ; 53 -> standard pair H - OM
+    3   26     1    0.00000000e+00    0.00000000e+00 ; 54 -> standard pair H - OM
+    4    7     1    0.00000000e+00    0.00000000e+00 ; 55 -> standard pair H - C
+    4    8     1    0.00000000e+00    0.00000000e+00 ; 56 -> standard pair H - C
+    4    9     1    0.00000000e+00    0.00000000e+00 ; 57 -> standard pair H - HC
+    4   10     1    0.00000000e+00    0.00000000e+00 ; 58 -> standard pair H - C
+    4   11     1    0.00000000e+00    0.00000000e+00 ; 59 -> standard pair H - HC
+    4   12     1    0.00000000e+00    0.00000000e+00 ; 60 -> standard pair H - C
+    4   13     1    0.00000000e+00    0.00000000e+00 ; 61 -> standard pair H - HC
+    4   14     1    0.00000000e+00    0.00000000e+00 ; 62 -> standard pair H - C
+    4   15     1    0.00000000e+00    0.00000000e+00 ; 63 -> standard pair H - HC
+    4   16     1    0.00000000e+00    0.00000000e+00 ; 64 -> standard pair H - C
+    4   17     1    0.00000000e+00    0.00000000e+00 ; 65 -> standard pair H - HC
+    4   19     1    0.00000000e+00    0.00000000e+00 ; 66 -> standard pair H - O
+    4   20     1    0.00000000e+00    0.00000000e+00 ; 67 -> standard pair H - N
+    4   21     1    0.00000000e+00    0.00000000e+00 ; 68 -> standard pair H - H
+    4   22     1    0.00000000e+00    0.00000000e+00 ; 69 -> standard pair H - CH1
+    4   23     1    0.00000000e+00    0.00000000e+00 ; 70 -> standard pair H - CH3
+    4   24     1    0.00000000e+00    0.00000000e+00 ; 71 -> standard pair H - C
+    4   25     1    0.00000000e+00    0.00000000e+00 ; 72 -> standard pair H - OM
+    4   26     1    0.00000000e+00    0.00000000e+00 ; 73 -> standard pair H - OM
+    5    9     1    7.16680000e-04    1.21155000e-06 ; 74 -> standard pair CH1 - HC
+    5   11     1    7.16680000e-04    1.21155000e-06 ; 75 -> standard pair CH1 - HC
+    5   12     1    3.76880200e-03    2.18867000e-05 ; 76 -> standard pair CH1 - C
+    5   13     1    7.16680000e-04    1.21155000e-06 ; 77 -> standard pair CH1 - HC
+    5   14     1    3.76880200e-03    2.18867000e-05 ; 78 -> standard pair CH1 - C
+    5   15     1    7.16680000e-04    1.21155000e-06 ; 79 -> standard pair CH1 - HC
+    5   16     1    3.76880200e-03    2.18867000e-05 ; 80 -> standard pair CH1 - C
+    5   17     1    7.16680000e-04    1.21155000e-06 ; 81 -> standard pair CH1 - HC
+    5   23     1    7.63809500e-03    5.08457000e-05 ; 82 -> standard pair CH1 - CH3
+    5   24     1    3.76880200e-03    2.18867000e-05 ; 83 -> standard pair CH1 - C
+    5   25     1    3.70492400e-03    8.48183500e-06 ; 84 -> standard pair CH1 - OM
+    5   26     1    3.70492400e-03    8.48183500e-06 ; 85 -> standard pair CH1 - OM
+    6   13     1    7.95064000e-04    7.16844000e-07 ; 86 -> standard pair CH2 - HC
+    6   15     1    7.95064000e-04    7.16844000e-07 ; 87 -> standard pair CH2 - HC
+    6   16     1    4.18099960e-03    1.29498160e-05 ; 88 -> standard pair CH2 - C
+    6   17     1    7.95064000e-04    7.16844000e-07 ; 89 -> standard pair CH2 - HC
+    6   21     1    0.00000000e+00    0.00000000e+00 ; 90 -> standard pair CH2 - H
+    6   22     1    6.73211800e-03    5.74058000e-05 ; 91 -> standard pair CH2 - CH1
+    6   23     1    8.47348100e-03    3.00841360e-05 ; 92 -> standard pair CH2 - CH3
+    6   24     1    4.18099960e-03    1.29498160e-05 ; 93 -> standard pair CH2 - C
+    6   25     1    4.11013520e-03    5.01849080e-06 ; 94 -> standard pair CH2 - OM
+    6   26     1    4.11013520e-03    5.01849080e-06 ; 95 -> standard pair CH2 - OM
+    7   17     1    4.45096000e-04    2.73306000e-07 ; 96 -> standard pair C - HC
+    7   19     1    2.00099680e-03    2.21089000e-06 ; 97 -> standard pair C - O
+    7   20     1    2.32224000e-03    3.77740000e-06 ; 98 -> standard pair C - N
+    7   21     1    0.00000000e+00    0.00000000e+00 ; 99 -> standard pair C - H
+    7   22     1    3.76880200e-03    2.18867000e-05 ; 100 -> standard pair C - CH1
+    7   23     1    4.74365900e-03    1.14699640e-05 ; 101 -> standard pair C - CH3
+    7   24     1    2.34062440e-03    4.93728400e-06 ; 102 -> standard pair C - C
+    7   25     1    2.30095280e-03    1.91336420e-06 ; 103 -> standard pair C - OM
+    7   26     1    2.30095280e-03    1.91336420e-06 ; 104 -> standard pair C - OM
+    8   15     1    4.45096000e-04    2.73306000e-07 ; 105 -> standard pair C - HC
+    8   18     1    2.34062440e-03    4.93728400e-06 ; 106 -> standard pair C - C
+    8   19     1    2.00099680e-03    2.21089000e-06 ; 107 -> standard pair C - O
+    8   20     1    2.32224000e-03    3.77740000e-06 ; 108 -> standard pair C - N
+    8   21     1    0.00000000e+00    0.00000000e+00 ; 109 -> standard pair C - H
+    8   22     1    3.76880200e-03    2.18867000e-05 ; 110 -> standard pair C - CH1
+    8   23     1    4.74365900e-03    1.14699640e-05 ; 111 -> standard pair C - CH3
+    8   24     1    2.34062440e-03    4.93728400e-06 ; 112 -> standard pair C - C
+    8   25     1    2.30095280e-03    1.91336420e-06 ; 113 -> standard pair C - OM
+    8   26     1    2.30095280e-03    1.91336420e-06 ; 114 -> standard pair C - OM
+    9   11     1    8.46400000e-05    1.51290000e-08 ; 115 -> standard pair HC - HC
+    9   14     1    4.45096000e-04    2.73306000e-07 ; 116 -> standard pair HC - C
+    9   15     1    8.46400000e-05    1.51290000e-08 ; 117 -> standard pair HC - HC
+    9   17     1    8.46400000e-05    1.51290000e-08 ; 118 -> standard pair HC - HC
+    9   18     1    4.45096000e-04    2.73306000e-07 ; 119 -> standard pair HC - C
+    9   19     1    3.80512000e-04    1.22385000e-07 ; 120 -> standard pair HC - O
+    9   20     1    4.41600000e-04    2.09100000e-07 ; 121 -> standard pair HC - N
+    9   21     1    0.00000000e+00    0.00000000e+00 ; 122 -> standard pair HC - H
+    9   22     1    7.16680000e-04    1.21155000e-06 ; 123 -> standard pair HC - CH1
+    9   23     1    9.02060000e-04    6.34926000e-07 ; 124 -> standard pair HC - CH3
+    9   24     1    4.45096000e-04    2.73306000e-07 ; 125 -> standard pair HC - C
+    9   25     1    4.37552000e-04    1.05915300e-07 ; 126 -> standard pair HC - OM
+    9   26     1    4.37552000e-04    1.05915300e-07 ; 127 -> standard pair HC - OM
+   10   13     1    4.45096000e-04    2.73306000e-07 ; 128 -> standard pair C - HC
+   10   18     1    2.34062440e-03    4.93728400e-06 ; 129 -> standard pair C - C
+   10   19     1    2.00099680e-03    2.21089000e-06 ; 130 -> standard pair C - O
+   10   20     1    2.32224000e-03    3.77740000e-06 ; 131 -> standard pair C - N
+   10   21     1    0.00000000e+00    0.00000000e+00 ; 132 -> standard pair C - H
+   10   22     1    3.76880200e-03    2.18867000e-05 ; 133 -> standard pair C - CH1
+   10   23     1    4.74365900e-03    1.14699640e-05 ; 134 -> standard pair C - CH3
+   10   24     1    2.34062440e-03    4.93728400e-06 ; 135 -> standard pair C - C
+   10   25     1    2.30095280e-03    1.91336420e-06 ; 136 -> standard pair C - OM
+   10   26     1    2.30095280e-03    1.91336420e-06 ; 137 -> standard pair C - OM
+   11   12     1    4.45096000e-04    2.73306000e-07 ; 138 -> standard pair HC - C
+   11   13     1    8.46400000e-05    1.51290000e-08 ; 139 -> standard pair HC - HC
+   11   17     1    8.46400000e-05    1.51290000e-08 ; 140 -> standard pair HC - HC
+   11   18     1    4.45096000e-04    2.73306000e-07 ; 141 -> standard pair HC - C
+   11   19     1    3.80512000e-04    1.22385000e-07 ; 142 -> standard pair HC - O
+   11   20     1    4.41600000e-04    2.09100000e-07 ; 143 -> standard pair HC - N
+   11   21     1    0.00000000e+00    0.00000000e+00 ; 144 -> standard pair HC - H
+   11   22     1    7.16680000e-04    1.21155000e-06 ; 145 -> standard pair HC - CH1
+   11   23     1    9.02060000e-04    6.34926000e-07 ; 146 -> standard pair HC - CH3
+   11   24     1    4.45096000e-04    2.73306000e-07 ; 147 -> standard pair HC - C
+   11   25     1    4.37552000e-04    1.05915300e-07 ; 148 -> standard pair HC - OM
+   11   26     1    4.37552000e-04    1.05915300e-07 ; 149 -> standard pair HC - OM
+   12   18     1    2.34062440e-03    4.93728400e-06 ; 150 -> standard pair C - C
+   12   19     1    2.00099680e-03    2.21089000e-06 ; 151 -> standard pair C - O
+   12   20     1    2.32224000e-03    3.77740000e-06 ; 152 -> standard pair C - N
+   12   21     1    0.00000000e+00    0.00000000e+00 ; 153 -> standard pair C - H
+   12   22     1    3.76880200e-03    2.18867000e-05 ; 154 -> standard pair C - CH1
+   12   23     1    4.74365900e-03    1.14699640e-05 ; 155 -> standard pair C - CH3
+   12   24     1    2.34062440e-03    4.93728400e-06 ; 156 -> standard pair C - C
+   12   25     1    2.30095280e-03    1.91336420e-06 ; 157 -> standard pair C - OM
+   12   26     1    2.30095280e-03    1.91336420e-06 ; 158 -> standard pair C - OM
+   13   15     1    8.46400000e-05    1.51290000e-08 ; 159 -> standard pair HC - HC
+   13   18     1    4.45096000e-04    2.73306000e-07 ; 160 -> standard pair HC - C
+   13   19     1    3.80512000e-04    1.22385000e-07 ; 161 -> standard pair HC - O
+   13   20     1    4.41600000e-04    2.09100000e-07 ; 162 -> standard pair HC - N
+   13   21     1    0.00000000e+00    0.00000000e+00 ; 163 -> standard pair HC - H
+   13   22     1    7.16680000e-04    1.21155000e-06 ; 164 -> standard pair HC - CH1
+   13   23     1    9.02060000e-04    6.34926000e-07 ; 165 -> standard pair HC - CH3
+   13   24     1    4.45096000e-04    2.73306000e-07 ; 166 -> standard pair HC - C
+   13   25     1    4.37552000e-04    1.05915300e-07 ; 167 -> standard pair HC - OM
+   13   26     1    4.37552000e-04    1.05915300e-07 ; 168 -> standard pair HC - OM
+   14   18     1    2.34062440e-03    4.93728400e-06 ; 169 -> standard pair C - C
+   14   19     1    2.00099680e-03    2.21089000e-06 ; 170 -> standard pair C - O
+   14   20     1    2.32224000e-03    3.77740000e-06 ; 171 -> standard pair C - N
+   14   21     1    0.00000000e+00    0.00000000e+00 ; 172 -> standard pair C - H
+   14   22     1    3.76880200e-03    2.18867000e-05 ; 173 -> standard pair C - CH1
+   14   23     1    4.74365900e-03    1.14699640e-05 ; 174 -> standard pair C - CH3
+   14   24     1    2.34062440e-03    4.93728400e-06 ; 175 -> standard pair C - C
+   14   25     1    2.30095280e-03    1.91336420e-06 ; 176 -> standard pair C - OM
+   14   26     1    2.30095280e-03    1.91336420e-06 ; 177 -> standard pair C - OM
+   15   18     1    4.45096000e-04    2.73306000e-07 ; 178 -> standard pair HC - C
+   15   19     1    3.80512000e-04    1.22385000e-07 ; 179 -> standard pair HC - O
+   15   20     1    4.41600000e-04    2.09100000e-07 ; 180 -> standard pair HC - N
+   15   21     1    0.00000000e+00    0.00000000e+00 ; 181 -> standard pair HC - H
+   15   22     1    7.16680000e-04    1.21155000e-06 ; 182 -> standard pair HC - CH1
+   15   23     1    9.02060000e-04    6.34926000e-07 ; 183 -> standard pair HC - CH3
+   15   24     1    4.45096000e-04    2.73306000e-07 ; 184 -> standard pair HC - C
+   15   25     1    4.37552000e-04    1.05915300e-07 ; 185 -> standard pair HC - OM
+   15   26     1    4.37552000e-04    1.05915300e-07 ; 186 -> standard pair HC - OM
+   16   18     1    2.34062440e-03    4.93728400e-06 ; 187 -> standard pair C - C
+   16   19     1    2.00099680e-03    2.21089000e-06 ; 188 -> standard pair C - O
+   16   20     1    2.32224000e-03    3.77740000e-06 ; 189 -> standard pair C - N
+   16   21     1    0.00000000e+00    0.00000000e+00 ; 190 -> standard pair C - H
+   16   22     1    3.76880200e-03    2.18867000e-05 ; 191 -> standard pair C - CH1
+   16   23     1    4.74365900e-03    1.14699640e-05 ; 192 -> standard pair C - CH3
+   16   24     1    2.34062440e-03    4.93728400e-06 ; 193 -> standard pair C - C
+   16   25     1    2.30095280e-03    1.91336420e-06 ; 194 -> standard pair C - OM
+   16   26     1    2.30095280e-03    1.91336420e-06 ; 195 -> standard pair C - OM
+   17   18     1    4.45096000e-04    2.73306000e-07 ; 196 -> standard pair HC - C
+   17   19     1    3.80512000e-04    1.22385000e-07 ; 197 -> standard pair HC - O
+   17   20     1    4.41600000e-04    2.09100000e-07 ; 198 -> standard pair HC - N
+   17   21     1    0.00000000e+00    0.00000000e+00 ; 199 -> standard pair HC - H
+   17   22     1    7.16680000e-04    1.21155000e-06 ; 200 -> standard pair HC - CH1
+   17   23     1    9.02060000e-04    6.34926000e-07 ; 201 -> standard pair HC - CH3
+   17   24     1    4.45096000e-04    2.73306000e-07 ; 202 -> standard pair HC - C
+   17   25     1    4.37552000e-04    1.05915300e-07 ; 203 -> standard pair HC - OM
+   17   26     1    4.37552000e-04    1.05915300e-07 ; 204 -> standard pair HC - OM
+   18   25     1    2.30095280e-03    1.91336420e-06 ; 205 -> standard pair C - OM
+   18   26     1    2.30095280e-03    1.91336420e-06 ; 206 -> standard pair C - OM
+   19   23     1    4.05534800e-03    5.13619000e-06 ; 207 -> standard pair O - CH3
+   19   24     1    2.00099680e-03    2.21089000e-06 ; 208 -> standard pair O - C
+   19   25     1    1.96708160e-03    8.56794500e-07 ; 209 -> standard pair O - OM
+   19   26     1    1.96708160e-03    8.56794500e-07 ; 210 -> standard pair O - OM
+   21   25     1    0.00000000e+00    0.00000000e+00 ; 211 -> standard pair H - OM
+   21   26     1    0.00000000e+00    0.00000000e+00 ; 212 -> standard pair H - OM
+    1    7     2    2.38803680e-03    2.38993700e-06 ; 213 -> 1-4 pair NL - C
+    1   19     2    2.34756160e-03    1.12029110e-06 ; 214 -> 1-4 pair NL - O
+    1   20     2    2.43640960e-03    1.69260100e-06 ; 215 -> 1-4 pair NL - N
+    2    6     2    0.00000000e+00    0.00000000e+00 ; 216 -> 1-4 pair H - CH2
+    2   18     2    0.00000000e+00    0.00000000e+00 ; 217 -> 1-4 pair H - C
+    3    6     2    0.00000000e+00    0.00000000e+00 ; 218 -> 1-4 pair H - CH2
+    3   18     2    0.00000000e+00    0.00000000e+00 ; 219 -> 1-4 pair H - C
+    4    6     2    0.00000000e+00    0.00000000e+00 ; 220 -> 1-4 pair H - CH2
+    4   18     2    0.00000000e+00    0.00000000e+00 ; 221 -> 1-4 pair H - C
+    5    8     2    2.61058480e-03    3.55092100e-06 ; 222 -> 1-4 pair CH1 - C
+    5   10     2    2.61058480e-03    3.55092100e-06 ; 223 -> 1-4 pair CH1 - C
+    5   21     2    0.00000000e+00    0.00000000e+00 ; 224 -> 1-4 pair CH1 - H
+    5   22     2    2.91168160e-03    3.73648900e-06 ; 225 -> 1-4 pair CH1 - CH1
+    6   19     2    3.26879880e-03    1.87512830e-06 ; 226 -> 1-4 pair CH2 - O
+    6   20     2    3.39251280e-03    2.83305290e-06 ; 227 -> 1-4 pair CH2 - N
+    7   18     2    2.34062440e-03    3.37456900e-06 ; 228 -> 1-4 pair C - C
+   18   23     2    4.00489640e-03    4.51127150e-06 ; 229 -> 1-4 pair C - CH3
+   18   24     2    2.34062440e-03    3.37456900e-06 ; 230 -> 1-4 pair C - C
+   19   21     2    0.00000000e+00    0.00000000e+00 ; 231 -> 1-4 pair O - H
+   19   22     2    2.56633760e-03    1.66450630e-06 ; 232 -> 1-4 pair O - CH1
+   20   25     2    2.34756160e-03    1.12029110e-06 ; 233 -> 1-4 pair N - OM
+   20   26     2    2.34756160e-03    1.12029110e-06 ; 234 -> 1-4 pair N - OM
+   21   23     2    0.00000000e+00    0.00000000e+00 ; 235 -> 1-4 pair H - CH3
+   21   24     2    0.00000000e+00    0.00000000e+00 ; 236 -> 1-4 pair H - C
+   23   25     2    3.93701680e-03    2.11467390e-06 ; 237 -> 1-4 pair CH3 - OM
+   23   26     2    3.93701680e-03    2.11467390e-06 ; 238 -> 1-4 pair CH3 - OM
+
+[ bonds ]
+    1    2    2      1.000000e-01      1.870000e+07 ; specified explicitly or in macro
+    1    3    2      1.000000e-01      1.870000e+07 ; specified explicitly or in macro
+    1    4    2      1.000000e-01      1.870000e+07 ; specified explicitly or in macro
+    1    5    2      1.470000e-01      8.710000e+06 ; specified explicitly or in macro
+    5    6    2      1.530000e-01      7.150000e+06 ; specified explicitly or in macro
+    5   18    2      1.530000e-01      7.150000e+06 ; specified explicitly or in macro
+    6    7    2      1.530000e-01      7.150000e+06 ; specified explicitly or in macro
+    7    8    2      1.390000e-01      1.080000e+07 ; specified explicitly or in macro
+    7   10    2      1.390000e-01      1.080000e+07 ; specified explicitly or in macro
+    8    9    2      1.090000e-01      1.230000e+07 ; specified explicitly or in macro
+    8   12    2      1.390000e-01      1.080000e+07 ; specified explicitly or in macro
+   10   11    2      1.090000e-01      1.230000e+07 ; specified explicitly or in macro
+   10   14    2      1.390000e-01      1.080000e+07 ; specified explicitly or in macro
+   12   13    2      1.090000e-01      1.230000e+07 ; specified explicitly or in macro
+   12   16    2      1.390000e-01      1.080000e+07 ; specified explicitly or in macro
+   14   15    2      1.090000e-01      1.230000e+07 ; specified explicitly or in macro
+   14   16    2      1.390000e-01      1.080000e+07 ; specified explicitly or in macro
+   16   17    2      1.090000e-01      1.230000e+07 ; specified explicitly or in macro
+   18   19    2      1.230000e-01      1.660000e+07 ; specified explicitly or in macro
+   18   20    2      1.330000e-01      1.180000e+07 ; specified explicitly or in macro
+   20   21    2      1.000000e-01      1.870000e+07 ; specified explicitly or in macro
+   20   22    2      1.470000e-01      8.710000e+06 ; specified explicitly or in macro
+   22   23    2      1.530000e-01      7.150000e+06 ; specified explicitly or in macro
+   22   24    2      1.530000e-01      7.150000e+06 ; specified explicitly or in macro
+   24   25    2      1.250000e-01      1.340000e+07 ; specified explicitly or in macro
+   24   26    2      1.250000e-01      1.340000e+07 ; specified explicitly or in macro
+
+[ angles ]
+    2    1    3    2      1.095000e+02      3.800000e+02 ; specified explicitly or in macro
+    2    1    4    2      1.095000e+02      3.800000e+02 ; specified explicitly or in macro
+    2    1    5    2      1.095000e+02      4.250000e+02 ; specified explicitly or in macro
+    3    1    4    2      1.095000e+02      3.800000e+02 ; specified explicitly or in macro
+    3    1    5    2      1.095000e+02      4.250000e+02 ; specified explicitly or in macro
+    4    1    5    2      1.095000e+02      4.250000e+02 ; specified explicitly or in macro
+    1    5    6    2      1.095000e+02      5.200000e+02 ; specified explicitly or in macro
+    1    5   18    2      1.095000e+02      5.200000e+02 ; specified explicitly or in macro
+    6    5   18    2      1.095000e+02      5.200000e+02 ; specified explicitly or in macro
+    5    6    7    2      1.110000e+02      5.300000e+02 ; specified explicitly or in macro
+    6    7    8    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+    6    7   10    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+    8    7   10    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+    7    8    9    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+    7    8   12    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+    9    8   12    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+    7   10   11    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+    7   10   14    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+   11   10   14    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+    8   12   13    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+    8   12   16    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+   13   12   16    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+   10   14   15    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+   10   14   16    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+   15   14   16    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+   12   16   14    2      1.200000e+02      5.600000e+02 ; specified explicitly or in macro
+   12   16   17    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+   14   16   17    2      1.200000e+02      5.050000e+02 ; specified explicitly or in macro
+    5   18   19    2      1.210000e+02      6.850000e+02 ; specified explicitly or in macro
+    5   18   20    2      1.150000e+02      6.100000e+02 ; specified explicitly or in macro
+   19   18   20    2      1.240000e+02      7.300000e+02 ; specified explicitly or in macro
+   18   20   21    2      1.230000e+02      4.150000e+02 ; specified explicitly or in macro
+   18   20   22    2      1.220000e+02      7.000000e+02 ; specified explicitly or in macro
+   21   20   22    2      1.150000e+02      4.600000e+02 ; specified explicitly or in macro
+   20   22   23    2      1.095000e+02      5.200000e+02 ; specified explicitly or in macro
+   20   22   24    2      1.095000e+02      5.200000e+02 ; specified explicitly or in macro
+   23   22   24    2      1.095000e+02      5.200000e+02 ; specified explicitly or in macro
+   22   24   25    2      1.170000e+02      6.350000e+02 ; specified explicitly or in macro
+   22   24   26    2      1.170000e+02      6.350000e+02 ; specified explicitly or in macro
+   25   24   26    2      1.260000e+02      7.700000e+02 ; specified explicitly or in macro
+
+[ dihedrals ]
+    2    1    5   18    1      0.000000e+00      3.770000e+00    3 ; 1 -> specified explicitly or in macro
+    1    5    6    7    1      0.000000e+00      5.920000e+00    3 ; 2 -> specified explicitly or in macro
+    1    5   18   20    9      1.800000e+02      3.500000e+00    2 ; 3 -> specified explicitly or in macro
+    1    5   18   20    9      0.000000e+00      4.000000e-01    6 ; 4 -> specified explicitly or in macro
+    5    6    7    8    1      0.000000e+00      1.000000e+00    6 ; 5 -> specified explicitly or in macro
+    5   18   20   22    1      1.800000e+02      3.350000e+01    2 ; 6 -> specified explicitly or in macro
+   18   20   22   24    9      0.000000e+00      2.800000e+00    3 ; 7 -> specified explicitly or in macro
+   18   20   22   24    9      1.800000e+02      7.000000e-01    6 ; 8 -> specified explicitly or in macro
+   20   22   24   26    9      1.800000e+02      3.500000e+00    2 ; 9 -> specified explicitly or in macro
+   20   22   24   26    9      0.000000e+00      4.000000e-01    6 ; 10 -> specified explicitly or in macro
+
+[ dihedrals ]
+; improper dihedrals
+    5    1   18    6    2      3.526439e+01      3.348462e+02 ; specified explicitly or in macro
+    6   10    8    7    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+    7    8   12   16    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+    7   10   14   16    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+    8    7   12    9    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+    8    7   10   14    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+    8   12   16   14    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   10    7   14   11    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   10    7    8   12    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   10   14   16   12    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   12   16    8   13    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   14   16   10   15    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   16   12   14   17    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   18    5   20   19    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   20   18   22   21    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+   22   20   24   23    2      3.526439e+01      3.348462e+02 ; specified explicitly or in macro
+   24   22   26   25    2      0.000000e+00      1.674231e+02 ; specified explicitly or in macro
+
+[ refdihedral ]
+1   5   18  20  
+
+[ optdihedrals ]
+1   5   18  20
+
+[ optatoms ]
+1

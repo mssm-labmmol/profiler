@@ -1,0 +1,673 @@
+[ defaults ]
+; nbfunc comb-rule gen-pairs fudgeLJ fudgeQQ
+       1         3     fudge  0.5000  0.5000
+
+[ atoms ]
+opls_287     3.2500000e-01     7.1128000e-01      -3.00000e-01 ; N 
+opls_290     0.0000000e+00     0.0000000e+00       3.30000e-01 ; H1 
+opls_290     0.0000000e+00     0.0000000e+00       3.30000e-01 ; H2 
+opls_290     0.0000000e+00     0.0000000e+00       3.30000e-01 ; H3 
+opls_293B     3.5000000e-01     2.7614400e-01       2.50000e-01 ; CA 
+opls_140     2.5000000e-01     1.2552000e-01       6.00000e-02 ; HA 
+opls_149     3.5000000e-01     2.7614400e-01      -5.00000e-03 ; CB 
+opls_140     2.5000000e-01     1.2552000e-01       6.00000e-02 ; HB1 
+opls_140     2.5000000e-01     1.2552000e-01       6.00000e-02 ; HB2 
+opls_145     3.5500000e-01     2.9288000e-01      -1.15000e-01 ; CG 
+opls_145     3.5500000e-01     2.9288000e-01      -1.15000e-01 ; CD1 
+opls_146     2.4200000e-01     1.2552000e-01       1.15000e-01 ; HD1 
+opls_145     3.5500000e-01     2.9288000e-01      -1.15000e-01 ; CD2 
+opls_146     2.4200000e-01     1.2552000e-01       1.15000e-01 ; HD2 
+opls_145     3.5500000e-01     2.9288000e-01      -1.15000e-01 ; CE1 
+opls_146     2.4200000e-01     1.2552000e-01       1.15000e-01 ; HE1 
+opls_145     3.5500000e-01     2.9288000e-01      -1.15000e-01 ; CE2 
+opls_146     2.4200000e-01     1.2552000e-01       1.15000e-01 ; HE2 
+opls_145     3.5500000e-01     2.9288000e-01      -1.15000e-01 ; CZ 
+opls_146     2.4200000e-01     1.2552000e-01       1.15000e-01 ; HZ 
+opls_235     3.7500000e-01     4.3932000e-01       5.00000e-01 ; C 
+opls_236     2.9600000e-01     8.7864000e-01      -5.00000e-01 ; O 
+opls_238     3.2500000e-01     7.1128000e-01      -5.00000e-01 ; N 
+opls_241     0.0000000e+00     0.0000000e+00       3.00000e-01 ; H 
+opls_283     3.5000000e-01     2.7614400e-01       4.00000e-02 ; CA 
+opls_140     2.5000000e-01     1.2552000e-01       6.00000e-02 ; HA 
+opls_135     3.5000000e-01     2.7614400e-01      -1.80000e-01 ; CB 
+opls_140     2.5000000e-01     1.2552000e-01       6.00000e-02 ; HB1 
+opls_140     2.5000000e-01     1.2552000e-01       6.00000e-02 ; HB2 
+opls_140     2.5000000e-01     1.2552000e-01       6.00000e-02 ; HB3 
+opls_271     3.7500000e-01     4.3932000e-01       7.00000e-01 ; C 
+opls_272     2.9600000e-01     8.7864000e-01      -8.00000e-01 ; O1 
+opls_272     2.9600000e-01     8.7864000e-01      -8.00000e-01 ; O2 
+
+[ nbpairs ]
+    1   11     1    3.39668956e-01    4.56420515e-01 ; 1 -> standard pair opls_287 - opls_145
+    1   12     1    2.80446073e-01    2.98797365e-01 ; 2 -> standard pair opls_287 - opls_146
+    1   13     1    3.39668956e-01    4.56420515e-01 ; 3 -> standard pair opls_287 - opls_145
+    1   14     1    2.80446073e-01    2.98797365e-01 ; 4 -> standard pair opls_287 - opls_146
+    1   15     1    3.39668956e-01    4.56420515e-01 ; 5 -> standard pair opls_287 - opls_145
+    1   16     1    2.80446073e-01    2.98797365e-01 ; 6 -> standard pair opls_287 - opls_146
+    1   17     1    3.39668956e-01    4.56420515e-01 ; 7 -> standard pair opls_287 - opls_145
+    1   18     1    2.80446073e-01    2.98797365e-01 ; 8 -> standard pair opls_287 - opls_146
+    1   19     1    3.39668956e-01    4.56420515e-01 ; 9 -> standard pair opls_287 - opls_145
+    1   20     1    2.80446073e-01    2.98797365e-01 ; 10 -> standard pair opls_287 - opls_146
+    1   24     1    0.00000000e+00    0.00000000e+00 ; 11 -> standard pair opls_287 - opls_241
+    1   25     1    3.37268439e-01    4.43188114e-01 ; 12 -> standard pair opls_287 - opls_283
+    1   26     1    2.85043856e-01    2.98797365e-01 ; 13 -> standard pair opls_287 - opls_140
+    1   27     1    3.37268439e-01    4.43188114e-01 ; 14 -> standard pair opls_287 - opls_135
+    1   28     1    2.85043856e-01    2.98797365e-01 ; 15 -> standard pair opls_287 - opls_140
+    1   29     1    2.85043856e-01    2.98797365e-01 ; 16 -> standard pair opls_287 - opls_140
+    1   30     1    2.85043856e-01    2.98797365e-01 ; 17 -> standard pair opls_287 - opls_140
+    1   31     1    3.49106001e-01    5.58998685e-01 ; 18 -> standard pair opls_287 - opls_271
+    1   32     1    3.10161248e-01    7.90543521e-01 ; 19 -> standard pair opls_287 - opls_272
+    1   33     1    3.10161248e-01    7.90543521e-01 ; 20 -> standard pair opls_287 - opls_272
+    2    8     1    0.00000000e+00    0.00000000e+00 ; 21 -> standard pair opls_290 - opls_140
+    2    9     1    0.00000000e+00    0.00000000e+00 ; 22 -> standard pair opls_290 - opls_140
+    2   10     1    0.00000000e+00    0.00000000e+00 ; 23 -> standard pair opls_290 - opls_145
+    2   11     1    0.00000000e+00    0.00000000e+00 ; 24 -> standard pair opls_290 - opls_145
+    2   12     1    0.00000000e+00    0.00000000e+00 ; 25 -> standard pair opls_290 - opls_146
+    2   13     1    0.00000000e+00    0.00000000e+00 ; 26 -> standard pair opls_290 - opls_145
+    2   14     1    0.00000000e+00    0.00000000e+00 ; 27 -> standard pair opls_290 - opls_146
+    2   15     1    0.00000000e+00    0.00000000e+00 ; 28 -> standard pair opls_290 - opls_145
+    2   16     1    0.00000000e+00    0.00000000e+00 ; 29 -> standard pair opls_290 - opls_146
+    2   17     1    0.00000000e+00    0.00000000e+00 ; 30 -> standard pair opls_290 - opls_145
+    2   18     1    0.00000000e+00    0.00000000e+00 ; 31 -> standard pair opls_290 - opls_146
+    2   19     1    0.00000000e+00    0.00000000e+00 ; 32 -> standard pair opls_290 - opls_145
+    2   20     1    0.00000000e+00    0.00000000e+00 ; 33 -> standard pair opls_290 - opls_146
+    2   22     1    0.00000000e+00    0.00000000e+00 ; 34 -> standard pair opls_290 - opls_236
+    2   23     1    0.00000000e+00    0.00000000e+00 ; 35 -> standard pair opls_290 - opls_238
+    2   24     1    0.00000000e+00    0.00000000e+00 ; 36 -> standard pair opls_290 - opls_241
+    2   25     1    0.00000000e+00    0.00000000e+00 ; 37 -> standard pair opls_290 - opls_283
+    2   26     1    0.00000000e+00    0.00000000e+00 ; 38 -> standard pair opls_290 - opls_140
+    2   27     1    0.00000000e+00    0.00000000e+00 ; 39 -> standard pair opls_290 - opls_135
+    2   28     1    0.00000000e+00    0.00000000e+00 ; 40 -> standard pair opls_290 - opls_140
+    2   29     1    0.00000000e+00    0.00000000e+00 ; 41 -> standard pair opls_290 - opls_140
+    2   30     1    0.00000000e+00    0.00000000e+00 ; 42 -> standard pair opls_290 - opls_140
+    2   31     1    0.00000000e+00    0.00000000e+00 ; 43 -> standard pair opls_290 - opls_271
+    2   32     1    0.00000000e+00    0.00000000e+00 ; 44 -> standard pair opls_290 - opls_272
+    2   33     1    0.00000000e+00    0.00000000e+00 ; 45 -> standard pair opls_290 - opls_272
+    3    8     1    0.00000000e+00    0.00000000e+00 ; 46 -> standard pair opls_290 - opls_140
+    3    9     1    0.00000000e+00    0.00000000e+00 ; 47 -> standard pair opls_290 - opls_140
+    3   10     1    0.00000000e+00    0.00000000e+00 ; 48 -> standard pair opls_290 - opls_145
+    3   11     1    0.00000000e+00    0.00000000e+00 ; 49 -> standard pair opls_290 - opls_145
+    3   12     1    0.00000000e+00    0.00000000e+00 ; 50 -> standard pair opls_290 - opls_146
+    3   13     1    0.00000000e+00    0.00000000e+00 ; 51 -> standard pair opls_290 - opls_145
+    3   14     1    0.00000000e+00    0.00000000e+00 ; 52 -> standard pair opls_290 - opls_146
+    3   15     1    0.00000000e+00    0.00000000e+00 ; 53 -> standard pair opls_290 - opls_145
+    3   16     1    0.00000000e+00    0.00000000e+00 ; 54 -> standard pair opls_290 - opls_146
+    3   17     1    0.00000000e+00    0.00000000e+00 ; 55 -> standard pair opls_290 - opls_145
+    3   18     1    0.00000000e+00    0.00000000e+00 ; 56 -> standard pair opls_290 - opls_146
+    3   19     1    0.00000000e+00    0.00000000e+00 ; 57 -> standard pair opls_290 - opls_145
+    3   20     1    0.00000000e+00    0.00000000e+00 ; 58 -> standard pair opls_290 - opls_146
+    3   22     1    0.00000000e+00    0.00000000e+00 ; 59 -> standard pair opls_290 - opls_236
+    3   23     1    0.00000000e+00    0.00000000e+00 ; 60 -> standard pair opls_290 - opls_238
+    3   24     1    0.00000000e+00    0.00000000e+00 ; 61 -> standard pair opls_290 - opls_241
+    3   25     1    0.00000000e+00    0.00000000e+00 ; 62 -> standard pair opls_290 - opls_283
+    3   26     1    0.00000000e+00    0.00000000e+00 ; 63 -> standard pair opls_290 - opls_140
+    3   27     1    0.00000000e+00    0.00000000e+00 ; 64 -> standard pair opls_290 - opls_135
+    3   28     1    0.00000000e+00    0.00000000e+00 ; 65 -> standard pair opls_290 - opls_140
+    3   29     1    0.00000000e+00    0.00000000e+00 ; 66 -> standard pair opls_290 - opls_140
+    3   30     1    0.00000000e+00    0.00000000e+00 ; 67 -> standard pair opls_290 - opls_140
+    3   31     1    0.00000000e+00    0.00000000e+00 ; 68 -> standard pair opls_290 - opls_271
+    3   32     1    0.00000000e+00    0.00000000e+00 ; 69 -> standard pair opls_290 - opls_272
+    3   33     1    0.00000000e+00    0.00000000e+00 ; 70 -> standard pair opls_290 - opls_272
+    4    8     1    0.00000000e+00    0.00000000e+00 ; 71 -> standard pair opls_290 - opls_140
+    4    9     1    0.00000000e+00    0.00000000e+00 ; 72 -> standard pair opls_290 - opls_140
+    4   10     1    0.00000000e+00    0.00000000e+00 ; 73 -> standard pair opls_290 - opls_145
+    4   11     1    0.00000000e+00    0.00000000e+00 ; 74 -> standard pair opls_290 - opls_145
+    4   12     1    0.00000000e+00    0.00000000e+00 ; 75 -> standard pair opls_290 - opls_146
+    4   13     1    0.00000000e+00    0.00000000e+00 ; 76 -> standard pair opls_290 - opls_145
+    4   14     1    0.00000000e+00    0.00000000e+00 ; 77 -> standard pair opls_290 - opls_146
+    4   15     1    0.00000000e+00    0.00000000e+00 ; 78 -> standard pair opls_290 - opls_145
+    4   16     1    0.00000000e+00    0.00000000e+00 ; 79 -> standard pair opls_290 - opls_146
+    4   17     1    0.00000000e+00    0.00000000e+00 ; 80 -> standard pair opls_290 - opls_145
+    4   18     1    0.00000000e+00    0.00000000e+00 ; 81 -> standard pair opls_290 - opls_146
+    4   19     1    0.00000000e+00    0.00000000e+00 ; 82 -> standard pair opls_290 - opls_145
+    4   20     1    0.00000000e+00    0.00000000e+00 ; 83 -> standard pair opls_290 - opls_146
+    4   22     1    0.00000000e+00    0.00000000e+00 ; 84 -> standard pair opls_290 - opls_236
+    4   23     1    0.00000000e+00    0.00000000e+00 ; 85 -> standard pair opls_290 - opls_238
+    4   24     1    0.00000000e+00    0.00000000e+00 ; 86 -> standard pair opls_290 - opls_241
+    4   25     1    0.00000000e+00    0.00000000e+00 ; 87 -> standard pair opls_290 - opls_283
+    4   26     1    0.00000000e+00    0.00000000e+00 ; 88 -> standard pair opls_290 - opls_140
+    4   27     1    0.00000000e+00    0.00000000e+00 ; 89 -> standard pair opls_290 - opls_135
+    4   28     1    0.00000000e+00    0.00000000e+00 ; 90 -> standard pair opls_290 - opls_140
+    4   29     1    0.00000000e+00    0.00000000e+00 ; 91 -> standard pair opls_290 - opls_140
+    4   30     1    0.00000000e+00    0.00000000e+00 ; 92 -> standard pair opls_290 - opls_140
+    4   31     1    0.00000000e+00    0.00000000e+00 ; 93 -> standard pair opls_290 - opls_271
+    4   32     1    0.00000000e+00    0.00000000e+00 ; 94 -> standard pair opls_290 - opls_272
+    4   33     1    0.00000000e+00    0.00000000e+00 ; 95 -> standard pair opls_290 - opls_272
+    5   12     1    2.91032644e-01    1.86176247e-01 ; 96 -> standard pair opls_293B - opls_146
+    5   14     1    2.91032644e-01    1.86176247e-01 ; 97 -> standard pair opls_293B - opls_146
+    5   15     1    3.52491135e-01    2.84388915e-01 ; 98 -> standard pair opls_293B - opls_145
+    5   16     1    2.91032644e-01    1.86176247e-01 ; 99 -> standard pair opls_293B - opls_146
+    5   17     1    3.52491135e-01    2.84388915e-01 ; 100 -> standard pair opls_293B - opls_145
+    5   18     1    2.91032644e-01    1.86176247e-01 ; 101 -> standard pair opls_293B - opls_146
+    5   19     1    3.52491135e-01    2.84388915e-01 ; 102 -> standard pair opls_293B - opls_145
+    5   20     1    2.91032644e-01    1.86176247e-01 ; 103 -> standard pair opls_293B - opls_146
+    5   26     1    2.95803989e-01    1.86176247e-01 ; 104 -> standard pair opls_293B - opls_140
+    5   27     1    3.50000000e-01    2.76144000e-01 ; 105 -> standard pair opls_293B - opls_135
+    5   28     1    2.95803989e-01    1.86176247e-01 ; 106 -> standard pair opls_293B - opls_140
+    5   29     1    2.95803989e-01    1.86176247e-01 ; 107 -> standard pair opls_293B - opls_140
+    5   30     1    2.95803989e-01    1.86176247e-01 ; 108 -> standard pair opls_293B - opls_140
+    5   31     1    3.62284419e-01    3.48303865e-01 ; 109 -> standard pair opls_293B - opls_271
+    5   32     1    3.21869539e-01    4.92576049e-01 ; 110 -> standard pair opls_293B - opls_272
+    5   33     1    3.21869539e-01    4.92576049e-01 ; 111 -> standard pair opls_293B - opls_272
+    6   11     1    2.97909382e-01    1.91734967e-01 ; 112 -> standard pair opls_140 - opls_145
+    6   12     1    2.45967478e-01    1.25520000e-01 ; 113 -> standard pair opls_140 - opls_146
+    6   13     1    2.97909382e-01    1.91734967e-01 ; 114 -> standard pair opls_140 - opls_145
+    6   14     1    2.45967478e-01    1.25520000e-01 ; 115 -> standard pair opls_140 - opls_146
+    6   15     1    2.97909382e-01    1.91734967e-01 ; 116 -> standard pair opls_140 - opls_145
+    6   16     1    2.45967478e-01    1.25520000e-01 ; 117 -> standard pair opls_140 - opls_146
+    6   17     1    2.97909382e-01    1.91734967e-01 ; 118 -> standard pair opls_140 - opls_145
+    6   18     1    2.45967478e-01    1.25520000e-01 ; 119 -> standard pair opls_140 - opls_146
+    6   19     1    2.97909382e-01    1.91734967e-01 ; 120 -> standard pair opls_140 - opls_145
+    6   20     1    2.45967478e-01    1.25520000e-01 ; 121 -> standard pair opls_140 - opls_146
+    6   24     1    0.00000000e+00    0.00000000e+00 ; 122 -> standard pair opls_140 - opls_241
+    6   25     1    2.95803989e-01    1.86176247e-01 ; 123 -> standard pair opls_140 - opls_283
+    6   26     1    2.50000000e-01    1.25520000e-01 ; 124 -> standard pair opls_140 - opls_140
+    6   27     1    2.95803989e-01    1.86176247e-01 ; 125 -> standard pair opls_140 - opls_135
+    6   28     1    2.50000000e-01    1.25520000e-01 ; 126 -> standard pair opls_140 - opls_140
+    6   29     1    2.50000000e-01    1.25520000e-01 ; 127 -> standard pair opls_140 - opls_140
+    6   30     1    2.50000000e-01    1.25520000e-01 ; 128 -> standard pair opls_140 - opls_140
+    6   31     1    3.06186218e-01    2.34826418e-01 ; 129 -> standard pair opls_140 - opls_271
+    6   32     1    2.72029410e-01    3.32094705e-01 ; 130 -> standard pair opls_140 - opls_272
+    6   33     1    2.72029410e-01    3.32094705e-01 ; 131 -> standard pair opls_140 - opls_272
+    7   16     1    2.91032644e-01    1.86176247e-01 ; 132 -> standard pair opls_149 - opls_146
+    7   18     1    2.91032644e-01    1.86176247e-01 ; 133 -> standard pair opls_149 - opls_146
+    7   19     1    3.52491135e-01    2.84388915e-01 ; 134 -> standard pair opls_149 - opls_145
+    7   20     1    2.91032644e-01    1.86176247e-01 ; 135 -> standard pair opls_149 - opls_146
+    7   24     1    0.00000000e+00    0.00000000e+00 ; 136 -> standard pair opls_149 - opls_241
+    7   25     1    3.50000000e-01    2.76144000e-01 ; 137 -> standard pair opls_149 - opls_283
+    7   26     1    2.95803989e-01    1.86176247e-01 ; 138 -> standard pair opls_149 - opls_140
+    7   27     1    3.50000000e-01    2.76144000e-01 ; 139 -> standard pair opls_149 - opls_135
+    7   28     1    2.95803989e-01    1.86176247e-01 ; 140 -> standard pair opls_149 - opls_140
+    7   29     1    2.95803989e-01    1.86176247e-01 ; 141 -> standard pair opls_149 - opls_140
+    7   30     1    2.95803989e-01    1.86176247e-01 ; 142 -> standard pair opls_149 - opls_140
+    7   31     1    3.62284419e-01    3.48303865e-01 ; 143 -> standard pair opls_149 - opls_271
+    7   32     1    3.21869539e-01    4.92576049e-01 ; 144 -> standard pair opls_149 - opls_272
+    7   33     1    3.21869539e-01    4.92576049e-01 ; 145 -> standard pair opls_149 - opls_272
+    8   12     1    2.45967478e-01    1.25520000e-01 ; 146 -> standard pair opls_140 - opls_146
+    8   14     1    2.45967478e-01    1.25520000e-01 ; 147 -> standard pair opls_140 - opls_146
+    8   15     1    2.97909382e-01    1.91734967e-01 ; 148 -> standard pair opls_140 - opls_145
+    8   16     1    2.45967478e-01    1.25520000e-01 ; 149 -> standard pair opls_140 - opls_146
+    8   17     1    2.97909382e-01    1.91734967e-01 ; 150 -> standard pair opls_140 - opls_145
+    8   18     1    2.45967478e-01    1.25520000e-01 ; 151 -> standard pair opls_140 - opls_146
+    8   19     1    2.97909382e-01    1.91734967e-01 ; 152 -> standard pair opls_140 - opls_145
+    8   20     1    2.45967478e-01    1.25520000e-01 ; 153 -> standard pair opls_140 - opls_146
+    8   22     1    2.72029410e-01    3.32094705e-01 ; 154 -> standard pair opls_140 - opls_236
+    8   23     1    2.85043856e-01    2.98797365e-01 ; 155 -> standard pair opls_140 - opls_238
+    8   24     1    0.00000000e+00    0.00000000e+00 ; 156 -> standard pair opls_140 - opls_241
+    8   25     1    2.95803989e-01    1.86176247e-01 ; 157 -> standard pair opls_140 - opls_283
+    8   26     1    2.50000000e-01    1.25520000e-01 ; 158 -> standard pair opls_140 - opls_140
+    8   27     1    2.95803989e-01    1.86176247e-01 ; 159 -> standard pair opls_140 - opls_135
+    8   28     1    2.50000000e-01    1.25520000e-01 ; 160 -> standard pair opls_140 - opls_140
+    8   29     1    2.50000000e-01    1.25520000e-01 ; 161 -> standard pair opls_140 - opls_140
+    8   30     1    2.50000000e-01    1.25520000e-01 ; 162 -> standard pair opls_140 - opls_140
+    8   31     1    3.06186218e-01    2.34826418e-01 ; 163 -> standard pair opls_140 - opls_271
+    8   32     1    2.72029410e-01    3.32094705e-01 ; 164 -> standard pair opls_140 - opls_272
+    8   33     1    2.72029410e-01    3.32094705e-01 ; 165 -> standard pair opls_140 - opls_272
+    9   12     1    2.45967478e-01    1.25520000e-01 ; 166 -> standard pair opls_140 - opls_146
+    9   14     1    2.45967478e-01    1.25520000e-01 ; 167 -> standard pair opls_140 - opls_146
+    9   15     1    2.97909382e-01    1.91734967e-01 ; 168 -> standard pair opls_140 - opls_145
+    9   16     1    2.45967478e-01    1.25520000e-01 ; 169 -> standard pair opls_140 - opls_146
+    9   17     1    2.97909382e-01    1.91734967e-01 ; 170 -> standard pair opls_140 - opls_145
+    9   18     1    2.45967478e-01    1.25520000e-01 ; 171 -> standard pair opls_140 - opls_146
+    9   19     1    2.97909382e-01    1.91734967e-01 ; 172 -> standard pair opls_140 - opls_145
+    9   20     1    2.45967478e-01    1.25520000e-01 ; 173 -> standard pair opls_140 - opls_146
+    9   22     1    2.72029410e-01    3.32094705e-01 ; 174 -> standard pair opls_140 - opls_236
+    9   23     1    2.85043856e-01    2.98797365e-01 ; 175 -> standard pair opls_140 - opls_238
+    9   24     1    0.00000000e+00    0.00000000e+00 ; 176 -> standard pair opls_140 - opls_241
+    9   25     1    2.95803989e-01    1.86176247e-01 ; 177 -> standard pair opls_140 - opls_283
+    9   26     1    2.50000000e-01    1.25520000e-01 ; 178 -> standard pair opls_140 - opls_140
+    9   27     1    2.95803989e-01    1.86176247e-01 ; 179 -> standard pair opls_140 - opls_135
+    9   28     1    2.50000000e-01    1.25520000e-01 ; 180 -> standard pair opls_140 - opls_140
+    9   29     1    2.50000000e-01    1.25520000e-01 ; 181 -> standard pair opls_140 - opls_140
+    9   30     1    2.50000000e-01    1.25520000e-01 ; 182 -> standard pair opls_140 - opls_140
+    9   31     1    3.06186218e-01    2.34826418e-01 ; 183 -> standard pair opls_140 - opls_271
+    9   32     1    2.72029410e-01    3.32094705e-01 ; 184 -> standard pair opls_140 - opls_272
+    9   33     1    2.72029410e-01    3.32094705e-01 ; 185 -> standard pair opls_140 - opls_272
+   10   20     1    2.93104077e-01    1.91734967e-01 ; 186 -> standard pair opls_145 - opls_146
+   10   22     1    3.24160454e-01    5.07283041e-01 ; 187 -> standard pair opls_145 - opls_236
+   10   23     1    3.39668956e-01    4.56420515e-01 ; 188 -> standard pair opls_145 - opls_238
+   10   24     1    0.00000000e+00    0.00000000e+00 ; 189 -> standard pair opls_145 - opls_241
+   10   25     1    3.52491135e-01    2.84388915e-01 ; 190 -> standard pair opls_145 - opls_283
+   10   26     1    2.97909382e-01    1.91734967e-01 ; 191 -> standard pair opls_145 - opls_140
+   10   27     1    3.52491135e-01    2.84388915e-01 ; 192 -> standard pair opls_145 - opls_135
+   10   28     1    2.97909382e-01    1.91734967e-01 ; 193 -> standard pair opls_145 - opls_140
+   10   29     1    2.97909382e-01    1.91734967e-01 ; 194 -> standard pair opls_145 - opls_140
+   10   30     1    2.97909382e-01    1.91734967e-01 ; 195 -> standard pair opls_145 - opls_140
+   10   31     1    3.64862988e-01    3.58703278e-01 ; 196 -> standard pair opls_145 - opls_271
+   10   32     1    3.24160454e-01    5.07283041e-01 ; 197 -> standard pair opls_145 - opls_272
+   10   33     1    3.24160454e-01    5.07283041e-01 ; 198 -> standard pair opls_145 - opls_272
+   11   18     1    2.93104077e-01    1.91734967e-01 ; 199 -> standard pair opls_145 - opls_146
+   11   21     1    3.64862988e-01    3.58703278e-01 ; 200 -> standard pair opls_145 - opls_235
+   11   22     1    3.24160454e-01    5.07283041e-01 ; 201 -> standard pair opls_145 - opls_236
+   11   23     1    3.39668956e-01    4.56420515e-01 ; 202 -> standard pair opls_145 - opls_238
+   11   24     1    0.00000000e+00    0.00000000e+00 ; 203 -> standard pair opls_145 - opls_241
+   11   25     1    3.52491135e-01    2.84388915e-01 ; 204 -> standard pair opls_145 - opls_283
+   11   26     1    2.97909382e-01    1.91734967e-01 ; 205 -> standard pair opls_145 - opls_140
+   11   27     1    3.52491135e-01    2.84388915e-01 ; 206 -> standard pair opls_145 - opls_135
+   11   28     1    2.97909382e-01    1.91734967e-01 ; 207 -> standard pair opls_145 - opls_140
+   11   29     1    2.97909382e-01    1.91734967e-01 ; 208 -> standard pair opls_145 - opls_140
+   11   30     1    2.97909382e-01    1.91734967e-01 ; 209 -> standard pair opls_145 - opls_140
+   11   31     1    3.64862988e-01    3.58703278e-01 ; 210 -> standard pair opls_145 - opls_271
+   11   32     1    3.24160454e-01    5.07283041e-01 ; 211 -> standard pair opls_145 - opls_272
+   11   33     1    3.24160454e-01    5.07283041e-01 ; 212 -> standard pair opls_145 - opls_272
+   12   14     1    2.42000000e-01    1.25520000e-01 ; 213 -> standard pair opls_146 - opls_146
+   12   17     1    2.93104077e-01    1.91734967e-01 ; 214 -> standard pair opls_146 - opls_145
+   12   18     1    2.42000000e-01    1.25520000e-01 ; 215 -> standard pair opls_146 - opls_146
+   12   20     1    2.42000000e-01    1.25520000e-01 ; 216 -> standard pair opls_146 - opls_146
+   12   21     1    3.01247407e-01    2.34826418e-01 ; 217 -> standard pair opls_146 - opls_235
+   12   22     1    2.67641551e-01    3.32094705e-01 ; 218 -> standard pair opls_146 - opls_236
+   12   23     1    2.80446073e-01    2.98797365e-01 ; 219 -> standard pair opls_146 - opls_238
+   12   24     1    0.00000000e+00    0.00000000e+00 ; 220 -> standard pair opls_146 - opls_241
+   12   25     1    2.91032644e-01    1.86176247e-01 ; 221 -> standard pair opls_146 - opls_283
+   12   26     1    2.45967478e-01    1.25520000e-01 ; 222 -> standard pair opls_146 - opls_140
+   12   27     1    2.91032644e-01    1.86176247e-01 ; 223 -> standard pair opls_146 - opls_135
+   12   28     1    2.45967478e-01    1.25520000e-01 ; 224 -> standard pair opls_146 - opls_140
+   12   29     1    2.45967478e-01    1.25520000e-01 ; 225 -> standard pair opls_146 - opls_140
+   12   30     1    2.45967478e-01    1.25520000e-01 ; 226 -> standard pair opls_146 - opls_140
+   12   31     1    3.01247407e-01    2.34826418e-01 ; 227 -> standard pair opls_146 - opls_271
+   12   32     1    2.67641551e-01    3.32094705e-01 ; 228 -> standard pair opls_146 - opls_272
+   12   33     1    2.67641551e-01    3.32094705e-01 ; 229 -> standard pair opls_146 - opls_272
+   13   16     1    2.93104077e-01    1.91734967e-01 ; 230 -> standard pair opls_145 - opls_146
+   13   21     1    3.64862988e-01    3.58703278e-01 ; 231 -> standard pair opls_145 - opls_235
+   13   22     1    3.24160454e-01    5.07283041e-01 ; 232 -> standard pair opls_145 - opls_236
+   13   23     1    3.39668956e-01    4.56420515e-01 ; 233 -> standard pair opls_145 - opls_238
+   13   24     1    0.00000000e+00    0.00000000e+00 ; 234 -> standard pair opls_145 - opls_241
+   13   25     1    3.52491135e-01    2.84388915e-01 ; 235 -> standard pair opls_145 - opls_283
+   13   26     1    2.97909382e-01    1.91734967e-01 ; 236 -> standard pair opls_145 - opls_140
+   13   27     1    3.52491135e-01    2.84388915e-01 ; 237 -> standard pair opls_145 - opls_135
+   13   28     1    2.97909382e-01    1.91734967e-01 ; 238 -> standard pair opls_145 - opls_140
+   13   29     1    2.97909382e-01    1.91734967e-01 ; 239 -> standard pair opls_145 - opls_140
+   13   30     1    2.97909382e-01    1.91734967e-01 ; 240 -> standard pair opls_145 - opls_140
+   13   31     1    3.64862988e-01    3.58703278e-01 ; 241 -> standard pair opls_145 - opls_271
+   13   32     1    3.24160454e-01    5.07283041e-01 ; 242 -> standard pair opls_145 - opls_272
+   13   33     1    3.24160454e-01    5.07283041e-01 ; 243 -> standard pair opls_145 - opls_272
+   14   15     1    2.93104077e-01    1.91734967e-01 ; 244 -> standard pair opls_146 - opls_145
+   14   16     1    2.42000000e-01    1.25520000e-01 ; 245 -> standard pair opls_146 - opls_146
+   14   20     1    2.42000000e-01    1.25520000e-01 ; 246 -> standard pair opls_146 - opls_146
+   14   21     1    3.01247407e-01    2.34826418e-01 ; 247 -> standard pair opls_146 - opls_235
+   14   22     1    2.67641551e-01    3.32094705e-01 ; 248 -> standard pair opls_146 - opls_236
+   14   23     1    2.80446073e-01    2.98797365e-01 ; 249 -> standard pair opls_146 - opls_238
+   14   24     1    0.00000000e+00    0.00000000e+00 ; 250 -> standard pair opls_146 - opls_241
+   14   25     1    2.91032644e-01    1.86176247e-01 ; 251 -> standard pair opls_146 - opls_283
+   14   26     1    2.45967478e-01    1.25520000e-01 ; 252 -> standard pair opls_146 - opls_140
+   14   27     1    2.91032644e-01    1.86176247e-01 ; 253 -> standard pair opls_146 - opls_135
+   14   28     1    2.45967478e-01    1.25520000e-01 ; 254 -> standard pair opls_146 - opls_140
+   14   29     1    2.45967478e-01    1.25520000e-01 ; 255 -> standard pair opls_146 - opls_140
+   14   30     1    2.45967478e-01    1.25520000e-01 ; 256 -> standard pair opls_146 - opls_140
+   14   31     1    3.01247407e-01    2.34826418e-01 ; 257 -> standard pair opls_146 - opls_271
+   14   32     1    2.67641551e-01    3.32094705e-01 ; 258 -> standard pair opls_146 - opls_272
+   14   33     1    2.67641551e-01    3.32094705e-01 ; 259 -> standard pair opls_146 - opls_272
+   15   21     1    3.64862988e-01    3.58703278e-01 ; 260 -> standard pair opls_145 - opls_235
+   15   22     1    3.24160454e-01    5.07283041e-01 ; 261 -> standard pair opls_145 - opls_236
+   15   23     1    3.39668956e-01    4.56420515e-01 ; 262 -> standard pair opls_145 - opls_238
+   15   24     1    0.00000000e+00    0.00000000e+00 ; 263 -> standard pair opls_145 - opls_241
+   15   25     1    3.52491135e-01    2.84388915e-01 ; 264 -> standard pair opls_145 - opls_283
+   15   26     1    2.97909382e-01    1.91734967e-01 ; 265 -> standard pair opls_145 - opls_140
+   15   27     1    3.52491135e-01    2.84388915e-01 ; 266 -> standard pair opls_145 - opls_135
+   15   28     1    2.97909382e-01    1.91734967e-01 ; 267 -> standard pair opls_145 - opls_140
+   15   29     1    2.97909382e-01    1.91734967e-01 ; 268 -> standard pair opls_145 - opls_140
+   15   30     1    2.97909382e-01    1.91734967e-01 ; 269 -> standard pair opls_145 - opls_140
+   15   31     1    3.64862988e-01    3.58703278e-01 ; 270 -> standard pair opls_145 - opls_271
+   15   32     1    3.24160454e-01    5.07283041e-01 ; 271 -> standard pair opls_145 - opls_272
+   15   33     1    3.24160454e-01    5.07283041e-01 ; 272 -> standard pair opls_145 - opls_272
+   16   18     1    2.42000000e-01    1.25520000e-01 ; 273 -> standard pair opls_146 - opls_146
+   16   21     1    3.01247407e-01    2.34826418e-01 ; 274 -> standard pair opls_146 - opls_235
+   16   22     1    2.67641551e-01    3.32094705e-01 ; 275 -> standard pair opls_146 - opls_236
+   16   23     1    2.80446073e-01    2.98797365e-01 ; 276 -> standard pair opls_146 - opls_238
+   16   24     1    0.00000000e+00    0.00000000e+00 ; 277 -> standard pair opls_146 - opls_241
+   16   25     1    2.91032644e-01    1.86176247e-01 ; 278 -> standard pair opls_146 - opls_283
+   16   26     1    2.45967478e-01    1.25520000e-01 ; 279 -> standard pair opls_146 - opls_140
+   16   27     1    2.91032644e-01    1.86176247e-01 ; 280 -> standard pair opls_146 - opls_135
+   16   28     1    2.45967478e-01    1.25520000e-01 ; 281 -> standard pair opls_146 - opls_140
+   16   29     1    2.45967478e-01    1.25520000e-01 ; 282 -> standard pair opls_146 - opls_140
+   16   30     1    2.45967478e-01    1.25520000e-01 ; 283 -> standard pair opls_146 - opls_140
+   16   31     1    3.01247407e-01    2.34826418e-01 ; 284 -> standard pair opls_146 - opls_271
+   16   32     1    2.67641551e-01    3.32094705e-01 ; 285 -> standard pair opls_146 - opls_272
+   16   33     1    2.67641551e-01    3.32094705e-01 ; 286 -> standard pair opls_146 - opls_272
+   17   21     1    3.64862988e-01    3.58703278e-01 ; 287 -> standard pair opls_145 - opls_235
+   17   22     1    3.24160454e-01    5.07283041e-01 ; 288 -> standard pair opls_145 - opls_236
+   17   23     1    3.39668956e-01    4.56420515e-01 ; 289 -> standard pair opls_145 - opls_238
+   17   24     1    0.00000000e+00    0.00000000e+00 ; 290 -> standard pair opls_145 - opls_241
+   17   25     1    3.52491135e-01    2.84388915e-01 ; 291 -> standard pair opls_145 - opls_283
+   17   26     1    2.97909382e-01    1.91734967e-01 ; 292 -> standard pair opls_145 - opls_140
+   17   27     1    3.52491135e-01    2.84388915e-01 ; 293 -> standard pair opls_145 - opls_135
+   17   28     1    2.97909382e-01    1.91734967e-01 ; 294 -> standard pair opls_145 - opls_140
+   17   29     1    2.97909382e-01    1.91734967e-01 ; 295 -> standard pair opls_145 - opls_140
+   17   30     1    2.97909382e-01    1.91734967e-01 ; 296 -> standard pair opls_145 - opls_140
+   17   31     1    3.64862988e-01    3.58703278e-01 ; 297 -> standard pair opls_145 - opls_271
+   17   32     1    3.24160454e-01    5.07283041e-01 ; 298 -> standard pair opls_145 - opls_272
+   17   33     1    3.24160454e-01    5.07283041e-01 ; 299 -> standard pair opls_145 - opls_272
+   18   21     1    3.01247407e-01    2.34826418e-01 ; 300 -> standard pair opls_146 - opls_235
+   18   22     1    2.67641551e-01    3.32094705e-01 ; 301 -> standard pair opls_146 - opls_236
+   18   23     1    2.80446073e-01    2.98797365e-01 ; 302 -> standard pair opls_146 - opls_238
+   18   24     1    0.00000000e+00    0.00000000e+00 ; 303 -> standard pair opls_146 - opls_241
+   18   25     1    2.91032644e-01    1.86176247e-01 ; 304 -> standard pair opls_146 - opls_283
+   18   26     1    2.45967478e-01    1.25520000e-01 ; 305 -> standard pair opls_146 - opls_140
+   18   27     1    2.91032644e-01    1.86176247e-01 ; 306 -> standard pair opls_146 - opls_135
+   18   28     1    2.45967478e-01    1.25520000e-01 ; 307 -> standard pair opls_146 - opls_140
+   18   29     1    2.45967478e-01    1.25520000e-01 ; 308 -> standard pair opls_146 - opls_140
+   18   30     1    2.45967478e-01    1.25520000e-01 ; 309 -> standard pair opls_146 - opls_140
+   18   31     1    3.01247407e-01    2.34826418e-01 ; 310 -> standard pair opls_146 - opls_271
+   18   32     1    2.67641551e-01    3.32094705e-01 ; 311 -> standard pair opls_146 - opls_272
+   18   33     1    2.67641551e-01    3.32094705e-01 ; 312 -> standard pair opls_146 - opls_272
+   19   21     1    3.64862988e-01    3.58703278e-01 ; 313 -> standard pair opls_145 - opls_235
+   19   22     1    3.24160454e-01    5.07283041e-01 ; 314 -> standard pair opls_145 - opls_236
+   19   23     1    3.39668956e-01    4.56420515e-01 ; 315 -> standard pair opls_145 - opls_238
+   19   24     1    0.00000000e+00    0.00000000e+00 ; 316 -> standard pair opls_145 - opls_241
+   19   25     1    3.52491135e-01    2.84388915e-01 ; 317 -> standard pair opls_145 - opls_283
+   19   26     1    2.97909382e-01    1.91734967e-01 ; 318 -> standard pair opls_145 - opls_140
+   19   27     1    3.52491135e-01    2.84388915e-01 ; 319 -> standard pair opls_145 - opls_135
+   19   28     1    2.97909382e-01    1.91734967e-01 ; 320 -> standard pair opls_145 - opls_140
+   19   29     1    2.97909382e-01    1.91734967e-01 ; 321 -> standard pair opls_145 - opls_140
+   19   30     1    2.97909382e-01    1.91734967e-01 ; 322 -> standard pair opls_145 - opls_140
+   19   31     1    3.64862988e-01    3.58703278e-01 ; 323 -> standard pair opls_145 - opls_271
+   19   32     1    3.24160454e-01    5.07283041e-01 ; 324 -> standard pair opls_145 - opls_272
+   19   33     1    3.24160454e-01    5.07283041e-01 ; 325 -> standard pair opls_145 - opls_272
+   20   21     1    3.01247407e-01    2.34826418e-01 ; 326 -> standard pair opls_146 - opls_235
+   20   22     1    2.67641551e-01    3.32094705e-01 ; 327 -> standard pair opls_146 - opls_236
+   20   23     1    2.80446073e-01    2.98797365e-01 ; 328 -> standard pair opls_146 - opls_238
+   20   24     1    0.00000000e+00    0.00000000e+00 ; 329 -> standard pair opls_146 - opls_241
+   20   25     1    2.91032644e-01    1.86176247e-01 ; 330 -> standard pair opls_146 - opls_283
+   20   26     1    2.45967478e-01    1.25520000e-01 ; 331 -> standard pair opls_146 - opls_140
+   20   27     1    2.91032644e-01    1.86176247e-01 ; 332 -> standard pair opls_146 - opls_135
+   20   28     1    2.45967478e-01    1.25520000e-01 ; 333 -> standard pair opls_146 - opls_140
+   20   29     1    2.45967478e-01    1.25520000e-01 ; 334 -> standard pair opls_146 - opls_140
+   20   30     1    2.45967478e-01    1.25520000e-01 ; 335 -> standard pair opls_146 - opls_140
+   20   31     1    3.01247407e-01    2.34826418e-01 ; 336 -> standard pair opls_146 - opls_271
+   20   32     1    2.67641551e-01    3.32094705e-01 ; 337 -> standard pair opls_146 - opls_272
+   20   33     1    2.67641551e-01    3.32094705e-01 ; 338 -> standard pair opls_146 - opls_272
+   21   28     1    3.06186218e-01    2.34826418e-01 ; 339 -> standard pair opls_235 - opls_140
+   21   29     1    3.06186218e-01    2.34826418e-01 ; 340 -> standard pair opls_235 - opls_140
+   21   30     1    3.06186218e-01    2.34826418e-01 ; 341 -> standard pair opls_235 - opls_140
+   21   32     1    3.33166625e-01    6.21292302e-01 ; 342 -> standard pair opls_235 - opls_272
+   21   33     1    3.33166625e-01    6.21292302e-01 ; 343 -> standard pair opls_235 - opls_272
+   22   26     1    2.72029410e-01    3.32094705e-01 ; 344 -> standard pair opls_236 - opls_140
+   22   27     1    3.21869539e-01    4.92576049e-01 ; 345 -> standard pair opls_236 - opls_135
+   22   28     1    2.72029410e-01    3.32094705e-01 ; 346 -> standard pair opls_236 - opls_140
+   22   29     1    2.72029410e-01    3.32094705e-01 ; 347 -> standard pair opls_236 - opls_140
+   22   30     1    2.72029410e-01    3.32094705e-01 ; 348 -> standard pair opls_236 - opls_140
+   22   31     1    3.33166625e-01    6.21292302e-01 ; 349 -> standard pair opls_236 - opls_271
+   22   32     1    2.96000000e-01    8.78640000e-01 ; 350 -> standard pair opls_236 - opls_272
+   22   33     1    2.96000000e-01    8.78640000e-01 ; 351 -> standard pair opls_236 - opls_272
+   24   28     1    0.00000000e+00    0.00000000e+00 ; 352 -> standard pair opls_241 - opls_140
+   24   29     1    0.00000000e+00    0.00000000e+00 ; 353 -> standard pair opls_241 - opls_140
+   24   30     1    0.00000000e+00    0.00000000e+00 ; 354 -> standard pair opls_241 - opls_140
+   24   32     1    0.00000000e+00    0.00000000e+00 ; 355 -> standard pair opls_241 - opls_272
+   24   33     1    0.00000000e+00    0.00000000e+00 ; 356 -> standard pair opls_241 - opls_272
+   28   32     1    2.72029410e-01    3.32094705e-01 ; 357 -> standard pair opls_140 - opls_272
+   28   33     1    2.72029410e-01    3.32094705e-01 ; 358 -> standard pair opls_140 - opls_272
+   29   32     1    2.72029410e-01    3.32094705e-01 ; 359 -> standard pair opls_140 - opls_272
+   29   33     1    2.72029410e-01    3.32094705e-01 ; 360 -> standard pair opls_140 - opls_272
+   30   32     1    2.72029410e-01    3.32094705e-01 ; 361 -> standard pair opls_140 - opls_272
+   30   33     1    2.72029410e-01    3.32094705e-01 ; 362 -> standard pair opls_140 - opls_272
+    1    8     2    2.85043856e-01    1.49398683e-01 ; 363 -> 1-4 pair opls_287 - opls_140
+    1    9     2    2.85043856e-01    1.49398683e-01 ; 364 -> 1-4 pair opls_287 - opls_140
+    1   10     2    3.39668956e-01    2.28210257e-01 ; 365 -> 1-4 pair opls_287 - opls_145
+    1   22     2    3.10161248e-01    3.95271761e-01 ; 366 -> 1-4 pair opls_287 - opls_236
+    1   23     2    3.25000000e-01    3.55640000e-01 ; 367 -> 1-4 pair opls_287 - opls_238
+    2    6     2    0.00000000e+00    0.00000000e+00 ; 368 -> 1-4 pair opls_290 - opls_140
+    2    7     2    0.00000000e+00    0.00000000e+00 ; 369 -> 1-4 pair opls_290 - opls_149
+    2   21     2    0.00000000e+00    0.00000000e+00 ; 370 -> 1-4 pair opls_290 - opls_235
+    3    6     2    0.00000000e+00    0.00000000e+00 ; 371 -> 1-4 pair opls_290 - opls_140
+    3    7     2    0.00000000e+00    0.00000000e+00 ; 372 -> 1-4 pair opls_290 - opls_149
+    3   21     2    0.00000000e+00    0.00000000e+00 ; 373 -> 1-4 pair opls_290 - opls_235
+    4    6     2    0.00000000e+00    0.00000000e+00 ; 374 -> 1-4 pair opls_290 - opls_140
+    4    7     2    0.00000000e+00    0.00000000e+00 ; 375 -> 1-4 pair opls_290 - opls_149
+    4   21     2    0.00000000e+00    0.00000000e+00 ; 376 -> 1-4 pair opls_290 - opls_235
+    5   11     2    3.52491135e-01    1.42194457e-01 ; 377 -> 1-4 pair opls_293B - opls_145
+    5   13     2    3.52491135e-01    1.42194457e-01 ; 378 -> 1-4 pair opls_293B - opls_145
+    5   24     2    0.00000000e+00    0.00000000e+00 ; 379 -> 1-4 pair opls_293B - opls_241
+    5   25     2    3.50000000e-01    1.38072000e-01 ; 380 -> 1-4 pair opls_293B - opls_283
+    6    8     2    2.50000000e-01    6.27600000e-02 ; 381 -> 1-4 pair opls_140 - opls_140
+    6    9     2    2.50000000e-01    6.27600000e-02 ; 382 -> 1-4 pair opls_140 - opls_140
+    6   10     2    2.97909382e-01    9.58674835e-02 ; 383 -> 1-4 pair opls_140 - opls_145
+    6   22     2    2.72029410e-01    1.66047352e-01 ; 384 -> 1-4 pair opls_140 - opls_236
+    6   23     2    2.85043856e-01    1.49398683e-01 ; 385 -> 1-4 pair opls_140 - opls_238
+    7   12     2    2.91032644e-01    9.30881234e-02 ; 386 -> 1-4 pair opls_149 - opls_146
+    7   14     2    2.91032644e-01    9.30881234e-02 ; 387 -> 1-4 pair opls_149 - opls_146
+    7   15     2    3.52491135e-01    1.42194457e-01 ; 388 -> 1-4 pair opls_149 - opls_145
+    7   17     2    3.52491135e-01    1.42194457e-01 ; 389 -> 1-4 pair opls_149 - opls_145
+    7   22     2    3.21869539e-01    2.46288025e-01 ; 390 -> 1-4 pair opls_149 - opls_236
+    7   23     2    3.37268439e-01    2.21594057e-01 ; 391 -> 1-4 pair opls_149 - opls_238
+    8   11     2    2.97909382e-01    9.58674835e-02 ; 392 -> 1-4 pair opls_140 - opls_145
+    8   13     2    2.97909382e-01    9.58674835e-02 ; 393 -> 1-4 pair opls_140 - opls_145
+    8   21     2    3.06186218e-01    1.17413209e-01 ; 394 -> 1-4 pair opls_140 - opls_235
+    9   11     2    2.97909382e-01    9.58674835e-02 ; 395 -> 1-4 pair opls_140 - opls_145
+    9   13     2    2.97909382e-01    9.58674835e-02 ; 396 -> 1-4 pair opls_140 - opls_145
+    9   21     2    3.06186218e-01    1.17413209e-01 ; 397 -> 1-4 pair opls_140 - opls_235
+   10   16     2    2.93104077e-01    9.58674835e-02 ; 398 -> 1-4 pair opls_145 - opls_146
+   10   18     2    2.93104077e-01    9.58674835e-02 ; 399 -> 1-4 pair opls_145 - opls_146
+   10   19     2    3.55000000e-01    1.46440000e-01 ; 400 -> 1-4 pair opls_145 - opls_145
+   10   21     2    3.64862988e-01    1.79351639e-01 ; 401 -> 1-4 pair opls_145 - opls_235
+   11   14     2    2.93104077e-01    9.58674835e-02 ; 402 -> 1-4 pair opls_145 - opls_146
+   11   17     2    3.55000000e-01    1.46440000e-01 ; 403 -> 1-4 pair opls_145 - opls_145
+   11   20     2    2.93104077e-01    9.58674835e-02 ; 404 -> 1-4 pair opls_145 - opls_146
+   12   13     2    2.93104077e-01    9.58674835e-02 ; 405 -> 1-4 pair opls_146 - opls_145
+   12   16     2    2.42000000e-01    6.27600000e-02 ; 406 -> 1-4 pair opls_146 - opls_146
+   12   19     2    2.93104077e-01    9.58674835e-02 ; 407 -> 1-4 pair opls_146 - opls_145
+   13   15     2    3.55000000e-01    1.46440000e-01 ; 408 -> 1-4 pair opls_145 - opls_145
+   13   20     2    2.93104077e-01    9.58674835e-02 ; 409 -> 1-4 pair opls_145 - opls_146
+   14   18     2    2.42000000e-01    6.27600000e-02 ; 410 -> 1-4 pair opls_146 - opls_146
+   14   19     2    2.93104077e-01    9.58674835e-02 ; 411 -> 1-4 pair opls_146 - opls_145
+   15   18     2    2.93104077e-01    9.58674835e-02 ; 412 -> 1-4 pair opls_145 - opls_146
+   16   17     2    2.93104077e-01    9.58674835e-02 ; 413 -> 1-4 pair opls_146 - opls_145
+   16   20     2    2.42000000e-01    6.27600000e-02 ; 414 -> 1-4 pair opls_146 - opls_146
+   18   20     2    2.42000000e-01    6.27600000e-02 ; 415 -> 1-4 pair opls_146 - opls_146
+   21   26     2    3.06186218e-01    1.17413209e-01 ; 416 -> 1-4 pair opls_235 - opls_140
+   21   27     2    3.62284419e-01    1.74151932e-01 ; 417 -> 1-4 pair opls_235 - opls_135
+   21   31     2    3.75000000e-01    2.19660000e-01 ; 418 -> 1-4 pair opls_235 - opls_271
+   22   24     2    0.00000000e+00    0.00000000e+00 ; 419 -> 1-4 pair opls_236 - opls_241
+   22   25     2    3.21869539e-01    2.46288025e-01 ; 420 -> 1-4 pair opls_236 - opls_283
+   23   28     2    2.85043856e-01    1.49398683e-01 ; 421 -> 1-4 pair opls_238 - opls_140
+   23   29     2    2.85043856e-01    1.49398683e-01 ; 422 -> 1-4 pair opls_238 - opls_140
+   23   30     2    2.85043856e-01    1.49398683e-01 ; 423 -> 1-4 pair opls_238 - opls_140
+   23   32     2    3.10161248e-01    3.95271761e-01 ; 424 -> 1-4 pair opls_238 - opls_272
+   23   33     2    3.10161248e-01    3.95271761e-01 ; 425 -> 1-4 pair opls_238 - opls_272
+   24   26     2    0.00000000e+00    0.00000000e+00 ; 426 -> 1-4 pair opls_241 - opls_140
+   24   27     2    0.00000000e+00    0.00000000e+00 ; 427 -> 1-4 pair opls_241 - opls_135
+   24   31     2    0.00000000e+00    0.00000000e+00 ; 428 -> 1-4 pair opls_241 - opls_271
+   26   28     2    2.50000000e-01    6.27600000e-02 ; 429 -> 1-4 pair opls_140 - opls_140
+   26   29     2    2.50000000e-01    6.27600000e-02 ; 430 -> 1-4 pair opls_140 - opls_140
+   26   30     2    2.50000000e-01    6.27600000e-02 ; 431 -> 1-4 pair opls_140 - opls_140
+   26   32     2    2.72029410e-01    1.66047352e-01 ; 432 -> 1-4 pair opls_140 - opls_272
+   26   33     2    2.72029410e-01    1.66047352e-01 ; 433 -> 1-4 pair opls_140 - opls_272
+   27   32     2    3.21869539e-01    2.46288025e-01 ; 434 -> 1-4 pair opls_135 - opls_272
+   27   33     2    3.21869539e-01    2.46288025e-01 ; 435 -> 1-4 pair opls_135 - opls_272
+   28   31     2    3.06186218e-01    1.17413209e-01 ; 436 -> 1-4 pair opls_140 - opls_271
+   29   31     2    3.06186218e-01    1.17413209e-01 ; 437 -> 1-4 pair opls_140 - opls_271
+   30   31     2    3.06186218e-01    1.17413209e-01 ; 438 -> 1-4 pair opls_140 - opls_271
+
+[ bonds ]
+    1    2    1      1.010000e-01      3.631712e+05 ;  H3 - N3 
+    1    3    1      1.010000e-01      3.631712e+05 ;  H3 - N3 
+    1    4    1      1.010000e-01      3.631712e+05 ;  H3 - N3 
+    1    5    1      1.471000e-01      3.071056e+05 ;  CT_2 - N3 
+    5    6    1      1.090000e-01      2.845120e+05 ;  CT_2 - HC 
+    5    7    1      1.529000e-01      2.242624e+05 ;  CT - CT_2 
+    5   21    1      1.522000e-01      2.652656e+05 ;  C - CT_2 
+    7    8    1      1.090000e-01      2.845120e+05 ;  CT - HC 
+    7    9    1      1.090000e-01      2.845120e+05 ;  CT - HC 
+    7   10    1      1.510000e-01      2.652656e+05 ;  CA - CT 
+   10   11    1      1.400000e-01      3.924592e+05 ;  CA - CA 
+   10   13    1      1.400000e-01      3.924592e+05 ;  CA - CA 
+   11   12    1      1.080000e-01      3.071056e+05 ;  CA - HA 
+   11   15    1      1.400000e-01      3.924592e+05 ;  CA - CA 
+   13   14    1      1.080000e-01      3.071056e+05 ;  CA - HA 
+   13   17    1      1.400000e-01      3.924592e+05 ;  CA - CA 
+   15   16    1      1.080000e-01      3.071056e+05 ;  CA - HA 
+   15   19    1      1.400000e-01      3.924592e+05 ;  CA - CA 
+   17   18    1      1.080000e-01      3.071056e+05 ;  CA - HA 
+   17   19    1      1.400000e-01      3.924592e+05 ;  CA - CA 
+   19   20    1      1.080000e-01      3.071056e+05 ;  CA - HA 
+   21   22    1      1.229000e-01      4.769760e+05 ;  C - O 
+   21   23    1      1.335000e-01      4.100320e+05 ;  C - N 
+   23   24    1      1.010000e-01      3.631712e+05 ;  H - N 
+   23   25    1      1.449000e-01      2.820016e+05 ;  CT_2 - N 
+   25   26    1      1.090000e-01      2.845120e+05 ;  CT_2 - HC 
+   25   27    1      1.529000e-01      2.242624e+05 ;  CT - CT_2 
+   25   31    1      1.522000e-01      2.652656e+05 ;  C_3 - CT_2 
+   27   28    1      1.090000e-01      2.845120e+05 ;  CT - HC 
+   27   29    1      1.090000e-01      2.845120e+05 ;  CT - HC 
+   27   30    1      1.090000e-01      2.845120e+05 ;  CT - HC 
+   31   32    1      1.250000e-01      5.489408e+05 ;  C_3 - O2 
+   31   33    1      1.250000e-01      5.489408e+05 ;  C_3 - O2 
+
+[ angles ]
+    2    1    3    1      1.095000e+02      2.928800e+02 ;  H3 - N3 - H3 
+    2    1    4    1      1.095000e+02      2.928800e+02 ;  H3 - N3 - H3 
+    2    1    5    1      1.095000e+02      2.928800e+02 ;  CT_2 - N3 - H3 
+    3    1    4    1      1.095000e+02      2.928800e+02 ;  H3 - N3 - H3 
+    3    1    5    1      1.095000e+02      2.928800e+02 ;  CT_2 - N3 - H3 
+    4    1    5    1      1.095000e+02      2.928800e+02 ;  CT_2 - N3 - H3 
+    1    5    6    1      1.095000e+02      2.928800e+02 ;  HC - CT_2 - N3 
+    1    5    7    1      1.112000e+02      6.694400e+02 ;  CT - CT_2 - N3 
+    1    5   21    1      1.112000e+02      6.694400e+02 ;  C - CT_2 - N3 
+    6    5    7    1      1.107000e+02      3.138000e+02 ;  CT - CT_2 - HC 
+    6    5   21    1      1.095000e+02      2.928800e+02 ;  C - CT_2 - HC 
+    7    5   21    1      1.111000e+02      5.271840e+02 ;  C - CT_2 - CT 
+    5    7    8    1      1.107000e+02      3.138000e+02 ;  CT_2 - CT - HC 
+    5    7    9    1      1.107000e+02      3.138000e+02 ;  CT_2 - CT - HC 
+    5    7   10    1      1.140000e+02      5.271840e+02 ;  CA - CT - CT_2 
+    8    7    9    1      1.078000e+02      2.761440e+02 ;  HC - CT - HC 
+    8    7   10    1      1.095000e+02      2.928800e+02 ;  CA - CT - HC 
+    9    7   10    1      1.095000e+02      2.928800e+02 ;  CA - CT - HC 
+    7   10   11    1      1.200000e+02      5.857600e+02 ;  CA - CA - CT 
+    7   10   13    1      1.200000e+02      5.857600e+02 ;  CA - CA - CT 
+   11   10   13    1      1.200000e+02      5.271840e+02 ;  CA - CA - CA 
+   10   11   12    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   10   11   15    1      1.200000e+02      5.271840e+02 ;  CA - CA - CA 
+   12   11   15    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   10   13   14    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   10   13   17    1      1.200000e+02      5.271840e+02 ;  CA - CA - CA 
+   14   13   17    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   11   15   16    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   11   15   19    1      1.200000e+02      5.271840e+02 ;  CA - CA - CA 
+   16   15   19    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   13   17   18    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   13   17   19    1      1.200000e+02      5.271840e+02 ;  CA - CA - CA 
+   18   17   19    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   15   19   17    1      1.200000e+02      5.271840e+02 ;  CA - CA - CA 
+   15   19   20    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+   17   19   20    1      1.200000e+02      2.928800e+02 ;  CA - CA - HA 
+    5   21   22    1      1.204000e+02      6.694400e+02 ;  CT_2 - C - O 
+    5   21   23    1      1.166000e+02      5.857600e+02 ;  CT_2 - C - N 
+   22   21   23    1      1.229000e+02      6.694400e+02 ;  N - C - O 
+   21   23   24    1      1.198000e+02      2.928800e+02 ;  C - N - H 
+   21   23   25    1      1.219000e+02      4.184000e+02 ;  C - N - CT_2 
+   24   23   25    1      1.184000e+02      3.179840e+02 ;  CT_2 - N - H 
+   23   25   26    1      1.095000e+02      2.928800e+02 ;  HC - CT_2 - N 
+   23   25   27    1      1.097000e+02      6.694400e+02 ;  CT - CT_2 - N 
+   23   25   31    1      1.101000e+02      5.271840e+02 ;  C_3 - CT_2 - N 
+   26   25   27    1      1.107000e+02      3.138000e+02 ;  CT - CT_2 - HC 
+   26   25   31    1      1.095000e+02      2.928800e+02 ;  C_3 - CT_2 - HC 
+   27   25   31    1      1.111000e+02      5.271840e+02 ;  C_3 - CT_2 - CT 
+   25   27   28    1      1.107000e+02      3.138000e+02 ;  CT_2 - CT - HC 
+   25   27   29    1      1.107000e+02      3.138000e+02 ;  CT_2 - CT - HC 
+   25   27   30    1      1.107000e+02      3.138000e+02 ;  CT_2 - CT - HC 
+   28   27   29    1      1.078000e+02      2.761440e+02 ;  HC - CT - HC 
+   28   27   30    1      1.078000e+02      2.761440e+02 ;  HC - CT - HC 
+   29   27   30    1      1.078000e+02      2.761440e+02 ;  HC - CT - HC 
+   25   31   32    1      1.170000e+02      5.857600e+02 ;  CT_2 - C_3 - O2 
+   25   31   33    1      1.170000e+02      5.857600e+02 ;  CT_2 - C_3 - O2 
+   32   31   33    1      1.260000e+02      6.694400e+02 ;  O2 - C_3 - O2 
+
+[ dihedrals ]
+    2    1    5    6    3   0.54601   1.63803   0.00000  -2.18405   0.00000   0.00000 ; 1 ->  H3 - N3 - CT_2 - HC
+    2    1    5    7    3   0.72592   2.17777   0.00000  -2.90370   0.00000   0.00000 ; 2 ->  CT - CT_2 - N3 - H3
+    2    1    5   21    3   0.72592   2.17777   0.00000  -2.90370   0.00000   0.00000 ; 3 ->  C - CT_2 - N3 - H3
+    3    1    5    6    3   0.54601   1.63803   0.00000  -2.18405   0.00000   0.00000 ; 4 ->  H3 - N3 - CT_2 - HC
+    3    1    5    7    3   0.72592   2.17777   0.00000  -2.90370   0.00000   0.00000 ; 5 ->  CT - CT_2 - N3 - H3
+    3    1    5   21    3   0.72592   2.17777   0.00000  -2.90370   0.00000   0.00000 ; 6 ->  C - CT_2 - N3 - H3
+    4    1    5    6    3   0.54601   1.63803   0.00000  -2.18405   0.00000   0.00000 ; 7 ->  H3 - N3 - CT_2 - HC
+    4    1    5    7    3   0.72592   2.17777   0.00000  -2.90370   0.00000   0.00000 ; 8 ->  CT - CT_2 - N3 - H3
+    4    1    5   21    3   0.72592   2.17777   0.00000  -2.90370   0.00000   0.00000 ; 9 ->  C - CT_2 - N3 - H3
+    1    5    7    8    3   0.97069   2.91206   0.00000  -3.88275   0.00000   0.00000 ; 10 ->  HC - CT - CT_2 - N3
+    1    5    7    9    3   0.97069   2.91206   0.00000  -3.88275   0.00000   0.00000 ; 11 ->  HC - CT - CT_2 - N3
+    1    5    7   10    3  -0.76567   2.70705   4.02501  -5.96639   0.00000   0.00000 ; 12 ->  CA - CT - CT_2 - N3
+    6    5    7    8    3   0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000 ; 13 ->  HC - CT - CT_2 - HC
+    6    5    7    9    3   0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000 ; 14 ->  HC - CT - CT_2 - HC
+    6    5    7   10    3   0.96650   2.89951   0.00000  -3.86601   0.00000   0.00000 ; 15 ->  CA - CT - CT_2 - HC
+   21    5    7    8    3  -0.15899  -0.47698   0.00000   0.63596   0.00000   0.00000 ; 16 ->  C - CT_2 - CT - HC
+   21    5    7    9    3  -0.15899  -0.47698   0.00000   0.63596   0.00000   0.00000 ; 17 ->  C - CT_2 - CT - HC
+   21    5    7   10    3  -4.23421   7.22159   1.90790  -4.89528   0.00000   0.00000 ; 18 ->  C - CT_2 - CT - CA
+    1    5   21   22    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 19 ->  N3 - CT_2 - C - O
+    1    5   21   23    3  10.36376  -6.60654 -10.49347   6.73624   0.00000   0.00000 ; 20 ->  N - C - CT_2 - N3
+    6    5   21   22    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 21 ->  HC - CT_2 - C - O
+    6    5   21   23    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 22 ->  HC - CT_2 - C - N
+    7    5   21   22    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 23 ->  CT - CT_2 - C - O
+    7    5   21   23    3   5.00825  -1.69870  -0.37238  -2.93716   0.00000   0.00000 ; 24 ->  CT - CT_2 - C - N
+    5    7   10   11    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 25 ->  CA - CA - CT - X
+    5    7   10   13    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 26 ->  CA - CA - CT - X
+    8    7   10   11    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 27 ->  CA - CA - CT - HC
+    8    7   10   13    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 28 ->  CA - CA - CT - HC
+    9    7   10   11    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 29 ->  CA - CA - CT - HC
+    9    7   10   13    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 30 ->  CA - CA - CT - HC
+    7   10   11   12    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 31 ->  X - CA - CA - X
+    7   10   11   15    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 32 ->  X - CA - CA - X
+   13   10   11   12    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 33 ->  X - CA - CA - X
+   13   10   11   15    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 34 ->  X - CA - CA - X
+    7   10   13   14    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 35 ->  X - CA - CA - X
+    7   10   13   17    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 36 ->  X - CA - CA - X
+   11   10   13   14    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 37 ->  X - CA - CA - X
+   11   10   13   17    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 38 ->  X - CA - CA - X
+   10   11   15   16    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 39 ->  X - CA - CA - X
+   10   11   15   19    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 40 ->  X - CA - CA - X
+   12   11   15   16    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 41 ->  X - CA - CA - X
+   12   11   15   19    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 42 ->  X - CA - CA - X
+   10   13   17   18    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 43 ->  X - CA - CA - X
+   10   13   17   19    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 44 ->  X - CA - CA - X
+   14   13   17   18    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 45 ->  X - CA - CA - X
+   14   13   17   19    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 46 ->  X - CA - CA - X
+   11   15   19   17    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 47 ->  X - CA - CA - X
+   11   15   19   20    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 48 ->  X - CA - CA - X
+   16   15   19   17    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 49 ->  X - CA - CA - X
+   16   15   19   20    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 50 ->  X - CA - CA - X
+   13   17   19   15    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 51 ->  X - CA - CA - X
+   13   17   19   20    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 52 ->  X - CA - CA - X
+   18   17   19   15    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 53 ->  X - CA - CA - X
+   18   17   19   20    3  30.33400   0.00000 -30.33400   0.00000   0.00000   0.00000 ; 54 ->  X - CA - CA - X
+    5   21   23   24    3  20.50160   0.00000 -20.50160   0.00000   0.00000   0.00000 ; 55 ->  CT_2 - C - N - H
+    5   21   23   25    3  30.28798  -4.81160 -25.47638   0.00000   0.00000   0.00000 ; 56 ->  CT_2 - C - N - CT_2
+   22   21   23   24    3  20.50160   0.00000 -20.50160   0.00000   0.00000   0.00000 ; 57 ->  H - N - C - O
+   22   21   23   25    3  25.47638   0.00000 -25.47638   0.00000   0.00000   0.00000 ; 58 ->  CT_2 - N - C - O
+   21   23   25   26    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 59 ->  C - N - CT_2 - HC
+   21   23   25   27    3  15.70255  31.75656  -3.66936 -43.78975   0.00000   0.00000 ; 60 ->  C - N - CT_2 - CT
+   21   23   25   31    3 -10.35749 -29.58716  -1.16734  41.11199   0.00000   0.00000 ; 61 ->  C_3 - CT_2 - N - C
+   24   23   25   26    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 62 ->  H - N - CT_2 - HC
+   24   23   25   27    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 63 ->  CT - CT_2 - N - H
+   24   23   25   31    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 64 ->  H - N - CT_2 - X
+   23   25   27   28    3   0.97069   2.91206   0.00000  -3.88275   0.00000   0.00000 ; 65 ->  HC - CT - CT_2 - N
+   23   25   27   29    3   0.97069   2.91206   0.00000  -3.88275   0.00000   0.00000 ; 66 ->  HC - CT - CT_2 - N
+   23   25   27   30    3   0.97069   2.91206   0.00000  -3.88275   0.00000   0.00000 ; 67 ->  HC - CT - CT_2 - N
+   26   25   27   28    3   0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000 ; 68 ->  HC - CT - CT_2 - HC
+   26   25   27   29    3   0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000 ; 69 ->  HC - CT - CT_2 - HC
+   26   25   27   30    3   0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000 ; 70 ->  HC - CT - CT_2 - HC
+   31   25   27   28    3  -0.47070  -1.41210   0.00000   1.88280   0.00000   0.00000 ; 71 ->  C_3 - CT_2 - CT - HC
+   31   25   27   29    3  -0.47070  -1.41210   0.00000   1.88280   0.00000   0.00000 ; 72 ->  C_3 - CT_2 - CT - HC
+   31   25   27   30    3  -0.47070  -1.41210   0.00000   1.88280   0.00000   0.00000 ; 73 ->  C_3 - CT_2 - CT - HC
+   23   25   31   32    3   3.43088   0.00000  -3.43088   0.00000   0.00000   0.00000 ; 74 ->  N - CT_2 - C_3 - O2
+   23   25   31   33    3   3.43088   0.00000  -3.43088   0.00000   0.00000   0.00000 ; 75 ->  N - CT_2 - C_3 - O2
+   26   25   31   32    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 76 ->  HC - CT_2 - C_3 - O2
+   26   25   31   33    3   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; 77 ->  HC - CT_2 - C_3 - O2
+   27   25   31   32    3   3.43088   0.00000  -3.43088   0.00000   0.00000   0.00000 ; 78 ->  CT - CT_2 - C_3 - O2
+   27   25   31   33    3   3.43088   0.00000  -3.43088   0.00000   0.00000   0.00000 ; 79 ->  CT - CT_2 - C_3 - O2
+
+[ dihedrals ]
+; improper dihedrals
+    5   23   21   22    4      1.800000e+02      4.393200e+01    2 ; specified explicitly or in macro
+    7   10   13   11    4      1.800000e+02      4.602400e+00    2 ; specified explicitly or in macro
+   10   15   11   12    4      1.800000e+02      4.602400e+00    2 ; specified explicitly or in macro
+   10   17   13   14    4      1.800000e+02      4.602400e+00    2 ; specified explicitly or in macro
+   11   19   15   16    4      1.800000e+02      4.602400e+00    2 ; specified explicitly or in macro
+   13   19   17   18    4      1.800000e+02      4.602400e+00    2 ; specified explicitly or in macro
+   15   17   19   20    4      1.800000e+02      4.602400e+00    2 ; specified explicitly or in macro
+   21   25   23   24    4      1.800000e+02      4.184000e+00    2 ; specified explicitly or in macro
+   25   32   31   33    4      1.800000e+02      4.393200e+01    2 ; specified explicitly or in macro
+
+[ refdihedral ]
+2   1   5   21  
+
+[ optdihedrals ]
+
+[ optatoms ]
+

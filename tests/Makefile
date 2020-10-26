@@ -1,0 +1,15 @@
+subdirs = MMCalc Opt
+
+.PHONY: MMCalc Opt tests
+
+MMCalc:
+	$(MAKE) -C $@ tests
+
+Opt:
+	$(MAKE) -C $@ prepare
+	$(MAKE) -C $@ tests
+
+tests: $(subdirs)
+
+clean:
+	set -e ; for subdir in $(subdirs); do $(MAKE) -C $$subdir clean ; done

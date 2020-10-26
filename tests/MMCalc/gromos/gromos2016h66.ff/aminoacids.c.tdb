@@ -1,0 +1,77 @@
+[ None ]
+;
+; ---------- COOH terminal patch for peptides
+;
+[ COOH ]
+[ replace ]
+C      C      C      12.0110     0.550
+O     O1      OA     15.9994    -0.410
+O2     O2     O      15.9994    -0.550
+[ add ]
+1      2      O2     C      CA      N
+       O      15.9994  -0.550
+1      2      HO2     O1      C      CA
+       H      1.00800   0.410
+[ bonds ]
+C      O1       gb_13
+C      O2      gb_5
+O1      HO2      gb_1
+[ angles ]
+O1      C      O2      ga_33
+C      O1      HO2      ga_12
+CA     C      O1       ga_19
+CA     C      O2      ga_30
+[ dihedrals ]
+N      CA     C      O1      gd_63
+N      CA     C      O1      gd_66
+CA     C      O1      HO2     gd_12
+[ impropers ]
+C      CA     O1      O2     gi_1
+
+
+
+
+
+
+
+[ COO- ]
+[ replace ]
+C      C      C      12.011      0.27
+O      O1      OM      15.9994      -0.635
+OXT      O2      OM      15.9994      -0.635
+[ add ]
+2      8      O      C      CA      N
+      OM      15.9994      -0.635
+[ bonds ]
+C      O1      gb_6
+C      O2      gb_6
+[ angles ]
+O1      C      O2      ga_38
+CA      C      O1      ga_22
+CA      C      O2      ga_22
+[ dihedrals ]
+N      CA      C      O2      gd_63
+N      CA      C      O2      gd_66
+[ impropers ]
+C      CA      O2      O1      gi_1
+
+
+
+
+;
+; ---------- D3OH terminal patch for DNA
+;
+[ D3OH ]
+[ replace ]
+C2*    C2*    CH2r   14.0270   0.000
+C3*    C3*    CH1    13.0190   0.150
+O3*    O3*    OA     15.9994  -0.548
+[ add ]
+1      2      H3*       O3*      C3*      C4*
+       H      1.00800   0.398
+[ bonds ]
+O3*    H3*    gb_1
+[ angles ]
+C3*    O3*    H3*    ga_12
+[ dihedrals ]
+C4*    C3*    O3*    H3*    gd_23

@@ -1,0 +1,49 @@
+[ parameter_optimization ]
+; NTORS   NLJ    FTORS
+_NTORS_   _NLJ_  _TORSTYPE_
+; TORSNT[I]
+; I=  1     2     3     4     5     6
+      1     1   _TORSNT_     1     1     1
+; LJNT[I]
+    _LJA_ _LJB_
+; WTEMP
+ _WTEMP_
+
+[ seed ]
+ 12705
+
+[ parameter_randomization ]
+; PINV
+    50
+; DIST[I]  MIN[I]    MAX[I]     MEAN[I]  STDDEV[I]
+        1       0        80         6.0       50.0
+   _DIST_    5e-4      1e-2        8e-3      50e-3
+        1    5e-7      1e-5        8e-6      50e-6
+
+[ genetic_algorithm ]
+; POPSIZE    NGENS
+       8         1
+; SELTYPE     NTEL
+    _SEL_        1
+;  CRTYPE   CRRATE    MUT
+     _CR_      100     20
+
+[ writetraj ]
+; NSTE: Frequency (in number of generations) to write to energy trajectory.
+; NSTP: Frequency (in number of generations) to write to parameters trajectory.
+;
+; NSTE   NSTP
+     1      1
+
+[ minimization ]
+;    MALG    DX0  DXM  NMAX     DELE
+   _MALG_   0.01  0.1     2     1e-4
+        0   0.01  0.1  5000     1e-9
+
+[ torsional_scan ]
+; RFRST: dihedral-scan starting angle (deg)
+; RSTEP: dihedral-scan step angle (deg)
+; RLST:  dihedral-scan stop/last angle (deg, inclusive)
+; RFCT:  force constant of dihedral restraints
+;   RFRST  RSTEP  RLST   RFCT
+        0     10   360   5000
