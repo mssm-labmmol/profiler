@@ -10,6 +10,7 @@
 \makeevenfoot{plain}{\thepage}{}{}
 \makeoddfoot{plain}{}{}{\thepage}
 \clearmark{section}
+\setsecnumdepth{subsection}
 \usepackage{overcite}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
@@ -1079,32 +1080,39 @@ consists of three steps:
 \chapter{Program Usage}
 \label{chap:program-usage}
 
-In this chapter, we describe the usage of the two main programs of the \profilertools{} package:
-\profilergen{}, used to perform torsional scans and calculate the corresponding energy profiles, and
-\profileropt{}, used to optimize torsional and/or 1--4 Lennard-Jones parameters based on the reproduction of reference data on torsional-scan energy profiles.
-The following convention will be used.
-When a command-line option and its value(s) are enclosed in square brackets, this means they are not mandatory.
-When the value for a command-line option is enclosed in angular brackets, this means it is a file;
-otherwise, it is an input variable (\autoref{sec:file-formats-input-variables}).
+In this chapter, we describe the usage of the two main programs of the
+\profilertools{} package: \profilergen{}, used to perform torsional
+scans and calculate the corresponding energy profiles, and
+\profileropt{}, used to optimize torsional and/or 1--4 Lennard-Jones
+parameters based on the reproduction of reference data of
+torsional-scan energy profiles.
+% The following convention will be
+% used.  When a command-line option and its value(s) are enclosed in
+% square brackets, this means they are not mandatory.  When the value
+% for a command-line option is enclosed in angular brackets, this means
+% it is a file; otherwise, it is an input variable
+% (\autoref{sec:file-formats-input-variables}).
 
 \section{Performing Torsional Scans: \profilergen{}}
 \label{sec:program-gen}
 
-To perform a torsional scan using \profilergen{}, the user has to
-supply the coordinates of the system of interest, an STP file
-containing its topology and the specification of the reference
-dihedral (see \autoref{sec:file-formats-STP}), and the definition of
-the desired torsional-scan angles. The coordinates may be of a single
-configuration or of a previously obtained torsional-scan trajectory.  Finally, the user
-can optionally control the settings of the energy minimization
-algorithm involved in the calculation of the energy profiles.
+To perform a torsional scan using \profilergen{}, the user must supply
+the coordinates of the system of interest, an STP file with its
+topology and the specification of the reference dihedral (see
+\autoref{sec:file-formats-STP}), and the definition of the
+torsional-scan angles. The coordinates can be of a single arbitrary
+conformation or of a trajectory corresponding to the desired torsional
+scan (if, for example, the user wants to refine a previously obtained
+scan trajectory). The user can also optionally control the settings of
+the energy minimization algorithm involved in the calculation of the
+energy profiles.
 
-The usage of \profilergen{} is as follows:
+The usage of \profilergen{} is as follows (optional arguments are enclosed in square brackets):
 
 \begin{lstlisting}
 /path/to/profilerGen.py 
     -c      <COORDS>             Torsional-scan trajectory or single molecular conformation (.xyz/.gro/.g96).
-    -t      <STP>                Special-topology (STP) file.
+    -t      <STP>                Special topology (STP) file.
     -op     PREFIX               Prefix for output files.
     -dr     RFRST RSTEP RLST     Torsional-scan angles (deg): from RFRST to RLST with a RSTEP step.
    [-dk     RFCT]                Force constant for dihedral restraint (default = 5000 kJ/(mol.rad^2)).
@@ -1113,15 +1121,15 @@ The usage of \profilergen{} is as follows:
    [-dxm    DXM]                 Maximal step size DXM in minimization algorithm (default = 0.20 nm).
    [-dele   DELE]                If |E_n+1 - E_n| <= DELE, minimization stops (default = 1.0e-09).
    [-nsteps NMAX]                Maximal number of steps in minimization (default = 50000).
-\end{lstlisting}\vspace{2ex}
+\end{lstlisting}\vspace{2ex} 
 
 \noindent The program will write the following files to disk:
 \begin{itemize}
 \item[---] \texttt{PREFIX.dat}: The requested torsional-scan energy profile;
 \item[---] \texttt{PREFIX.xyz}: Torsional-scan trajectory;
-\item[---] \texttt{PREFIX\_full.dat}: Torsional-scan energy profile split into components\footnote{Components: bonds, angles, proper dihedrals, improper dihedrals, proper dihedral restraints, Lennard-Jones, Coulomb. The total potential energies are not shifted to zero.} (Xmgrace-compatible);
-\item[---] \texttt{PREFIX\_1.dat...PREFIX\_K.dat}: Minimization energy trajectory at each step of the torsional scan;
-\item[---] \texttt{PREFIX\_1.xyz...PREFIX\_K.xyz}: Minimization coordinates trajectory at each step of the torsional scan,
+\item[---] \texttt{PREFIX\_full.dat}: Torsional-scan energy profile split into components\footnote{Components: total, bonds, angles, proper dihedrals, improper dihedrals, proper dihedral restraints, Lennard-Jones, Coulomb. The total potential energies are not shifted to zero.} (Xmgrace-compatible);
+\item[---] \texttt{PREFIX\_1.dat...PREFIX\_K.dat}: Energy trajectory of the minimization of each step of the torsional scan;
+\item[---] \texttt{PREFIX\_1.xyz...PREFIX\_K.xyz}: Coordinates trajectory of the minimization of each step of the torsional~scan,
 \end{itemize}
 where $K$ is the length of the torsional scan.
 
@@ -1132,20 +1140,21 @@ For more details on the calculation of the energy profiles, see \autoref{sec:ga-
 
 To perform parameter optimization using \profileropt{}, the user has
 to supply starting torsional-scan trajectories of the systems of
-interest, the STP files containing their topologies and specification
-of the reference dihedrals and optimized terms (see
-\autoref{sec:file-formats-STP}), the reference data to use in the
-optimization and the input parameters file INP
+interest, the STP files containing their topologies and the
+specification of the reference dihedrals and optimized terms (see
+\autoref{sec:file-formats-STP}), the reference data to use as targets
+in the optimization and the input parameters file INP
 (\autoref{sec:file-formats-INP}).
 
-The usage of \profileropt{} is as follows:
+The usage of \profileropt{} is as follows (optional arguments are
+enclosed in square brackets):
 
 \begin{lstlisting}
 /path/to/profilerOpt.py
     -np NPROCS                    Number of subprocesses spawned in parallelization.
     -r  <REF_1> ... <REF_S>       Reference data files.
     -c  <COORDS_1> ... <COORDS_S> Torsional-scan trajectory files (.g96/.xyz/.gro).
-    -t  <STP_1> ... <STP_S>       Special-topology files (.stp).
+    -t  <STP_1> ... <STP_S>       Special topology files (.stp).
     -i  <INP>                     Input file containing profilerOpt parameters (.inp).
     -op PREFIX                    Prefix for output files.
    [-w  <WEI_1> ... <WEI_S>]      Weight files (default = derive weights from <INP> file).
@@ -1159,17 +1168,17 @@ torsional scan.
 The program will write the following files to disk:
 \begin{itemize}
 \item [---]\texttt{PREFIX.ifp}: Parameters and weighted RMSD of the optimal individual;
-\item[---] \texttt{PREFIX\_minim\_1.dat...PREFIX\_minim\_S.dat}: \par Enhanced energy profile of the optimal individual for each system;
-\item[---] \texttt{PREFIX\_minim\_1.xyz...PREFIX\_minim\_S.xyz}: \par Enhanced torsional-scan trajectory of the optimal individual for each system;
-\item[---] \texttt{PREFIX\_1.dat...PREFIX\_S.dat}: Energy profile of the optimal individual for each system;
-\item[---] \texttt{PREFIX\_1.xyz...PREFIX\_S.xyz}: Torsional-scan trajectory of the optimal individual for each system;
-\item [---]\texttt{PREFIX\_1.tre...PREFIX\_S.tre}: Trajectory of individual energy profiles over generations for each system;
-\item [---]\texttt{PREFIX.trp}: Trajectory of individual parameters over generations;
-\item [---]\texttt{PREFIX.trr}: Trajectory of weighted RMSD values over generations,
+\item[---] \texttt{PREFIX\_minim\_1.dat...PREFIX\_minim\_S.dat}: \par Refined energy profile of each system for the optimal individual;
+\item[---] \texttt{PREFIX\_minim\_1.xyz...PREFIX\_minim\_S.xyz}: \par Refined torsional-scan trajectory of each system for the optimal individual;
+\item[---] \texttt{PREFIX\_1.dat...PREFIX\_S.dat}: Energy profile of each system for the optimal individual;
+\item[---] \texttt{PREFIX\_1.xyz...PREFIX\_S.xyz}: Torsional-scan trajectory of each system for the optimal individual;
+\item [---]\texttt{PREFIX\_1.tre...PREFIX\_S.tre}: Energy profile of each system for all individuals and generations;
+\item [---]\texttt{PREFIX.trp}: Parameters of all individualls for all generations;
+\item [---]\texttt{PREFIX.trr}: Average and best weighted RMSD values for all generations,
 \end{itemize}
 where $S$ is the number of systems.
 
-The enhanced quantities mentioned above are obtained based on refined
+The refined quantities mentioned above are obtained based on enhanced
 energy minimization settings, as described in \autoref{sec:ga-tpes}.
 The IFP, TRP, TRE and TRR output file formats are described in
 \autoref{sec:file-formats-file-formats}.
