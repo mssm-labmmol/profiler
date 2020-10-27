@@ -1,4 +1,4 @@
-PROFILER_OPT = /home/yan/programs/profilerOpt/profilerOpt.py
+PROFILER_OPT := $(abspath ../../profilerOpt.py)
 
 INPUTS = $(wildcard output*.inp)
 OUTPUTS = $(INPUTS:.inp=.o)

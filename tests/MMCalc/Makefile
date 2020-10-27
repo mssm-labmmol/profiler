@@ -1,5 +1,5 @@
-ITP_TO_STP = /home/yan/programs/itp_to_stp/itp_to_stp.py
-PROFILER_GEN = /home/yan/programs/profilerOpt/profilerGen.py
+ITP_TO_STP := $(abspath ../../utils/gromos_itp_to_stp/gromos_itp_to_stp.py
+PROFILER_GEN := $(abspath ../../profilerGen.py)
 SUBDIRS = gromos amber opls
 
 export ITP_TO_STP

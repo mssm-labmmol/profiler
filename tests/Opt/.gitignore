@@ -1,5 +1,6 @@
 #*#
 *~
-output*
+/output*
+/test*
 *.out
 *.o
