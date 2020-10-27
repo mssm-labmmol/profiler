@@ -1,4 +1,16 @@
-\documentclass[10pt,a4paper]{report}
+\documentclass[10pt,a4paper,openany]{memoir}
+\makeatletter
+\createmark{chapter}{both}{shownumber}{\@chapapp\ }{. \ }
+\makeatother
+\makeheadrule{headings}{\textwidth}{0.3pt}
+\makeevenfoot{headings}{\thepage}{}{}
+\makeoddfoot{headings}{}{}{\thepage}
+\makeoddhead{headings}{}{}{\rightmark}
+\makeevenhead{headings}{\leftmark}{}{}
+\makeevenfoot{plain}{\thepage}{}{}
+\makeoddfoot{plain}{}{}{\thepage}
+\clearmark{section}
+\usepackage{overcite}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -33,8 +45,19 @@
 \definecolor{mygray}{rgb}{0.85,0.85,0.85}
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
 
-\title{profilerTools \\ v. 1.0}
-\author{Yan~M.~H.~Gon\c{c}alves \& Bruno~A.~C.~Horta}
+% \setlength{\droptitle}{50pt}
+\renewcommand{\maketitlehooka}{%
+  \vfill\hrulefill}
+\renewcommand{\maketitlehookb}{%
+  \hrulefill\par \hfill \textit{Corresponding to Version 1.0}}
+\renewcommand{\maketitlehookc}{%
+  \vfill}
+\title{\Huge\texttt{profilerTools} \\ User Manual}
+\author{{\huge MSSM Group} \\ Maintained by Yan M. H. Gonçalves}
+\date{\footnotesize\textcopyright 2020--: \hspace{5ex}
+  MSSM Group, Laboratório de Modelagem Molecular,\\
+  \hspace{16ex} Instituto de Química, Universidade Federal do Rio de Janeiro}
+  
 \lstdefinelanguage{gromacs}{morecomment=[l]{;}}
 \lstset{
   backgroundcolor=\color{mygray},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
@@ -72,10 +95,59 @@
     literate={├}{|}1 {─}{--}1 {└}{+}1 
   }
   \begin{document}
-
   \maketitle
+  \thispagestyle{empty}
+
+  \clearpage
+  \frontmatter
+  \nouppercaseheads
+  \addtolength{\headheight}{2ex}
+  \addtolength{\headsep}{-2ex}
+
+  \section{Citation Information}
+
+  % If the \profilertools{} suite was helpful in achieving your results,
+  % we kindly ask you to cite the following paper:
+
+  % \begin{quote}
+  %   Long title of the paper, with many things. Many details of the
+  %   journal, such as name and pages. Possibly also a DOI: xxxxxxx.
+  % \end{quote}
+
+  % \noindent If you wish to cite this manual, please refer to it as
+
+  % \begin{quote}
+  %   Gonçalves, Y.~M.~H. \textit{profilerTools: User Manual
+  %   (v1.0)}. \url{https://github.com/mssm-labmmol/profiler} (2020).
+  % \end{quote}
+
+  In the absence of a scientific publication, we kindly ask you to
+  cite this manual if the \profilertools{} suite was helpful in
+  achieving your results, referring to it as
+
+  \begin{quote}
+    Gonçalves, Y.~M.~H. and the MSSM Group. \textit{profilerTools: User Manual
+      (Version 1.0)}.\\
+    \url{https://github.com/mssm-labmmol/profiler}
+    (2020).
+  \end{quote}
+
+  \section{License}
+
+  \profilertools{} is released under the MIT License. For more
+  information, check the LICENSE file supplied with the source code or
+  consult \autoref{appendix:MIT-license}
+
+  \section{Contact}
+
+  For bug reports or other software-related questions, send an e-mail
+  to \url{yanmarques@gmail.com}.  More information about our research
+  group can be found on the webpage
+  \url{https://labmmol.iq.ufrj.br/mssm}.
 
 \tableofcontents
+
+  \mainmatter
 
 \newcommand*{\profi}{\texttt{profilerOpt}}
 
@@ -102,7 +174,7 @@ The following notation and definitions will be used for mathematical and physica
 \label{sec:bond-terms}
 
 The following functional forms are supported for the calculation of
-the energies and forces associated with a bond-stretching degree of freedom:\cite{GROMOS-doc}
+the energies and forces associated with a bond-stretching degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
 
 \begin{itemize}
 \item [---] \textit{Harmonic}
@@ -1041,8 +1113,9 @@ The usage of \profilergen{} is as follows:
    [-dxm    DXM]                 Maximal step size DXM in minimization algorithm (default = 0.20 nm).
    [-dele   DELE]                If |E_n+1 - E_n| <= DELE, minimization stops (default = 1.0e-09).
    [-nsteps NMAX]                Maximal number of steps in minimization (default = 50000).
-\end{lstlisting}\vspace{-2ex}
-The program will write the following files to disk:
+\end{lstlisting}\vspace{2ex}
+
+\noindent The program will write the following files to disk:
 \begin{itemize}
 \item[---] \texttt{PREFIX.dat}: The requested torsional-scan energy profile;
 \item[---] \texttt{PREFIX.xyz}: Torsional-scan trajectory;
@@ -1076,7 +1149,9 @@ The usage of \profileropt{} is as follows:
     -i  <INP>                     Input file containing profilerOpt parameters (.inp).
     -op PREFIX                    Prefix for output files.
    [-w  <WEI_1> ... <WEI_S>]      Weight files (default = derive weights from <INP> file).
-\end{lstlisting}\vspace{-2ex} where $S$ is the number of systems.
+\end{lstlisting}\vspace{1ex}
+
+\noindent where $S$ is the number of systems.
 The reference (mandatory) and weight (optional) files of each system contain a single column
 of values where the $k$-th row corresponds to the $k$-th step of the
 torsional scan.
@@ -1161,7 +1236,7 @@ given in \autoref{table:input-variables} for reference.
       RSTEP & Float & Step angle of torsional scan. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rstep}\\
       RLST & Float & Last angle of torsional scan. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rlst}\\
       RFCT & Float & Force constant of dihedral restraint for torsional scan. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rfct}\\
-      MALG & Array of Integers & Minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:minimization}\\
+      MALG & Array of Integers & Minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:malg}\\
       DX0 & Array of Floats & Initial step sizes DX0 in minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dx0}\\
       DXM & Array of Floats & Maximal step sizes DXM in minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dxm}\\
       NMAX & Array of Integers & Maximum number of steps in minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:nmax}\\
@@ -2056,7 +2131,7 @@ directory, which is organized as follows:
     |--- 2mb.dat
     |--- bu.dat
 \end{lstlisting}
-\vspace{-2ex}\par
+\vspace{1ex}\par
 
 \noindent The contents of the directories above are:
 \begin{itemize}
@@ -2149,7 +2224,7 @@ CH2      7.4684160e-03       3.3965580e-05       4.7238130e-03       4.7419260e-
 [ refdihedral ]
 ; idx
 3   1   4   2
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{2ex}\par
 
 \noindent 
 %
@@ -2168,7 +2243,7 @@ and run the command:
 \begin{lstlisting}
   mkdir scans scans/bu scans/2mb
 \end{lstlisting}
-\vspace{-2ex}\par
+\vspace{1ex}\par
 
 \noindent to create them for each system.
 %
@@ -2188,7 +2263,7 @@ For butane, this can be done by running the command:\footnote{Backslashes are us
     -dele 1.0e-09 \
     -nsteps 500000 \
     -op scans/bu/bu
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent To consult the meaning of each command-line option, see
 \autoref{sec:program-gen}.
@@ -2221,7 +2296,7 @@ with \texttt{2mb}:
     -dele 1.0e-09 \
     -nsteps 500000 \
     -op scans/2mb/2mb
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent Once again, the resulting energy profile is reported in
 \texttt{scans/2mb/2mb.dat} and is also plotted in
@@ -2253,7 +2328,7 @@ this tutorial.
 %
 For the sake of speed, you might want to consider parallelizing each
 run, which can be done with the \texttt{-np} command-line option (see
-\autoref{sec:program-usage-opt}).
+\autoref{sec:program-opt}).
 %
 However, this leads to loss of reproducibility, which originates in
 technical issues regarding random number generation when the
@@ -2292,7 +2367,7 @@ For example, in the STP file of 2-methylbutane
 ; idxs
 2   3
 2   4
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent indicates that the two CH3-CH3 nonbonded pairs of which the
 involved atoms are 2, 3 and 2, 4 are the targets of the Lennard-Jones
@@ -2303,7 +2378,7 @@ optimization. It is followed by the fragment
 [ optdihedrals ]
 ; idxs
 4   1   5   2   
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent that sets the dihedral angle CH3-CH1-CH2-CH3 formed by the
 atoms 4, 1, 5 and 2 as the target of the torsional optimization.
@@ -2334,7 +2409,7 @@ First, in
       1     1
 ; WTEMP
       0
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent the optimization of both torsional (NTORS) and
 Lennard-Jones (NLJ) terms is set up.
@@ -2354,7 +2429,7 @@ In
 [ seed ]
 ;   SEED
    19804
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent the random number generator seed is set to 17135.
 %
@@ -2376,7 +2451,7 @@ In
         2       0         1        8e-3      24e-3
 ; CS12
         2       0         1        8e-6      24e-6
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent the details of the obtention of random parameters are set
 up.
@@ -2401,7 +2476,7 @@ In
         4        2
 ;  CRTYPE   CRRATE MUTRATE
         2      100      40
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent the details of the genetic algorithm are set up.
 %
@@ -2423,7 +2498,7 @@ In
 [ writetraj ]
 ; NSTE   NSTP
      5      5
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent the frequencies of writing individual energy profiles (NSTE)
 and individual parameters (NSTP) to the TRE and TRP files are
@@ -2439,7 +2514,7 @@ In
         1      0.02     0.2       20        1e-2
         1      0.02     0.2   500000        1e-9
 
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent the minimization algorithm settings are specified.
 %
@@ -2468,7 +2543,7 @@ In
 [ torsional_scan ]
 ;   RFRST  RSTEP  RLST   RFCT
         0     10   360   5000
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent the torsional-scan details are specified.
 %
@@ -2491,7 +2566,7 @@ output files of \profileropt{}:
 
 \begin{lstlisting}
 mkdir scenario_1
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent To perform the optimization, run the following command:
 
@@ -2502,7 +2577,7 @@ mkdir scenario_1
     -t stp/bu_pairs.stp stp/2mb_pairs.stp \
     -i inp/all-terms.inp \
     -op scenario_1/opt
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent A complete description of the command-line options can be
 found in \autoref{sec:program-opt}.
@@ -2539,7 +2614,7 @@ The TRR output file (\texttt{scenario\under{}1/opt.trr}) reads
 ...
    49     7.1041770e+01     2.3566693e+00
    50     2.4350660e+01     2.3566693e+00
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent where the ellipsis \texttt{...} indicates the omission of
 lines.
@@ -2564,7 +2639,7 @@ The TRP output file (\texttt{scenario\under{}1/opt.trp}) reads
     0.00    12.2490638    1 ... 0.00     6.3990019    6     2.1167276e-02     2.1299433e-08     3.9020127e+03
 6    
 #   PHI1            K1   M1 ... PHI6            K6   M6               CS6              CS12             WRMSD
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent where the ellipsis \texttt{...} indicates the omission of
 lines and columns.
@@ -2602,7 +2677,7 @@ For example, the butane TRE file reads
   360.00     2.2428204e+01 ... 0.0000000e+00
 6
 #    ANG              IND1 ...        IND128  
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent where the ellipsis \texttt{...} indicates the omission of lines and
 columns.
@@ -2634,7 +2709,7 @@ The IFP output file (\texttt{scenario\under{}1/opt.ifp}) reads
               0.00         0.5522696    6
 #            WRMSD
      2.3566693e+00
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent and reports the results of the parameter optimization: the
 parameters of the optimal individual and the corresponding weighted
@@ -2658,7 +2733,7 @@ scenario_1/opt_minim_1.dat
 scenario_1/opt_minim_1.xyz
 scenario_1/opt_minim_2.dat
 scenario_1/opt_minim_2.xyz
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 \noindent Each file is identified with the number of the system and
 with a string indicating the minimization algorithm used in its
 obtention.
@@ -2705,7 +2780,7 @@ include the weight files in the call to \profileropt, \textit{i.e.},
     -i inp/all-terms.inp \
     -op scenario_2/opt \
     -w wei/bu.dat wei/2mb.dat
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent where the last line contains the weight files.
 %
@@ -2728,7 +2803,7 @@ file are
               0.00         1.3870725    6
 #            WRMSD
      1.1921891e+00
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent The corresponding energy profiles of
 \texttt{scenario\under{}2/opt\under{}minim\under{}1.dat} and
@@ -2774,7 +2849,7 @@ block reads:
       1     1
 ; WTEMP
       0
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent 
 %
@@ -2789,7 +2864,7 @@ use the appropriate INP file in the call to \profileropt,
     -t stp/bu_pairs.stp stp/2mb_pairs.stp \
     -i inp/custom-terms.inp \
     -op scenario_3/opt 
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent In the above, it is assumed that a directory
 \texttt{scenario\under{}3} has been previously created to store the
@@ -2810,7 +2885,7 @@ file are
               0.00         0.0000000    6
 #            WRMSD
      6.5948745e-01
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent The corresponding energy profiles of
 \texttt{scenario\under{}3/opt\under{}minim\under{}1.dat} and
@@ -2848,7 +2923,7 @@ For example, in the 2-methylbutane STP file,
 [ optatoms ]
 ; idxs
 2   3   4
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent indicates that the atoms 2, 3 and 4 receive the
 Lennard-Jones parameters of the optimal GA individual.
@@ -2864,7 +2939,7 @@ use the appropriate STP files in the call to \profileropt,
     -t stp/bu_atomic.stp stp/2mb_atomic.stp \
     -i inp/all-terms.inp \
     -op scenario_4/opt
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent In the above, it is assumed that a directory
 \texttt{scenario\under{}4} has been previously created to store the
@@ -2885,7 +2960,7 @@ file are:
               0.00         0.5522696    6
 #            WRMSD
      2.3566693e+00
-\end{lstlisting}\vspace{-2ex}\par
+\end{lstlisting}\vspace{1ex}\par
 
 \noindent Note that they are identical to the ones obtained in
 Scenario 1 (\autoref{sec:tutorial-scenario-1}), as anticipated above.
@@ -2907,5 +2982,45 @@ in \autoref{fig:tutorial-profiles}.
     of the STP files.}
   \label{fig:tutorial-profiles}
 \end{figure}
+
+\begin{thebibliography}{9}
+\bibitem{GROMOS-doc} van Gunsteren, W. F., Billeter, S. R., Eising,
+  A. A., Hünenberger, P. H., Krüger, P., Mark, A. E., Scott,
+  W. R. P. and Tironi, I. G. Biomolecular Simulation: The GROMOS96
+  Manual and User Guide. Volume~2:~Algorithms and Formulae for
+  Modelling of Molecular Systems, Vdf Hochschulverlag AG an der ETH
+  Zürich, Zürich, Switzerland, 1996.
+\bibitem{GROMACS-doc} Abraham, M.~J., van~der~Spoel, D., Lindahl,~E.,
+  Hess,~B. and the GROMACS development team. GROMACS User Manual
+  version 2019. \url{http://www.gromacs.org}.
+\end{thebibliography}
+
+\appendix
+\chapter{MIT License}
+\label{appendix:MIT-license}
+
+\begin{verbatim}
+MIT License
+
+Copyright (c) 2020 mssm-labmmol
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+\end{verbatim}
 
 \end{document}
