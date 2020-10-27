@@ -380,7 +380,15 @@ class multiProfile (object):
             cs12_1 = bestParent.cs12 + r * (bestParent.cs12 - worstParent.cs12)
             cs6_2  = r * bestParent.cs6  + (1 - r) *  worstParent.cs6
             cs12_2 = r * bestParent.cs12 + (1 - r) *  worstParent.cs12
-            if (cs6_1 > 0) and (cs6_2 > 0) and (cs12_1 > 0) and (cs12_2 > 0):
+            if (optOpts.nLJ == 1):
+                testValue = (cs6_1 > 0) and (cs6_2 > 0) and (cs12_1 > 0) and (cs12_2 > 0)
+            elif (optOpts.nLJ == 0):
+                testValue = True
+            elif (optOpts.nLJ == -1):
+                testValue = (cs6_1 > 0) and (cs6_2 > 0)
+            elif (optOpts.nLJ == -2):
+                testValue = (cs12_1 > 0) and (cs12_2 > 0)
+            if (testValue):
                 break
             else:
                 r *= 0.50
