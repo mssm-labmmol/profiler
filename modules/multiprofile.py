@@ -95,7 +95,7 @@ class profile (object):
             # set restraints in a push-pop fashion
 
 
-            self.mmCalc.pushDihedralRestraint (*self.refDih, phi, self.restrConst)
+            self.mmCalc.pushDihedralRestraint (*self.refDih, phi_0=phi, k=self.restrConst)
             # minimize
             self.emAlgo.run(self.ensemble[i])
             self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
