@@ -61,13 +61,11 @@ def checkfiles (fnlist):
             raise IOError ("File {0} does not exist!".format(fn))
 
 def selectionWrapper (seltype):
-    if   (seltype) == 1:
-        return DefaultSelectionMethod
-    elif (seltype) == 2:
+    elif (seltype) == 1:
         return RoulettSelectionMethod
-    elif (seltype) == 3:
+    elif (seltype) == 2:
         return RankSelectionMethod
-    elif (seltype) == 4:
+    elif (seltype) == 3:
         return TournamentSelectionMethod
     else:
         raise RuntimeError ("Selection type {} not allowed.".format(seltype))
