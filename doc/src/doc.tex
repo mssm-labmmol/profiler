@@ -1186,85 +1186,27 @@ The IFP, TRP, TRE and TRR output file formats are described in
 \chapter{Input Variables and File Formats}
 \label{chap:file-formats}
 
-The execution of the \profileropt{} and \profilergen{} programs
-depends on several input variables and input data, supplied either as
-command-line options or in appropriate input files.  Likewise, during
-execution, the output of these programs is written to the standard
-streams and to specific output files. In this chapter, we discuss the
-configuration of these input variables and the format of these input
-and output files.
+The execution of \profileropt{} and \profilergen{} depends on several
+input variables and input data supplied either as command-line options
+or in appropriate input files.  During execution, the output of these
+programs is written to the standard streams and to specific output
+files. In this chapter, we discuss the configuration of these input
+variables and the format of these input and output files.
 
 \section{Input Variables}
 \label{sec:file-formats-input-variables}
 
-Input variables control the details of execution of the programs and
-are of two major types: numeric values (integer or float) and arrays
-of numeric values. They can be supplied either as command-line options
-or in an appropriate input file, depending on the usage.  For example,
-the input variable NPROCS (number of processes for parallelization) is
-an integer specified in the command-line option \texttt{-np} of
-\profileropt{}; the input variable LJNT (controls the optimization of
-Lennard-Jones terms) is an array of two integers specified in the INP
-input file. A complete list of input variables and their types is
-given in \autoref{table:input-variables} for reference.
-
-\begin{landscape}
-  \begin{center}
-    \begin{longtable}{llllll}
-      \caption{Input variables, their types, where they are set and links to more detailed description of their allowed values.}
-      \label{table:input-variables}\\
-      \toprule
-      Variable & Type & Description & Set in & Block/Option & Cross-reference\\
-      \midrule
-      \endhead
-      \profileropt{} &  &  &  &  & \\ \midrule
-      NPROCS & Integer & Number of subprocesses spawned in parallelization. & Cmd-line & \texttt{-np} & \autoref{sec:program-opt}\\
-      NTORS & Integer & Controls optimization of torsional parameters. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:ntors}\\
-      NLJ & Integer & Controls optimization of Lennard-Jones parameters. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:nlj}\\
-      FTORS & Integer & Controls functional form of torsional terms. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:ftors}\\
-      TORSNT & Array of Integers & Fine control of functional form of torsional terms. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:torsnt}\\
-      LJNT & Array of Integers & Controls which Lennard-Jones components are optimized. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:ljnt}\\
-      WTEMP & Float & Controls weights given to reference data points. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:wtemp}\\
-      PINV & Integer & Probability (over 100) of inverting sign of random torsional parameters. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:pinv}\\
-      DIST & Array of Integers & Controls types of distributions to draw random parameters from. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:dist}\\
-      MIN & Array of Float & Controls minimum values for random parameters. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:min}\\
-      MAX & Array of Float & Controls maximum values for random parameters. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:max}\\
-      MEAN & Array of Float & Controls mean values of the distributions to draw random parameters from. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:mean}\\
-      STDDEV & Array of Float & Controls std. dev. of the distributions to draw random parameters from. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:stddev}\\
-      SEED & Integer & Sets seed of random number generator. & INP file & \texttt{seed} & \autopageref{descr:seed}\\
-      POPSIZE & Integer & Population size in GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:popsize}\\
-      NGENS & Integer & Number of generations in the GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:ngens}\\
-      SELTYPE & Integer & Selection operator in GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:seltype}\\
-      NTEL & Integer & Number of elite individuals in GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:ntel}\\
-      CRTYPE & Integer & Crossover operator in GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:crtype}\\
-      CRRATE & Integer & Probability (over 100) of crossover. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:crrate}\\
-      MUTRATE & Integer & Probability (over 100) of mutation. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:mutrate}\\
-      NSTE & Integer & Frequency of writing population energies to TRE file. & INP file & \texttt{writetraj} & \autopageref{descr:nste}\\
-      NSTP & Integer & Frequency of writing population parameters to TRP file. & INP file & \texttt{writetraj} & \autopageref{descr:nstp}\\
-      RFRST & Float & Starting angle of torsional scan. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rfrst}\\
-      RSTEP & Float & Step angle of torsional scan. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rstep}\\
-      RLST & Float & Last angle of torsional scan. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rlst}\\
-      RFCT & Float & Force constant of dihedral restraint for torsional scan. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rfct}\\
-      MALG & Array of Integers & Minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:malg}\\
-      DX0 & Array of Floats & Initial step sizes DX0 in minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dx0}\\
-      DXM & Array of Floats & Maximal step sizes DXM in minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dxm}\\
-      NMAX & Array of Integers & Maximum number of steps in minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:nmax}\\
-      DELE & Array of Floats & Energy-convergence criteria of minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dele}\\
-      \midrule
-      \profilergen{} &  &  &  &  & \\ \midrule
-      RFRST & Float & Starting angle of torsional scan. & Cmd-line & \texttt{-dr} & \autoref{sec:program-gen}\\
-      RSTEP & Float & Step angle of torsional scan. & Cmd-line & \texttt{-dr} & \autoref{sec:program-gen}\\
-      RLST & Float & Last angle of torsional scan. & Cmd-line & \texttt{-dr} & \autoref{sec:program-gen}\\
-      RFCT & Float & Force constant of dihedral restraint for torsional scan. & Cmd-line & \texttt{-dk} & \autoref{sec:program-gen}\\
-      MALG & Integer & Minimization algorithm. & Cmd-line & \texttt{-min} & \autoref{sec:program-gen}\\
-      DX0 & Float & Initial step size DX0 in minimization algorithms. & Cmd-line & \texttt{-dx0} & \autoref{sec:program-gen}\\
-      DXM & Float & Maximal step size DXM in minimization algorithms. & Cmd-line & \texttt{-dxm} & \autoref{sec:program-gen}\\
-      NMAX & Integer & Maximum number of steps in minimization algorithm. & Cmd-line & \texttt{-dele} & \autoref{sec:program-gen}\\
-      DELE & Float & Energy-convergence criterium of minimization algorithm. & Cmd-line & \texttt{-nsteps} & \autoref{sec:program-gen}\\
-      \bottomrule
-      \end{longtable}
-    \end{center}
-\end{landscape}
+The input variables control the details of execution of the programs
+and are of two major types: numeric values (integer or float) and
+arrays of numeric values. They can be supplied either as command-line
+options or in an appropriate input file, depending on its kind.  For
+example, the input variable NPROCS (number of processes for
+parallelization) is an integer specified in the command-line option
+\texttt{-np} of \profileropt{}; the input variable LJNT (controls the
+optimization of Lennard-Jones terms) is an array of two integers
+specified in the INP input file. A complete list of input variables
+and their types is given in \autoref{table:input-variables} (at the
+end of the chapter) for reference.
 
 \section{File Formats}
 \label{sec:file-formats-file-formats}
@@ -1274,24 +1216,28 @@ given in \autoref{table:input-variables} for reference.
 
 The special topology (STP) file combines the topology with the
 specification of the RD (\autoref{sec:ga-tpes}), the ODs and the OPs
-(\autoref{sec:ga-opt-control}).  This file is organized into blocks,
-each starting with a line consisting of \texttt{[~blockname~]} (where
-\texttt{blockname} is the name of the block) and ending with an empty
-line or with the start of a new block.  The structure of the STP file
-is based on three parts, composed by the following blocks:
+(\autoref{sec:ga-opt-control}). Comments can be inserted after a ``;''
+character.  This file is organized into blocks, each starting with a
+line consisting of \texttt{[~blockname~]} (where \texttt{blockname} is
+the name of the block) and ending with an empty line.  The structure
+of the STP file is based on three parts, composed by the following
+blocks:
 \begin{enumerate}
 \item Topology and interaction parameters:\par \texttt{[~defaults~]}; \texttt{[~atoms~]}; \texttt{[~nbpairs~]}; \texttt{[~bonds~]}; \texttt{[~angles~]}; \texttt{[~dihedrals~]}.
-\item Reference dihedral:\par\texttt{[~refdihedral~]}.
-\item Optimization targets:\par\texttt{[~optdihedrals~]}; \texttt{[~optpairs~]} or \texttt{[~optatoms~]}.
+\item Reference dihedral (RD):\par\texttt{[~refdihedral~]}.
+\item Optimization targets (ODs and OPs):\par\texttt{[~optdihedrals~]}; \texttt{[~optpairs~]} or \texttt{[~optatoms~]}.
 \end{enumerate}
 
 \subsubsection{Topology and Interaction Parameters}
 \label{sec:stp-topology}
 
-Users who are familiar with the GROMACS package will notice that the
+Users who are familiar with the GROMACS
+package\footnote{See \url{http://www.gromacs.org}} will notice that the
 format of the STP file looks very similar to that of the GROMACS ITP
-file, specially in its topology part. In the following, we discuss
-each of these blocks.
+file, specially in the nomenclature of the blocks of the topology
+part. However, the correspondence between these two file formats is
+not perfect. In the following, we discuss in details each of the
+topology blocks.
 
 \paragraph{\texttt{[~defaults~]}}
 
@@ -1299,7 +1245,7 @@ The format of this block is similar to its correspondent in the ITP file format\
 The following variables are specified in order:
 \begin{itemize}
 \item [---] \texttt{nbfunc}: \textbf{(Integer)} the non-bonded function type. Only the value 1 (Lennard-Jones) is supported;
-\item [---] \texttt{comb-rule}: \textbf{(Integer)} the number of the combination rule and Lennard-Jones potential representation (see \autoref{table:defaults}).
+\item [---] \texttt{comb-rule}: \textbf{(Integer)} the number of the combination/mixing rule and Lennard-Jones potential representation (see \autoref{table:defaults}).
   Note that all molecular-mechanics calculations are ultimately performed in the $C_6$-$C_{12}$ representation, regardless of the representation expected in the STP file.
 \item [---] \texttt{gen-pairs}: \textbf{(String)} the strategy of automatic obtention of  1--4 Lennard-Jones pair parameters based on the mixing rule. The allowed values are:
   \begin{itemize}
@@ -1316,7 +1262,7 @@ For more details about the calculation of the pair parameters using the mixing r
   \caption{Representation of the Lennard-Jones parameters expected in
     the STP file along with the corresponding mixing rule for each
     allowed value of \texttt{comb-rule} in the \texttt{[~defaults~]}
-    block.}
+    block. See \autoref{sec:nonbonded} for more details.}
   \label{table:defaults}
   \hspace{1ex}\par
   \centering
@@ -1338,8 +1284,8 @@ If \texttt{gen-pairs} is \texttt{atomic}, each line must contain, in sequence an
 \item[---] Atom type \textbf{(String)}
 \item[---] Lennard-Jones parameter $C_6$ or $\sigma$ \textbf{(Float)}; see \autoref{table:defaults}.
 \item[---] Lennard-Jones parameter $C_{12}$ or $\epsilon$ \textbf{(Float)}; see \autoref{table:defaults}.
-\item[---] Lennard-Jones parameter $CS_6$ or $\sigma_S$ \textbf{(Float)}; see \autoref{table:defaults}.
-\item[---] Lennard-Jones parameter $CS_{12}$ or $\epsilon_S$ \textbf{(Float)}; see \autoref{table:defaults}.
+\item[---] 1--4 Lennard-Jones parameter $CS_6$ or $\sigma_S$ \textbf{(Float)}; see \autoref{table:defaults}.
+\item[---] 1--4 Lennard-Jones parameter $CS_{12}$ or $\epsilon_S$ \textbf{(Float)}; see \autoref{table:defaults}.
 \item[---] Atomic partial charge $q$ \textbf{(Float)}
 \end{itemize}
 For other values of \texttt{gen-pairs}, $CS_6$ and $CS_{12}$ are not used and may be omitted.
@@ -1347,8 +1293,6 @@ If they are supplied, their values are skipped when parsing the file.
 
 
 \paragraph{\texttt{[~nbpairs~]}}
-
-
 
 In this block, each line describes a nonbonded pair $a_i$---$a_j$ and
 must contain, in sequence and separated by spaces, the indexes $a_i$
@@ -1375,7 +1319,7 @@ Interaction type & Block & Code & List of parameters & Cross-reference\\
 \midrule
 Nonbonded & &  &  & \\
 \hspace{1ex} Standard pair & \texttt{nbpairs} &  1 & $C_6$ (kJ~mol$^{-1}$nm$^{-6}$); $C_{12}$ (kJ~mol$^{-1}$nm$^{-12}$)$^{(a)}$ \newline $\sigma$ (nm); $\epsilon$ (kJ~mol$^{-1}$)$^{(b)}$& \autoref{eq:lj-term}\\
-\hspace{1ex} 1--4 pair & \texttt{nbpairs} &  2 & $CS_6$ (kJ~mol$^{-1}$nm$^{-6}$); $CS_{12}$ (kJ~mol$^{-1}$nm$^{-12}$)$^{(a)}$ \newline $\sigma_S$ (nm); $\epsilon_S$ (kJ~mol$^{-1}$)$^{(b)}$ & \autoref{eq:lj-term}\\
+\hspace{1ex} 1--4 pair & \texttt{nbpairs} &  2 & $CS_6$ (kJ~mol$^{-1}$nm$^{-6}$); $CS_{12}$ (kJ~mol$^{-1}$nm$^{-12}$)$^{(a)}$ \newline $\sigma_S$ (nm); $\epsilon_S$ (kJ~mol$^{-1}$)$^{(b)}$ & \autoref{eq:lj-term-14}\\
 \hline
 Bonds &  &  & \\
 \hspace{1ex} Harmonic & \texttt{bonds} &  1 & \(b_0\) (nm); \(k_b^h\) (kJ~mol$^{-1}$nm$^{-2}$) & \autoref{eq:harmonic-bond-energy}\\
@@ -1390,7 +1334,8 @@ Proper dihedrals &  &  &  & \\
 \hspace{1ex} Standard periodic$^{(c)}$  & \texttt{dihedrals} &  1 & \(\phi_{0,m}\) (deg); \(k_{d,m}^s\) (kJ~mol$^{-1}$); \(m\) & \autoref{eq:proper-standard-energy}\\
 \hspace{1ex} Ryckaert-Bellemans & \texttt{dihedrals} &  3 & \(c_0\); \(c_1\); \(c_2\); \(c_3\); \(c_4\); \(c_5\) (kJ~mol$^{-1}$)& \autoref{eq:proper-rb-energy}\\
 \hspace{1ex} Fourier & \texttt{dihedrals} &  5 & \(f_1\); \(f_2\); \(f_3\); \(f_4\) (kJ~mol$^{-1}$) & \autoref{eq:proper-fourier-energy}\\
-\hspace{1ex} Standard periodic$^{(d)}$  & \texttt{dihedrals} &  9 & \(\phi_{0,m}\) (deg); \(k_{d,m}^s\) (kJ~mol$^{-1}$); \(m\) & \autoref{eq:proper-standard-energy}\\
+    \hspace{1ex} Standard periodic$^{(d)}$  & \texttt{dihedrals} &  9 & \(\phi_{0,m}\) (deg); \(k_{d,m}^s\) (kJ~mol$^{-1}$); \(m\) & \autoref{eq:proper-standard-energy}\\
+    \hspace{1ex} Harmonic restraint & \texttt{dihedrals} &  \(-1\) & \(\phi_{0}\) (deg); \(k_{d}^r\) (kJ~mol$^{-1}$rad$^{-2}$) & \autoref{eq:proper-restraint-energy}\\
 \hline
 Improper dihedrals & &  &  & \\
 \hspace{1ex} Harmonic & \texttt{dihedrals} &  2 & \(\phi_{0}\) (deg); \(k_i^h\) (kJ~mol$^{-1}$rad$^{-2}$)& \autoref{eq:improper-harmonic-energy}\\
@@ -1462,18 +1407,21 @@ the common functional form).
 The reference dihedral along which to perform the torsional scans is
 set in the \texttt{[~refdihedral~]} block of the STP file. This block
 is formed by a single line containing the indexes of the four atoms of
-the desired dihedral angle. For consistency, it is required that the
-reference dihedral match one of the dihedral angles listed in a
-\texttt{[~dihedrals~]} block.
+the desired dihedral angle separated by spaces. For consistency, it is
+required that the reference dihedral match one of the dihedral angles
+listed in a \texttt{[~dihedrals~]} block.
 
 \subsubsection{Optimization Targets}
 \label{sec:stp-optterms}
 
 \paragraph{Dihedrals}
 
-The dihedral-angle terms affected by the optimization are specified in the \texttt{[~optdihedrals~]} block.
-In this block, each line describes a dihedral angle and contains the indexes of its four atoms.
-For consistency, every dihedral listed in this block must match one of the dihedral angles listed in a \texttt{[~dihedrals~]} block. 
+The dihedral-angle terms affected by the optimization are specified in
+the \texttt{[~optdihedrals~]} block.  In this block, each line
+describes a dihedral angle and contains the indexes of its four atoms
+separated by spaces. For consistency, every dihedral angle listed in this
+block must match one of the dihedral angles listed in a
+\texttt{[~dihedrals~]} block.
 
 % \begin{lstlisting}
 % [ optdihedrals ]
@@ -1488,9 +1436,9 @@ For consistency, every dihedral listed in this block must match one of the dihed
 \paragraph{1--4 Pairs}
 
 The third-neighbor nonbonded pairs affected by the optimization can be specified in two mutually exclusive ways.
-When optimization of specific nonbonded pairs is intended, the most effective strategy is to use the \texttt{[~optpairs~]} block, wherein each line describes a 1--4 nonbonded pair and contains the indexes of its two atoms.
+When optimization of specific nonbonded pairs is intended, the most effective strategy is to use the \texttt{[~optpairs~]} block, wherein each line describes a 1--4 nonbonded pair and contains the indexes of its two atoms separated by spaces.
 When the molecular-mechanics calculations are performed, the GA parameters override the pair parameters of all pairs listed in this block.
-For consistency, it is required that every pair listed in this block must match one of the 1--4 pairs listed in the \texttt{[~nbpairs~]} block.
+For consistency, it is required that every listed pair must match one of the 1--4 pairs in the \texttt{[~nbpairs~]} block.
 
 When optimization of the 1--4 Lennard-Jones parameters of an \textit{atomtype} is intended instead (which only makes sense if \texttt{gen-pairs} is \texttt{atomic}, which is
     not the case for most force fields\footnote{To our knowledge, only GROMOS-type force fields are compatible with setting \texttt{gen-pairs} to \texttt{atomic}.}), the \texttt{[~optatoms~]} block can be used.
@@ -1502,12 +1450,12 @@ This in turn affects (\textit{via} mixing rule) \textit{all} 1--4 nonbonded pair
 \subsection{Input Parameters File (INP)}
 \label{sec:file-formats-INP}
 
-The input parameters file (INP) contains the definition of the majority of the input variables of \profileropt{}.
+The input parameters (INP) file contains the definition of the majority of the input variables of \profileropt{}.
 Like the STP file, the INP file is organized into blocks, wherein input variables of similar nature are defined according to their position.
 Sucessive positions in a block are separated by spaces or by a line break, with no syntactic distinction between the two.
 However, the use of line breaks is recommended to separate clusters of closely related variables within each block.
 In the following, we go through each block in succession, giving the position, description and allowed values of the input variables.
-Note that a complete list of the input variables and their corresponding blocks is also given in \autoref{table:stp-types}.
+Note that a complete list of the input variables and their corresponding blocks is also given in \autoref{table:input-variables}.
 
 \subsubsection{\texttt{[~parameter\_optimization~]}}
 \label{sec:inp-parameter_optimization}
@@ -1530,7 +1478,7 @@ Positions of the variables:
 \label{descr:ntors}
      NTORS&\textbf{(Integer)} Controls optimization of torsional parameters.                                                       \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-     \(0\)&do not optimize                                                                                      \\ 
+     \(0\)&do not optimize (use values from topology)                                                           \\ 
      \(1\)&optimize                                                                                             \\ 
 \end{tabular}
 \vspace{1ex}
@@ -1541,7 +1489,7 @@ Positions of the variables:
 \label{descr:nlj}
        NLJ&\textbf{(Integer)} Controls optimization of Lennard-Jones parameters.                                                   \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-     \(0\)&do not optimize                                                                                      \\ 
+     \(0\)&do not optimize (use values from topology)                                                          \\ 
      \(1\)&optimize                                                                                             \\ 
 \end{tabular}
 \vspace{1ex}
@@ -1562,7 +1510,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:torsnt}
-    TORSNT[I]&\textbf{(Array of Integers)} Fine control of functional form of torsional terms.                                               \\ 
+    TORSNT[I]&\textbf{(Array of Integers)} Fine control of the functional form of torsional terms.                                               \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
      \(0\)&set I-th term to zero                                                                                \\ 
      \(1\)&optimize I-th term                                                                                   \\ 
@@ -1594,10 +1542,10 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:wtemp}
-     WTEMP&\textbf{(Float)} Controls weights given to reference data points.                                                     \\ 
+     WTEMP&\textbf{(Float)} Controls weights given to reference data points when weight files are not supplied. \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
      \(0\)&uniform weights                                                                                      \\ 
-    \(>0\)&Boltzmann weights with temperature WTEMP                                                             \\ 
+    \(>0\)&Boltzmann weights with temperature WTEMP (see \autoref{sec:ga-fitness-wei})                                                            \\ 
 \end{tabular}
 \vspace{1ex}
 }
@@ -1621,7 +1569,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:pinv}
-      PINV&\textbf{(Integer)} Probability (over 100) of inverting sign of random torsional parameters.                             \\ 
+      PINV&\textbf{(Integer)} Probability of inverting sign of random torsional parameters.                             \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
     \(0 \ldots 100 \)&set probability to PINV/100                                                                          \\ 
 \end{tabular}
@@ -1631,7 +1579,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:dist}
-      DIST[I]&\textbf{(Array of Integers)} Controls types of distributions to draw random parameters from.                                      \\ 
+      DIST[I]&\textbf{(Array of Integers)} Controls types of probability distributions of random parameters.                                      \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
      \(1\)&uniform distribution                                                                                 \\ 
 \(2\)&LogNormal distribution                                                                                  \\ 
@@ -1648,7 +1596,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:min}
-       MIN[I]&\textbf{(Array of Float)} Controls minimum values of random parameters.                                                       \\ 
+       MIN[I]&\textbf{(Array of Float)} Minimum values of random parameters.                                                       \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(\in\mathbb{R}\)&only accept random values larger than MIN[I]                                                                          \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
@@ -1662,7 +1610,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:max}
-       MAX[I]&\textbf{(Array of Float)} Controls maximum values of random parameters.                                                       \\ 
+       MAX[I]&\textbf{(Array of Float)} Maximum values of random parameters.                                                       \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(\in\mathbb{R}\)&only accept random values smaller than MAX[I]                                                                          \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
@@ -1676,7 +1624,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:mean}
-      MEAN[I]&\textbf{(Array of Float)} Controls mean values of the distributions to draw random parameters from.                            \\ 
+      MEAN[I]&\textbf{(Array of Float)} Mean values of the probability distributions.                            \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(\in\mathbb{R}\)&set mean of DIST[I] to MEAN[I]; ignored for uniform and LogUniform distributions                                                                       \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
@@ -1690,7 +1638,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:stddev}
-    STDDEV[I]&\textbf{(Array of Float)} Controls std.~dev. of the distributions to draw random parameters from.                              \\ 
+    STDDEV[I]&\textbf{(Array of Float)} Std.~dev. of the probability distributions.                              \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(\in\mathbb{R}\)&set std.~dev. of DIST[I] to STDDEV[I]; ignored for uniform and LogUniform distributions                                                       \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
@@ -1700,6 +1648,10 @@ Positions of the variables:
 \end{tabular}
 \vspace{1ex}
 }
+
+Note that the uniform and LogUniform distributions are well defined by
+the values of MIN and MAX. For this reason, the MEAN and STDDEV values
+are ignored for these types of distributions.
 
 \subsubsection{\texttt{[~seed~]}}
 \label{sec:inp-seed}
@@ -1719,7 +1671,7 @@ Positions of the variables:
 \label{descr:seed}
       SEED&\textbf{(Integer)} Random number generator seed.                                                                        \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-    \(>-1\)&set random number generator seed to Python default                                                  \\ 
+    \(-1\)&set random number generator seed to Python default                                                  \\ 
     \(>0\)&set random number generator seed to SEED                                                             \\ 
 \end{tabular}
 \vspace{1ex}
@@ -1753,7 +1705,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:ngens}
-     NGENS&\textbf{(Integer)} Number of generations to run the GA for.                                                             \\ 
+     NGENS&\textbf{(Integer)} Number of generations of the GA.                                                             \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
     \(>0\)&set number of generations to NGENS                                                                   \\ 
 \end{tabular}
@@ -1775,7 +1727,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:ntel}
-      NTEL&\textbf{(Integer)} Number of elite individuals in the GA population.                                                    \\ 
+      NTEL&\textbf{(Integer)} Number of elite individuals of the GA.                                                    \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
      \(0\)&no elitism                                                                                           \\ 
     \(>0\)&set number of elite individuals to NTEL                                                              \\ 
@@ -1797,7 +1749,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:crrate}
-    CRRATE&\textbf{(Integer)} Probability (over 100) of crossover.                                                                 \\ 
+    CRRATE&\textbf{(Integer)} Probability of crossover.                                                                 \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(0\ldots 100\)&set probability of crossover to CRRATE/100                                                           \\ 
 \end{tabular}
@@ -1807,7 +1759,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:mutrate}
-   MUTRATE&\textbf{(Integer)} Probability (over 100) of mutation.                                                                  \\ 
+   MUTRATE&\textbf{(Integer)} Probability of mutation.                                                                  \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(0\ldots 100\)&set probability of mutation to MUTRATE/100                                                           \\ 
 \end{tabular}
@@ -1866,9 +1818,9 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:rfrst}
-     RFRST&\textbf{(Float)} Starting angle of the torsional scan.                                                                \\ 
+     RFRST&\textbf{(Float)} First angle of the torsional scans.                                                                \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-\(\in\mathbb{R}\)&set starting angle to RFRST degrees                                                                  \\ 
+\(\in\mathbb{R}\)&set first angle to RFRST degrees                                                                  \\ 
 \end{tabular}
 \vspace{1ex}
 }
@@ -1876,7 +1828,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:rstep}
-     RSTEP&\textbf{(Float)} Step angle of the torsional scan.                                                                    \\ 
+     RSTEP&\textbf{(Float)} Step angle of the torsional scans.                                                                    \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(\in\mathbb{R}\)&set step angle to RSTEP degrees                                                                      \\ 
 \end{tabular}
@@ -1886,7 +1838,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:rlst}
-      RLST&\textbf{(Float)} Last angle of the torsional scan (inclusive).                                                        \\ 
+      RLST&\textbf{(Float)} Last angle of the torsional scans (inclusive).                                                        \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(\in\mathbb{R}\)&set last angle to RLST degrees                                                                       \\ 
 \end{tabular}
@@ -1896,9 +1848,9 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:rfct}
-      RFCT&\textbf{(Float)} Force constant of the dihedral restraint of the torsional scan.                                      \\ 
+      RFCT&\textbf{(Float)} Force constant of the dihedral restraint used the torsional scans.                                      \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-    \(>0\)&set force constant of the harmonic dihedral restraint to RFCT kJ~mol$^{-1}$rad$^{-2}$                \\ 
+    \(>0\)&set force constant of the harmonic dihedral restraint to RFCT (kJ~mol$^{-1}$rad$^{-2})$        \\ 
 \end{tabular}
 \vspace{1ex}
 }
@@ -1910,7 +1862,8 @@ Positions of the variables:
 \noindent Positions of the variables:
 \begin{center}
   \begin{tabular}{lllll}
-    MALG & DX0 & DXM & NMAX & DELE \\
+    MALG[1] & DX0[1] & DXM[1] & NMAX[1] & DELE[1] \\
+    MALG[2] & DX0[2] & DXM[2] & NMAX[2] & DELE[2] \\
   \end{tabular}
 \end{center}
 
@@ -1920,7 +1873,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:malg}
-      MALG[I]&\textbf{(Array of Integers)} Minimization algorithms.                                                                             \\ 
+      MALG[I]&\textbf{(Array of Integers)} Controls types of the minimization algorithms.                                                                             \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
      \(1\)&steepest-descents (more robust, less prone to errors)                                                                                    \\ 
      \(2\)&conjugate-gradients (less robust, more prone to errors)                                                                                  \\ 
@@ -1947,7 +1900,7 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:dxm}
-  DXM[I]&\textbf{(Array of Floats)} Maximal step sizes DXM in the minimization algorithms.                                               \\ 
+  DXM[I]&\textbf{(Array of Floats)} Maximum step sizes DXM in the minimization algorithms.                                               \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
   \(>0\)&set DXM of MALG[I] to DX0[I]                                                                         \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
@@ -1962,7 +1915,7 @@ Positions of the variables:
 \label{descr:nmax}
       NMAX[I]&\textbf{(Array of Integers)} Maximum number of steps in the minimization algorithms.                                              \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-    \(>0\)&set the maximal number of steps of MALG[I] to NMAX[I]                                                \\ 
+    \(>0\)&set the maximum number of steps of MALG[I] to NMAX[I]                                                \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
   \(1\)&minimization settings for all individuals and all generations \\
   \(2\)&enhanced minimization settings for optimal individual at the end of the run \\
@@ -1975,7 +1928,7 @@ Positions of the variables:
 \label{descr:dele}
       DELE[I]&\textbf{(Array of Floats)} Energy-convergence criteria of the minimization algorithms.                                          \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-    \(>0\)&sete DELE for MALG[I] to DELE[I] \\ 
+    \(>0\)&set DELE of MALG[I] to DELE[I] \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
   \(1\)&minimization settings for all individuals and all generations \\
   \(2\)&enhanced minimization settings for optimal individual at the end of the run \\
@@ -1983,9 +1936,7 @@ Positions of the variables:
 \vspace{1ex}
 }
 
-\noindent For more details on the algorithmic meaning of these variables, see \autoref{chap:minim}.
-
-
+\noindent For more details about the algorithmic meaning of these variables, see \autoref{chap:minim}.
 
 \subsection{Interaction Function Parameters File (IFP)}
 \label{sec:file-formats-IFP}
@@ -1995,16 +1946,16 @@ values of the optimized parameters, \textit{i.e.} those of the best
 individual of the GA population, along with the corresponding value of
 the weighted RMSD. These quantities are listed below identifying
 comment lines that are compatible with the notation in
-\autoref{eq:ga-individual}.
+\autoref{sec:ga-population}.
 
 \subsection{Parameters Trajectory File (TRP)}
 \label{sec:file-formats-TRP}
 
-The parameters trajectory file (TRP) contains the GA-individual
-parameters for every NSTP-th generation.  The data corresponding to
+The parameters trajectory file (TRP) contains the parameters of all GA
+individuals for every NSTP-th generation.  The data corresponding to
 each generation is lead by a line containing the generation number,
 followed by a comment line labelling the parameters in accordance with
-the notation in \autoref{eq:ga-individual} and then one line per
+the notation in \autoref{sec:ga-population} and then one line per
 individual in which its parameters are listed. Individuals are ranked
 from best to worst (increasing order on weighted RMSD). This file is
 intended to allow the user to check on the diversity of the parameters
@@ -2013,14 +1964,15 @@ accross the population and their convergence over the generations.
 \subsection{Energy Trajectory File (TRE)}
 \label{sec:file-formats-TRE}
 
-The energy trajectory file (TRE) contains the GA-individual energy
-profiles for every NSTE-th generation.  The data corresponding to each
-generation is lead by a line containing the generation number,
-followed by one line per torsional-scan angle where the energies of
-each individual at the corresponding torsional-scan step are listed.
-This file is intended to allow the user to check on the diversity of
-the energy profiles accross the population and their convergence over
-generations.
+The energy trajectory file (TRE) contains the energy profiles of all
+GA individuals for every NSTE-th generation.  The data corresponding
+to each generation is lead by a line containing the generation number,
+followed by a comment line labelling the columns and then one line per
+torsional-scan angle where the energies of each individual at the
+corresponding torsional-scan step are listed along with the value of
+the angle itself. This file is intended to allow the user to check on
+the diversity of the energy profiles accross the population and their
+convergence over generations.
 
 \subsection{Weighted RMSD Trajectory File (TRR)}
 \label{sec:file-formats-TRR}
@@ -2030,12 +1982,70 @@ values of the weighted RMSD accross the population for every
 generation.  This file is useful to inspect the diversity of the
 population and its convergence over the generations. If the average
 value converges too fastly, or if its limiting value is too close to
-the best value, then more diversity is needed in the population.  This
-can be achieved, for example, by raising the value of the mutation
-probability, using a less-conservative crossover operator
+the best value, then more diversity may benefit the optimization.
+This can be achieved, for example, by raising the value of the
+mutation probability, using a less-conservative crossover operator
 (\textit{e.g.} the heuristic operator) or adjusting the parameters of
 the probability distribution functions involved in parameter
 randomization.
+
+\begin{landscape}
+  \begin{center}
+    \begin{longtable}{llllll}
+      \caption{Input variables, their types, where they are set and links to more detailed descriptions of their allowed values.}
+      \label{table:input-variables}\\
+      \toprule
+      Variable & Type & Description & Set in & Block/Option & Cross-reference\\
+      \midrule
+      \endhead
+      \profileropt{} &  &  &  &  & \\ \midrule
+      NPROCS & Integer & Number of forked subprocesses. & Cmd-line & \texttt{-np} & \autoref{sec:program-opt}\\
+      NTORS & Integer & Controls optimization of torsional parameters. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:ntors}\\
+      NLJ & Integer & Controls optimization of Lennard-Jones parameters. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:nlj}\\
+      FTORS & Integer & Controls functional form of torsional terms. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:ftors}\\
+      TORSNT & Array of Integers & Fine control of the functional form of torsional terms. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:torsnt}\\
+      LJNT & Array of Integers & Controls which Lennard-Jones components are optimized. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:ljnt}\\
+      WTEMP & Float & Controls weights given to reference data points. & INP file & \texttt{parameter\_optimization} & \autopageref{descr:wtemp}\\
+      PINV & Integer & Probability of inverting sign of random torsional parameters. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:pinv}\\
+      DIST & Array of Integers & Controls types of probability distributions of random parameters. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:dist}\\
+      MIN & Array of Float & Minimum values of random parameters. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:min}\\
+      MAX & Array of Float & Maximum values of random parameters. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:max}\\
+      MEAN & Array of Float & Mean values of the probability distributions. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:mean}\\
+      STDDEV & Array of Float & Std. dev. of the probability distributions. & INP file & \texttt{parameter\_randomization} & \autopageref{descr:stddev}\\
+      SEED & Integer & Seed of random number generator. & INP file & \texttt{seed} & \autopageref{descr:seed}\\
+      POPSIZE & Integer & Size of the GA population. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:popsize}\\
+      NGENS & Integer & Number of generations of the GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:ngens}\\
+      SELTYPE & Integer & Selection operator of the GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:seltype}\\
+      NTEL & Integer & Number of elite individuals of the GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:ntel}\\
+      CRTYPE & Integer & Crossover operator of the GA. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:crtype}\\
+      CRRATE & Integer & Probability of crossover. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:crrate}\\
+      MUTRATE & Integer & Probability of mutation. & INP file & \texttt{genetic\_algorithm} & \autopageref{descr:mutrate}\\
+      NSTE & Integer & Frequency of writing population energies to the TRE file. & INP file & \texttt{writetraj} & \autopageref{descr:nste}\\
+      NSTP & Integer & Frequency of writing population parameters to the TRP file. & INP file & \texttt{writetraj} & \autopageref{descr:nstp}\\
+      RFRST & Float & First angle of the torsional scans. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rfrst}\\
+      RSTEP & Float & Step angle of the torsional scans. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rstep}\\
+      RLST & Float & Last angle of the torsional scans. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rlst}\\
+      RFCT & Float & Force constant of the dihedral restraint used in the torsional scans. & INP file & \texttt{torsional\_scan} & \autopageref{descr:rfct}\\
+      MALG & Array of Integers & Controls types of the minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:malg}\\
+      DX0 & Array of Floats & Initial step sizes of the minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dx0}\\
+      DXM & Array of Floats & Maximum step sizes of the minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dxm}\\
+      NMAX & Array of Integers & Maximum number of steps of the minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:nmax}\\
+      DELE & Array of Floats & Energy-convergence criteria of the minimization algorithms. & INP file & \texttt{minimization} & \autopageref{descr:dele}\\
+      \midrule
+      \profilergen{} &  &  &  &  & \\ \midrule
+      RFRST & Float & First angle of the torsional scan. & Cmd-line & \texttt{-dr} & \autoref{sec:program-gen}\\
+      RSTEP & Float & Step angle of the torsional scan. & Cmd-line & \texttt{-dr} & \autoref{sec:program-gen}\\
+      RLST & Float & Last angle of the torsional scan. & Cmd-line & \texttt{-dr} & \autoref{sec:program-gen}\\
+      RFCT & Float & Force constant of the dihedral restraint used in the torsional scan. & Cmd-line & \texttt{-dk} & \autoref{sec:program-gen}\\
+      MALG & Integer & Controls type of the minimization algorithm. & Cmd-line & \texttt{-min} & \autoref{sec:program-gen}\\
+      DX0 & Float & Initial step size of the minimization algorithm. & Cmd-line & \texttt{-dx0} & \autoref{sec:program-gen}\\
+      DXM & Float & Maximum step size of the minimization algorithm. & Cmd-line & \texttt{-dxm} & \autoref{sec:program-gen}\\
+      NMAX & Integer & Maximum number of steps of the minimization algorithm. & Cmd-line & \texttt{-dele} & \autoref{sec:program-gen}\\
+      DELE & Float & Energy-convergence criteriumc of the minimization algorithm. & Cmd-line & \texttt{-nsteps} & \autoref{sec:program-gen}\\
+      \bottomrule
+      \end{longtable}
+    \end{center}
+\end{landscape}
 
 \chapter{Tutorial}
 \label{chap:tutorial}
@@ -2118,7 +2128,7 @@ terminal configuration.
 \section{File Structure}
 \label{sec:tutorial-file-structure}
 
-The tutorial files can be found inside the \texttt{examples}
+The tutorial files can be found inside the \texttt{doc/tutorial/examples}
 directory, which is organized as follows:
 
 \begin{lstlisting}
@@ -2163,6 +2173,9 @@ directory: one for the optimization of the CH3-CH3 pairtype
 %
 These files, and also the weight files in the \texttt{wei} directory,
 will be discussed in more details in the following sections.
+%
+For conciseness, file names will be referred to with omission
+of the \texttt{doc/tutorial/examples} prefix.
 
 \section{Generating Torsional-Scan Trajectories}
 \label{sec:tutorial-profilergen}
@@ -2261,7 +2274,7 @@ Now, it is time to run \profilergen{}.
 For butane, this can be done by running the command:\footnote{Backslashes are used to escape the newline character throughout the entire chapter.}
 
 \begin{lstlisting}
-../../profilerGen.py \
+../../../profilerGen.py \
     -c coords/bu.g96 \
     -t stp/bu_pairs.stp \
     -dr 0 10 360 \
@@ -2294,7 +2307,7 @@ For 2-methylbutane, we proceed in a similar way, replacing \texttt{bu}
 with \texttt{2mb}:
 
 \begin{lstlisting}
-../../profilerGen.py \
+../../../profilerGen.py \
     -c coords/2mb.g96 \
     -t stp/2mb_pairs.stp \
     -dr 0 10 360 \
@@ -2308,7 +2321,7 @@ with \texttt{2mb}:
 \end{lstlisting}\vspace{1ex}\par
 
 \noindent Once again, the resulting energy profile is reported in
-\texttt{scans/2mb/2mb.dat} and is also plotted in
+\texttt{scans/2mb/2mb.dat} and plotted in
 \autoref{fig:tutorial-profiles}.
 %
 The torsional-scan trajectory is stored in \texttt{scans/2mb/2mb.xyz}.
@@ -2343,6 +2356,7 @@ However, this leads to loss of reproducibility, which originates in
 technical issues regarding random number generation when the
 \texttt{multiprocessing} library is used for parallelization (as is
 our case).
+% MULTIPROCESSING_TAG
 %
 This is a limitation that we intend to address in future versions of
 the program.
@@ -2351,7 +2365,7 @@ For this tutorial, we prioritize reproducibility instead of speed so
 we report the commands without requesting parallelization.
 %
 Also, we supply the output files of the runs of each scenario in the
-\texttt{examples\_results} directory.
+\texttt{doc/tutorial/examples\_results} directory.
 
 \subsection{Scenario 1}
 \label{sec:tutorial-scenario-1}
@@ -2430,7 +2444,8 @@ For the latter, both the attractive and the repulsive components are
 optimized (LJNT).
 %
 Finally, if weight files are not supplied when \profileropt{} is
-called, the fallback behavior is set to using uniform weights (WTEMP).
+called (as is the case in this scenario), the fallback behavior is set
+to using uniform weights (WTEMP).
 
 In
 
@@ -2440,9 +2455,9 @@ In
    19804
 \end{lstlisting}\vspace{1ex}\par
 
-\noindent the random number generator seed is set to 17135.
+\noindent the random number generator seed is set to 19804.
 %
-The control of the seed is useful for reproducibility purposes.
+Control of the seed is useful for reproducibility purposes.
 %
 As long as parallelization is not requested, two \profileropt{} runs
 with the same seed will yield the same results.
@@ -2482,7 +2497,7 @@ In
 ; POPSIZE    NGENS
       128     50
 ; SELTYPE     NTEL
-        4        2
+        3        2
 ;  CRTYPE   CRRATE MUTRATE
         2      100      40
 \end{lstlisting}\vspace{1ex}\par
@@ -2580,7 +2595,7 @@ mkdir scenario_1
 \noindent To perform the optimization, run the following command:
 
 \begin{lstlisting}
-../../profilerOpt.py \
+../../../profilerOpt.py \
     -r qm/bu.dat qm/2mb.dat \
     -c scans/bu/bu.xyz scans/2mb/2mb.xyz \
     -t stp/bu_pairs.stp stp/2mb_pairs.stp \
@@ -2653,9 +2668,9 @@ The TRP output file (\texttt{scenario\under{}1/opt.trp}) reads
 \noindent where the ellipsis \texttt{...} indicates the omission of
 lines and columns.
 %
-The fragment reproduced above reports the GA-individual parameters
-(one individual per line) and the corresponding weighted RMSD of the
-first generation, as indicated by the top number.
+The fragment reproduced above reports the parameters of each GA
+individual (one individual per line) and the corresponding weighted
+RMSD of the first generation, as indicated by the top number.
 %
 The meaning of each column is explained by the comments below the
 generation number.
@@ -2782,7 +2797,7 @@ To perform the optimization, the most important change necessary is to
 include the weight files in the call to \profileropt, \textit{i.e.},
 
 \begin{lstlisting}
-../../profilerOpt.py \
+../../../profilerOpt.py \
     -r qm/bu.dat qm/2mb.dat \
     -c scans/bu/bu.xyz scans/2mb/2mb.xyz \
     -t stp/bu_pairs.stp stp/2mb_pairs.stp \
@@ -2867,7 +2882,7 @@ use the appropriate INP file in the call to \profileropt,
 \textit{i.e.},
 
 \begin{lstlisting}
-../../profilerOpt.py \
+../../../profilerOpt.py \
     -r qm/bu.dat qm/2mb.dat \
     -c scans/bu/bu.xyz scans/2mb/2mb.xyz \
     -t stp/bu_pairs.stp stp/2mb_pairs.stp \
@@ -2942,7 +2957,7 @@ use the appropriate STP files in the call to \profileropt,
 \textit{i.e.},
 
 \begin{lstlisting}
-../../profilerOpt.py \
+../../../profilerOpt.py \
     -r qm/bu.dat qm/2mb.dat \
     -c scans/bu/bu.xyz scans/2mb/2mb.xyz \
     -t stp/bu_atomic.stp stp/2mb_atomic.stp \
