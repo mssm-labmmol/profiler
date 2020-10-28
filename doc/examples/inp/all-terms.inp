@@ -30,7 +30,7 @@
 ; POPSIZE    NGENS
       128     50
 ; SELTYPE     NTEL
-        4        2
+        3        2
 ;  CRTYPE   CRRATE MUTRATE
         2      100      40
 
