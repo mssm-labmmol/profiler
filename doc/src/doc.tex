@@ -168,7 +168,7 @@ The following notation and definitions will be used for mathematical and physica
 \item[---] $r_{ij} = \sqrt{\mathbf{r}_{ij} \cdot \mathbf{r}_{ij}}$ \par \hspace{10ex} Distance between particle $i$ and particle $j$.
 \item [---] $\theta_{ijk} = \arccos{\frac{\mathbf{r}_{ij} \cdot \mathbf{r}_{kj}}{r_{ij}r_{kj}}}$  \par \hspace{10ex} Angle involving particles $i$, $j$ and $k$.
   \item [---] $\phi_{ijkl} = \sign{(\rsub{ij} \cdot \rsub{nk})} \arccos{\left( \frac{\rsub{mj} \cdot \rsub{nk}}{r_{mj}r_{nk}} \right)}$, with $\rsub{mj} = \rsub{ij}\times\rsub{kj}$ and $\rsub{nk} = \rsub{kj}\times\rsub{kl}$
-     \par \hspace{10ex} Dihedral-angle involving particles $i$, $j$, $k$ and $l$.
+     \par \hspace{10ex} Dihedral angle involving particles $i$, $j$, $k$ and $l$.
    \end{itemize}
 
 \section{Bond stretching}
@@ -231,9 +231,9 @@ the energies and forces associated with a bond-angle stretching degree of freedo
   Potential energy form:
   \begin{align}
     \label{eq:ub-angle-energy}
-    V(\theta_{ijk},r_{ik}; k_a^{ub}, \theta^{ub}_0,k_{13}^{ub},b_{13}^{ub}) & = \frac{1}{2} \ k_a^{ub} (\theta_{ijk} - \theta_0)^2 + \frac{1}{2}  \ k_{13}^{ub} (r_{ik} - b_{13}^{ub})^2 \quad , \\ \nonumber
-    \frac{\partial V(\theta_{ijk},r_{ik}; k_a^{ub}, \theta^{ub}_0,k_{13}^{ub},b_{13}^{ub})}{\partial \theta_{ijk}} & = k_a^{ub} (\theta_{ijk} - \theta_0) \quad , \\ \nonumber
-    \frac{\partial V(\theta_{ijk},r_{ik}; k_a^{ub}, \theta^{ub}_0,k_{13}^{ub},b_{13}^{ub})}{\partial r_{ik}}  & = k_{13}^{ub} (r_{ik} - b_{13}^{ub}) \quad ,
+    V(\theta_{ijk},r_{ik}; k_a^{ub}, \theta_0,k_{13}^{ub},b_{13}^{ub}) & = \frac{1}{2} \ k_a^{ub} (\theta_{ijk} - \theta_0)^2 + \frac{1}{2}  \ k_{13}^{ub} (r_{ik} - b_{13}^{ub})^2 \quad , \\ \nonumber
+    \frac{\partial V(\theta_{ijk},r_{ik}; k_a^{ub}, \theta_0,k_{13}^{ub},b_{13}^{ub})}{\partial \theta_{ijk}} & = k_a^{ub} (\theta_{ijk} - \theta_0) \quad , \\ \nonumber
+    \frac{\partial V(\theta_{ijk},r_{ik}; k_a^{ub}, \theta_0,k_{13}^{ub},b_{13}^{ub})}{\partial r_{ik}}  & = k_{13}^{ub} (r_{ik} - b_{13}^{ub}) \quad ,
   \end{align}
 
 \end{itemize}  
@@ -254,8 +254,8 @@ torsion degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
   Potential energy form:
   \begin{align}
     \label{eq:proper-standard-energy}
-    V(\phi_{ijkl} ; \{k_{d,m}^s, \phi_{0,m}\}_{m=1..6}) & = \sum_{m=1}^{N_T} k_{d,m}^s\ (1 + \cos{\phi_{0,m}} \cos{m \phi_{ijkl}})\quad , \\ \nonumber
-    \frac{\partial V(\phi_{ijkl} ; \{k_{d,m}^s, \phi_{0,m}\}_{m=1..6})}{\partial \phi_{ijkl}} & = -\sum_{m=1}^{N_T} m k_{d,m}^s \cos{\phi_{0,m}} \sin{m \phi_{ijkl}}\quad ,
+    V(\phi_{ijkl} ; \{k_{d,m}^s, \phi_{0,m}\}_{m=1..6}) & = \sum_{m=1}^{6} k_{d,m}^s\ (1 + \cos{\phi_{0,m}} \cos{m \phi_{ijkl}})\quad , \\ \nonumber
+    \frac{\partial V(\phi_{ijkl} ; \{k_{d,m}^s, \phi_{0,m}\}_{m=1..6})}{\partial \phi_{ijkl}} & = -\sum_{m=1}^{6} m k_{d,m}^s \cos{\phi_{0,m}} \sin{m \phi_{ijkl}}\quad ,
   \end{align}
   with $\phi_{0,m}=0,\pi$.
   
@@ -296,7 +296,7 @@ torsion degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
   \frac{\partial V(\phi_{ijkl}; k_d^r, \phi_0)}{\partial \phi_{ijkl}} & = k_d^r (\phi_{ijkl} - \phi_0) \quad , 
 \end{align}
 \end{itemize}
-where $V(\phi_{ijkl})$ is the potential energy term for the proper dihedral-angle involving particles $i$, $j$, $k$ and $l$.
+where $V(\phi_{ijkl})$ is the potential energy term for the proper dihedral angle involving particles $i$, $j$, $k$ and $l$.
 
 \section{Improper dihedral-angle bending}
 \label{sec:improper-terms}
@@ -324,7 +324,7 @@ bending degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
   \end{align}
   with $\phi_{0}=0,\pi$.
  \end{itemize}
- where $V(\phi_{ijkl})$ is the potential energy term for the improper dihedral-angle involving particles $i$, $j$, $k$ and $l$.
+ where $V(\phi_{ijkl})$ is the potential energy term for the improper dihedral angle involving particles $i$, $j$, $k$ and $l$.
 
 \section{Nonbonded interactions}
 \label{sec:nonbonded}
@@ -354,7 +354,7 @@ calculated based on the following functional forms, respectively:\cite{GROMOS-do
 where the interaction between particles $i$ and $j$ is considered.
 
 When the pair-specific $C_{12,ij}$ and
-$C_{6,ij}$ Lennard-Jones parameters are not explicitly defined,
+$C_{6,ij}$ Lennard-Jones parameters are not explicitly defined in the topology
 they are obtained from atomic
 counterparts, using one of the following mixing rules:
 \begin{itemize}
@@ -371,10 +371,8 @@ counterparts, using one of the following mixing rules:
   \end{align}
 \end{itemize}
 
-Internally, the $C_6$-$C_{12}$ representation of the Lennard-Jones
-potential is always used.  However, some force fields are
-traditionally specified in terms of the $\sigma$-$\epsilon$
-representation of the Lennard-Jones potential:
+Some force fields are specified in terms of the
+$\sigma$-$\epsilon$ representation of the Lennard-Jones potential:
 \begin{itemize}
   \item [---] \textit{Lennard-Jones} ($\sigma$-$\epsilon$)
 \begin{equation}
@@ -395,6 +393,7 @@ with corresponding mixing rules
   \sigma_{ij} = \frac{1}{2}(\sigma_i + \sigma_j) \quad , \quad \epsilon_{ij} = \sqrt{\epsilon_i \epsilon_j} \quad .
   \end{align}
 \end{itemize}
+When this is the case, the nonbonded parameters are internally converted to the $C_6$-$C_{12}$ representation, with which all molecular-mechanics calculations are performed.
 
 \subsection{1--4 interactions}
 \label{sec:1-4-interactions}
@@ -407,11 +406,28 @@ their standard values by a common factor $f_{QQ}$ as
   \label{eq:fudge-QQ}
     V(r_{ij};q_i,q_j) = f_{QQ}\ \frac{q_i q_j}{4\pi\epsilon_0 r_{ij}} \quad , \quad 0 \leq f_{QQ} \leq 1\ .
 \end{equation}
-For the 1--4 Lennard-Jones interactions, the options listed below are available.
-The first is more common and establishes a simple rule for computing 1--4 Lennard-Jones parameters based on the standard Lennard-Jones parameters.
+For the 1--4 Lennard-Jones interactions, the same Lennard-Jones
+potential form is used, but with a special set of parameters
+$CS_{6,ij},CS_{12,ij}$:
+\begin{align}
+  \label{eq:lj-term-14}
+      V(r_{ij};CS_{6,ij},CS_{12,ij}) & = \frac{CS_{12,ij}}{r_{ij}^{12}} - \frac{CS_{6,ij}}{r_{ij}^6} \quad .
+\end{align}
+For the $\sigma$-$\epsilon$ representation, the same observations as the standard interactions apply.
+
+When the 1--4 pair-specific nonbonded parameters $CS_{6,ij},CS_{12,ij}$ (or their $\sigma_{S,ij},\epsilon_{S,ij}$ equivalents) are not explicitly defined in the topology they are obtained from atomic parameters in one of two ways.
+The first is more common and establishes a simple mathematical rule for computing them.
 The second is more uncommon (but is used \textit{e.g.} in GROMOS force fields) and relies on defining additional atomic Lennard-Jones parameters to use exclusively with 1--4 interactions. 
 \begin{itemize}
-\item [---] Scale down the standard atomic parameters by a common factor $f_{LJ}$, obtaining 1--4 atomic parameters $CS_{6} = f_{LJ}C_{6}$ and $CS_{12} = f_{LJ}C_{12}$. After that, proceed as usual, obtaining the 1--4 pair parameters $CS_{12,ij}$ and $CS_{6,ij}$ \textit{via} mixing rule and computing the scaled-down potential energy:
+\item [---] First strategy (\textit{fudge}): Scale down the standard
+  atomic parameters $C_{6,\alpha},C_{12,\alpha}$ ($\alpha=i,j$) by a
+  common factor $f_{LJ}$, obtaining 1--4 atomic parameters
+  $CS_{6,\alpha} = f_{LJ}C_{6,\alpha}$ and
+  $CS_{12,\alpha} = f_{LJ}C_{12,\alpha}$ ($\alpha=i,j$). After that,
+  proceed as usual, obtaining the 1--4 pair parameters $CS_{12,ij}$
+  and $CS_{6,ij}$ \textit{via} mixing rule from
+  $CS_{6,\alpha},CS_{12,\alpha}$ ($\alpha=i,j$) and computing the
+  scaled-down potential energy:
   \begin{equation}
     \label{eq:fudge-LJ}
     V(r_{ij};C_{6,ij},C_{12,ij}) =   \frac{CS_{12,ij}}{r_{ij}^{12}} - \frac{CS_{6,ij}}{r_{ij}^6} = f_{LJ} \left( \frac{C_{12,ij}}{r_{ij}^{12}} - \frac{C_{6,ij}}{r_{ij}^6} \right) \quad , \quad 0 \leq f_{LJ} \leq 1
@@ -421,11 +437,14 @@ The second is more uncommon (but is used \textit{e.g.} in GROMOS force fields) a
 %     \label{eq:explicit-LJ}
 %       V(r_{ij};CS_{6,ij},CS_{12,ij}) = \frac{CS_{12,ij}}{r_{ij}^{12}} - \frac{CS_{6,ij}}{r_{ij}^6} \right)
 %   \end{equation}
-\item [---] Instead of using a fixed factor $f_{LJ}$ to modify the atomic parameters, specify an additional arbitrary set of atomic parameters $CS_6$ and $CS_{12}$ which are exclusive to 1--4 interactions. The 1--4 pair parameters $CS_{12,ij}$ and $CS_{6,ij}$ are then obtained \textit{via} mixing rule, resulting in a pair-specific scaled-down potential energy
-    \begin{equation}
-    \label{eq:atomic-LJ}
-    V(r_{ij};CS_{6,ij},CS_{12,ij}) =  \frac{CS_{12,ij}}{r_{ij}^{12}} - \frac{CS_{6,ij}}{r_{ij}^6} 
-  \end{equation}
+\item [---] Second strategy (\textit{atomic}): Instead of using a
+  fixed factor $f_{LJ}$ to modify the atomic parameters, specify an
+  independent additional set of atomic parameters $CS_{6,\alpha}$ and
+  $CS_{12,\alpha}$ ($\alpha=i,j$) which are exclusive to 1--4
+  interactions. The 1--4 pair parameters $CS_{12,ij}$ and $CS_{6,ij}$
+  are then obtained \textit{via} mixing rule from
+  $CS_{6,\alpha},CS_{12,\alpha}$ ($\alpha=i,j$), resulting in a
+  pair-specific scaled-down potential energy.
 \end{itemize}
 
 \section{Forces}
@@ -434,7 +453,7 @@ The second is more uncommon (but is used \textit{e.g.} in GROMOS force fields) a
 The atomic forces due to the potential energy terms reported above are
 obtained by computing the analytical derivatives of the corresponding
 expressions with respect to the atomic positions involved in the
-degree of freedom.  In general,
+degree of freedom. They are:
 
 \begin{itemize}
   \item[---]\textit{Bond terms and nonbonded terms}
@@ -459,8 +478,7 @@ position of particle $\alpha$. Each expression above is the product of
 a straightforward uni-dimensional derivative involving the potential
 expression with a more complicated ``geometrical'' derivative. The
 former terms are reported in the Sections above for each functional
-form. The latter terms are common to all interactions and are listed
-below:
+form. The latter terms are listed below\cite{GROMOS-doc}:
 
 \begin{itemize}
   \item [---]\textit{Bond terms and nonbonded terms}
@@ -496,8 +514,8 @@ below:
 The functional forms used for each interaction term are selected in
 the input STP file via type codes. Likewise, the Lennard-Jones
 potential representation, mixing rule and 1--4 details are specified
-in this same file. For more information, read the STP file format
-section on \autoref{chap:file-formats}.
+in this same file. For more information, read about the STP file
+format in \autoref{sec:file-formats-STP}.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -510,10 +528,12 @@ section on \autoref{chap:file-formats}.
   regardless of the distance between the interacting particles. No
   other scheme for computing the nonbonded interactions is currently
   supported.
-\item[---] Only one functional form is accepted for each type of
-  bonded interaction. The only exception is for proper dihedral
-  restraints, which can be defined along with any other form of proper
-  dihedral term. 
+\item[---] For a given system, only one functional form is accepted
+  for each type of bonded interaction. For example, if one
+  bond-stretching degree of freedom of the system is described by the
+  harmonic form, then all of them also must be. The only exception is
+  for proper dihedral restraints, which can be defined along with any
+  other form of proper dihedral.
 \end{itemize}
 
 \chapter{Energy Minimization}
@@ -553,9 +573,7 @@ The $n$-th step of the steepest-descents energy minimization algorithm is as fol
 The initial value of the step size $\Delta x(t_n)$ is specified in the input variable DX0.
 If the energy decreases in a given step $n$, $\Delta x(t_{n+1}) = \min{\{1.2\cdot\Delta x(t_{n}),\ \text{DXM}\}}$, where DXM is an input variable.
 If the energy increases, $\Delta x(t_{n+1}) = 0.5\cdot\Delta x(t_{n})$.
-The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the energy difference between successive steps is less than the one specified in the input variable DELE.
-
-For more information on the input variables above, see \autoref{chap:file-formats}.
+The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the (absolute) energy difference between successive steps is less than the one specified in the input variable DELE.
 
 \section{Conjugate-gradients}
 \label{sec:conjugate-gradients}
@@ -618,7 +636,6 @@ In terms of these real functions, the $n$-th step of the algorithm involves two 
 \end{enumerate}
 
 The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the energy difference between successive steps is less than the value of the input variable DELE.
-For more information on these input variables and others mentioned above, see \autoref{chap:file-formats}.
 
 \chapter{Parameter Optimization}
 \label{chap:ga}
@@ -652,14 +669,14 @@ three main parts:
 
 \profileropt{} admits a fairly flexible setup of boundary conditions
 for the optimized parameters. In terms of the torsional parameters,
-the user can select either a standard or Ryckaert-Bellemans functional
-form, with customized summands. It is also possible to not optimize
-torsional parameters at all. In terms of the Lennard-Jones parameters,
-the user can opt on optimizing both attractive and repulsive
-parameters, only one of them or none of them. For example, it is
-possible to carry out a \profileropt{} run where only $CS_{12}$ and
-odd-multiplicity terms of a standard proper dihedral form are taken
-into account. The configuration of these boundary conditions is
+the user can select either a standard periodic or Ryckaert-Bellemans
+functional form, with customized summands. It is also possible to not
+optimize torsional parameters at all. In terms of the Lennard-Jones
+parameters, the user can opt on optimizing both attractive and
+repulsive parameters, only one of them or none of them. For example,
+it is possible to carry out a \profileropt{} run where only $CS_{12}$
+and odd-multiplicity terms of a standard proper dihedral form are
+taken into account. The configuration of these boundary conditions is
 performed in the INP input file, as described in
 \autoref{sec:inp-parameter_optimization}.
 
@@ -680,21 +697,29 @@ and ODs is performed in the STP file of each system, as described in
 \section{Torsional-scan Energy Profiles}
 \label{sec:ga-tpes}
 
-The torsional-scan dihedral angles $\phi_k$ are configured in the INP
-file, described in \autoref{sec:inp-torsional_scan}. For each system,
-they are performed along the \textit{Reference
-  Dihedral} (RD) specified in the corresponding STP file, as described in
-\autoref{sec:stp-ref_dihedral}.
-The torsional-scan energy profile $\mathcal{V}_s$ for a given system $s$ is obtained by
+The central objects of all molecular-mechanics calculations of \profilertools{} are the torsional scan and the corresponding energy profile.
+%
+We define a \textit{torsional scan} as a sequence of concatenated molecular configurations (\textit{i.e.} a trajectory) in which a single dihedral angle [the \textit{reference dihedral} (RD)] is successively restrained to pre-defined values (the \textit{torsional-scan angles}), while all other internal degrees of freedom are relaxed.
+In many cases, \textit{torsional scan} may also refer to the process of obtaining these configurations.
+The sequence of the unrestrained potential energies of the configurations of the torsional scan is the \textit{torsional-scan energy profile} (or simply \textit{energy profile}).
+All energy profiles in \profilertools{} are shifted (\textit{i.e.} each energy of the sequence is subtracted by the same value) so that their minimum values are equal to 0.
+
+The torsional-scan angles $\phi_k$ are configured in the INP file for
+\profileropt{} (see \autoref{sec:inp-torsional_scan}) and in the
+command-line options for \profilergen{} (see\autoref{sec:program-gen})
+In practice, the torsional-scan energy profile $\mathcal{V}_s$ for a
+given system $s$ is obtained by the following scheme:
 \begin{enumerate}
-\item Fixing its RD at each dihedral angle $\phi_k$ \textit{via} a dihedral restraint and
-\begin{enumerate}
-\item [a.] Performing a restrained energy minization;
-\item [b.] Computing the value of the total potential energy subtracted by the
-  dihedral-restraint energy, referred to as $\mathcal{V}_{sk}$;
+\item For each $\phi_k$:
+  \begin{enumerate}
+  \item[a.]  Apply a dihedral restraint with a reference angle of $\phi_k$ to the RD;
+  \item [b.] Perform a restrained energy minization;
+  \item [c.] Compute the value of the total potential energy
+    subtracted by the dihedral-restraint energy (\textit{i.e.} the
+    unrestrained potential energy), referred to as $\mathcal{V}_{sk}$;
 \end{enumerate}
-\item Subtracting its unrestrained potential energies
-  $\mathcal{V}_{sk}$ along the torsional-scan by their minima,
+\item Subtract the unrestrained potential energies
+  $\mathcal{V}_{sk}$ by their minimum:
   \begin{equation}
   \label{eq:ga-tors-scan}
   \mathcal{V}_s = \{ \mathcal{V}_{sk} - \min_k{\mathcal{V}_{sk}},\ k=1\ldots N_K \} \quad ,
@@ -702,10 +727,16 @@ The torsional-scan energy profile $\mathcal{V}_s$ for a given system $s$ is obta
 where $N_K$ is the number of dihedral angles of the torsional scan.
 \end{enumerate}
 
-Two settings of energy minimization can be configured for the calculation of the torsional-scan energy profiles.
-The first is used during the GA run, every time a torsional-scan is performed for an individual.
-Since thousands of torsional scans are executed in a GA run, this setting should not be very costly.
-The second is used only once after the GA run to refine the torsional-scan energy profiles of the optimal individual. Both settings are specified in the INP file, as described in \autoref{sec:inp-minimization}.
+For \profileropt{}, two settings of energy minimization can be
+configured for the torsional scans.  The first is used during the GA
+run, every time a torsional scan is performed for an individual.
+Since thousands of torsional scans are executed in a typical GA run,
+this setting should not be very costly.  The second is used only once
+after the GA run to refine the torsional-scan energy profiles of the
+optimal individual. Both settings are specified in the INP file, as
+described in \autoref{sec:inp-minimization}. For \profilergen{}, only
+one setting is available, configured in the command-line options (see
+\autoref{sec:program-gen}).
 
 % 2 settings for EM
 % - one is executed during the GA so should be cheaper
@@ -788,9 +819,13 @@ The computational scheme for the $n$-th generation of the GA reads,
   \item[c.] Carry the children into the population of the $(n+1)$-th generation.
   \end{enumerate}
 \end{enumerate}
-The initial population is obtained randomly, as described in \autoref{sec:ga-parameter-randomization}.
-The algorithm stops when the current generation reaches the maximal value specified in the INP file (\autoref{sec:inp-ga}).
-At this point, the parameters of the best individual are written in the IFP output file, and its torsional-scan energy profiles are refined with enhanced energy minimization settings if so requested (\autoref{sec:ga-tpes}).
+The initial population is obtained randomly, as described in
+\autoref{sec:ga-parameter-randomization}.  The algorithm stops when
+the number of generations reaches the maximal value specified in the
+INP file (\autoref{sec:inp-ga}).  At this point, the parameters of the
+best individual are written in the IFP output file, and its
+torsional-scan energy profiles are refined with enhanced energy
+minimization settings if so requested (\autoref{sec:ga-tpes}).
 
 \subsection{Population}
 \label{sec:ga-population}
@@ -801,10 +836,10 @@ array of floating-point values
   \label{eq:ga-individual}
   I_i = (CS_6(i), CS_{12}(i), \{k_m(i)\}_{m=1\ldots 6}) \quad , \quad i = 1 \ldots N_P
 \end{equation}
-where $CS_6, CS_{12}$ are Lennard-Jones parameters, $\{k_m\}_{m=1\ldots 6}$ are the torsional parameters and $N_P$ is the size of the population.
+where $N_P$ is the size of the population, $CS_6, CS_{12}$ are Lennard-Jones parameters and $\{k_m\}_{m=1\ldots 6}$ are torsional parameters.
 If the standard dihedral representation is used, these values are the force constants $k_{d,m}^s$ for each multiplicity $m$ in \autoref{eq:proper-standard-energy}.
 If the Ryckaert-Bellemans representation is used, these values are the constants $c_m$  for each $(m-1)$-th order term in \autoref{eq:proper-rb-energy}.
-The values of all parameters are either obtained randomly (\autoref{sec:ga-parameter-randomization}), or as a result of the application of the crossover (\autoref{sec:ga-crossover}) or mutation (\autoref{sec:ga-mutation}) operators.
+The values of all parameters are either obtained randomly (\autoref{sec:ga-parameter-randomization}) or result from the application of the crossover (\autoref{sec:ga-crossover}) or mutation (\autoref{sec:ga-mutation}) operators.
 
 At a first glance, one might be confused by the absence of the phase-shift terms $\phi_{0,m}^s$ of \autoref{eq:proper-standard-energy} in the individual representation above (for the case of the standard dihedral representation).
 However, note that the potential energy function in \autoref{eq:proper-standard-energy} satisfies
@@ -852,7 +887,7 @@ First, each individual $I_i$ of the population is evaluated in terms of the weig
   \mathcal{R}\left(I_i;\{w_{sk},r_{sk}\}_{\substack{s\\k}} \right) = \sqrt{\frac{\sum_{s=1}^{N_S} \sum_{k=1}^{N_K} w_{sk}(\mathcal{V}_{sk}(I_i)-r_{sk})^2}{N_S \sum_{k=1}^{N_R} w_{sk}}} \quad ,
 \end{equation}
 where the $w_{sk},r_{sk}$ are the weights and reference data described in \autoref{sec:ga-fitness-wei}
-and each $\mathcal{V}_{sk}(I_i)$ is the $k$-th torsional-scan of $\mathcal{V}_s(I_i)$ described in \autoref{sec:ga-tpes}.
+and each $\mathcal{V}_{sk}(I_i)$ is the $k$-th step of the energy profile $\mathcal{V}_s(I_i)$ described in \autoref{sec:ga-tpes}.
 This distance-like quantity is converted into a fitness value \textit{via}
 \begin{equation}
   \label{eq:ga-fitness}
@@ -861,7 +896,7 @@ This distance-like quantity is converted into a fitness value \textit{via}
 The $\mathcal{R}$ and $\mathcal{F}$ quantities differ in terms of normalization, ordering and interpretability.
 The latter is normalized over the population and should be maximized in the optimization, but has no clear physical interpretation.
 The former is (at least \textit{a priori}) not normalized and should be minimized, but has a very clear physical interpretation.
-For these reasons, $\mathcal{F}$ is used internally in the GA as the metric of fitness, while $\mathcal{R}$ is used in the output files.
+For these reasons, $\mathcal{F}$ is used internally in the GA as the metric of fitness, while $\mathcal{R}$ is reported in the output files.
 
 % In practice, the only relevant parameters for the GA are those that are requested to be optimized.
 % These are the parameters that are replaced by the original values (those specified in the STP file; see \autoref{chap:file-formats}) when calculating the fitness of each individual.
@@ -973,16 +1008,17 @@ $j$-th individual be selected set to
 \subsection{Reproduction}
 \label{sec:ga-reproduction}
 
-In the reproduction stage, the $2N_S$ parents obtained with the selection
-operator reproduce to generate $2N_S$ children, out of which $N_P-N_{EL}$
-are carried into the population of the next generation. The children are
-generated by applying the crossover operator on each
-pair of parents and then applying the mutation
-operator on each child. If $N_P-N_{EL}$ is even, then $2N_S=N_P-N_{EL}$
-and all children are carried into the population of the next generation. If
-$N_P - N_{EL}$ is odd, then $2N_S=N_P-N_{EL}+1$, and the last child
-generated is discarded so as to keep the population size at $N_P$.
-The following sections discuss the crossover and mutation operators in details.
+In the reproduction stage, the $2N_S$ parents obtained with the
+selection operator reproduce to generate $2N_S$ children, out of which
+$N_P-N_{EL}$ are carried over to the population of the next
+generation. The children are generated by (possibly) applying the
+crossover operator on each pair of parents and then (possibly)
+applying the mutation operator on each child. If $N_P-N_{EL}$ is even,
+then $2N_S=N_P-N_{EL}$ and all children are carried over to the
+population of the next generation. If $N_P - N_{EL}$ is odd, then
+$2N_S=N_P-N_{EL}+1$, and the last child generated is discarded so as
+to keep the population size at $N_P$.  The following sections discuss
+the crossover and mutation operators in details.
 
 \subsubsection{Crossover}
 \label{sec:ga-crossover}
@@ -1014,7 +1050,7 @@ where each child parameter $p^{(\alpha)}$ is obtained \textit{via} a mixing func
 \end{equation*}
 The crossover operator is chosen in the INP file
 (\autoref{sec:inp-ga}), and two options are available: the arithmetic
-crossover or the heuristic crossover.
+crossover and the heuristic crossover.
 
 In the arithmetic crossover, each child parameter is obtained as the following
 weighted average of the parent parameters:
