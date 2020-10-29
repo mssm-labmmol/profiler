@@ -12,6 +12,7 @@
 \clearmark{section}
 \setsecnumdepth{subsection}
 \usepackage{overcite}
+\usepackage{microtype}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -95,6 +96,7 @@
 \lstdefinestyle{ascii-tree}{
     literate={├}{|}1 {─}{--}1 {└}{+}1 
   }
+
   \begin{document}
   \maketitle
   \thispagestyle{empty}
@@ -152,26 +154,41 @@
 
 \newcommand*{\profi}{\texttt{profilerOpt}}
 
-\chapter{Molecular Mechanics}
+\chapter{Molecular Mechanics and Energy Minimization}
 \label{chap:mm}
 
-All molecular-mechanics calculations are performed using custom code which depends only on standard Python libraries and \texttt{numpy}.
-In this chapter, we report all functional forms supported for the
-calculation of molecular-mechanics energies and forces.
-The following notation and definitions will be used for mathematical and physical quantities whenever convenient:
+In \profilertools{}, molecular-mechanics energies and forces are calculated using custom code which depends only on standard Python libraries and \texttt{numpy}.
+In this chapter, we give details about the computation of all quantities which directly involve these calculations.
+First, we report all force-field functional forms available in the suite.
+After that, we give the expressions for the calculation of forces.
+We then describe the energy minimization algorithms implemented in the programs.
+Finally, we define the central object of the molecular-mechanics calculations of \profilertools{}, namely, the torsional scan and its corresponding energy profile.
+
+Considering a system of $N$ particles, the following notation and definitions will be used for mathematical and physical quantities whenever convenient:
 
 \begin{itemize}
-\item[---] $\mathbf{u} \cdot \mathbf{v}$ \par \hspace{10ex} Dot product of vectors $\mathbf{u}$ and $\mathbf{v}$.
-\item[---] $\mathbf{u} \times \mathbf{v}$ \par \hspace{10ex} Cross product of vectors $\mathbf{u}$ and $\mathbf{v}$.
-\item[---] $\mathbf{r}_i$ \par \hspace{10ex} Position of particle $i$.
-\item[---] $\mathbf{r}_{ij} = \mathbf{r}_i - \mathbf{r}_j$ \par \hspace{10ex} Displacement from particle $j$ to particle $i$.
-\item[---] $r_{ij} = \sqrt{\mathbf{r}_{ij} \cdot \mathbf{r}_{ij}}$ \par \hspace{10ex} Distance between particle $i$ and particle $j$.
-\item [---] $\theta_{ijk} = \arccos{\frac{\mathbf{r}_{ij} \cdot \mathbf{r}_{kj}}{r_{ij}r_{kj}}}$  \par \hspace{10ex} Angle involving particles $i$, $j$ and $k$.
-  \item [---] $\phi_{ijkl} = \sign{(\rsub{ij} \cdot \rsub{nk})} \arccos{\left( \frac{\rsub{mj} \cdot \rsub{nk}}{r_{mj}r_{nk}} \right)}$, with $\rsub{mj} = \rsub{ij}\times\rsub{kj}$ and $\rsub{nk} = \rsub{kj}\times\rsub{kl}$
-     \par \hspace{10ex} Dihedral angle involving particles $i$, $j$, $k$ and $l$.
-   \end{itemize}
+\item[---] $\mathbf{u} \cdot \mathbf{v}$ \par  Dot product of vectors $\mathbf{u}$ and $\mathbf{v}$.
+\item[---] $\mathbf{u} \times \mathbf{v}$ \par  Cross product of vectors $\mathbf{u}$ and $\mathbf{v}$.
+\item[---] $\mathbf{r}_i$ \par  Position of particle $i$.
+\item[---] $\mathbf{r}_{ij} = \mathbf{r}_i - \mathbf{r}_j$ \par  Displacement from particle $j$ to particle $i$.
+\item[---] $r_{ij} = \sqrt{\mathbf{r}_{ij} \cdot \mathbf{r}_{ij}}$ \par  Distance between particle $i$ and particle $j$.
+\item[---] $\theta_{ijk} = \arccos{\frac{\mathbf{r}_{ij} \cdot \mathbf{r}_{kj}}{r_{ij}r_{kj}}}$  \par  Angle involving particles $i$, $j$ and $k$.
+\item[---] $\phi_{ijkl} = \sign{(\rsub{ij} \cdot \rsub{nk})} \arccos{\left( \frac{\rsub{mj} \cdot \rsub{nk}}{r_{mj}r_{nk}} \right)}$, with $\rsub{mj} = \rsub{ij}\times\rsub{kj}$ and $\rsub{nk} = \rsub{kj}\times\rsub{kl}$
+  \par  Dihedral angle involving particles $i$, $j$, $k$ and $l$.
+\item[---] $\mathbf{r}(t_n) = (\rsub{1}(t_n),\rsub{2}(t_n)\ldots\rsub{N}(t_n))$
+  \par
+  
+  Configuration at the $n$-th step of the energy-minimization algorithm.
+\item[---] $\mathbf{f}(t_n) = (\fsub{1}(t_n),\fsub{2}(t_n)\ldots\fsub{N}(t_n))$
+  \par
+  Configuration of the forces at the $n$-th step of the energy-minimization~algorithm.
+\end{itemize}
 
-\section{Bond stretching}
+\section{Force-field Functional Forms}
+\label{sec:mm-force-field-functional-forms}
+
+
+\subsection{Bond stretching}
 \label{sec:bond-terms}
 
 The following functional forms are supported for the calculation of
@@ -201,7 +218,7 @@ the energies and forces associated with a bond-stretching degree of freedom:\cit
 \noindent
 where $V(r_{ij})$ is the potential energy term for the bond between particles $i$ and $j$.
 
-\section{Bond-angle stretching}
+\subsection{Bond-angle stretching}
 \label{sec:angle-terms}
 
 The following functional forms are supported for the calculation of
@@ -241,7 +258,7 @@ the energies and forces associated with a bond-angle stretching degree of freedo
 where $V(\theta_{ijk},[r_{ik}])$ is the potential energy term for the angle involving particles $i$, $j$ and $k$.
 Note that the Urey-Bradley form introduces dependence on an additional degree of freedom, the distance $r_{ik}$, which is treated as a harmonic bond between particles $i$ and $k$.
 
-\section{Proper dihedral-angle torsion}
+\subsection{Proper dihedral-angle torsion}
 \label{sec:proper-terms}
 
 The following functional forms are supported for the calculation of
@@ -298,7 +315,7 @@ torsion degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
 \end{itemize}
 where $V(\phi_{ijkl})$ is the potential energy term for the proper dihedral angle involving particles $i$, $j$, $k$ and $l$.
 
-\section{Improper dihedral-angle bending}
+\subsection{Improper dihedral-angle bending}
 \label{sec:improper-terms}
 
 The following functional forms are supported for the calculation of
@@ -326,10 +343,10 @@ bending degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
  \end{itemize}
  where $V(\phi_{ijkl})$ is the potential energy term for the improper dihedral angle involving particles $i$, $j$, $k$ and $l$.
 
-\section{Nonbonded interactions}
+\subsection{Nonbonded interactions}
 \label{sec:nonbonded}
 
-\subsection{Standard interactions}
+\subsubsection{Standard interactions}
 \label{sec:standard-lj-interactions}
 
 The nonbonded interactions are calculated for every pair of
@@ -395,7 +412,7 @@ with corresponding mixing rules
 \end{itemize}
 When this is the case, the nonbonded parameters are internally converted to the $C_6$-$C_{12}$ representation, with which all molecular-mechanics calculations are performed.
 
-\subsection{1--4 interactions}
+\subsubsection{1--4 interactions}
 \label{sec:1-4-interactions}
 
 The interactions of pairs of particles that are identified as sharing
@@ -447,7 +464,16 @@ The second is more uncommon (but is used \textit{e.g.} in GROMOS force fields) a
   pair-specific scaled-down potential energy.
 \end{itemize}
 
-\section{Forces}
+\subsection{Choice of Functional Forms}
+\label{sec:choice-of-functional-forms}
+
+The functional forms used for each interaction term are selected in
+the input STP file via type codes. Likewise, the Lennard-Jones
+potential representation, mixing rule and 1--4 details are specified
+in this same file. For more information, read about the STP file
+format in \autoref{sec:file-formats-STP}.
+
+\section{Calculation of Forces}
 \label{sec:forces}
 
 The atomic forces due to the potential energy terms reported above are
@@ -508,55 +534,15 @@ form. The latter terms are listed below\cite{GROMOS-doc}:
   \end{align*}
 \end{itemize}
 
-\section{Choice of functional forms}
-\label{sec:choice-of-functional-forms}
-
-The functional forms used for each interaction term are selected in
-the input STP file via type codes. Likewise, the Lennard-Jones
-potential representation, mixing rule and 1--4 details are specified
-in this same file. For more information, read about the STP file
-format in \autoref{sec:file-formats-STP}.
-
-\section{Limitations}
-\label{sec:limitations}
-
-\begin{itemize}
-\item[---] Periodic boundary conditions are currently not taken into
-  account. Please make sure your systems fit entirely within the
-  central simulation box to avoid any problems.
-\item[---] The nonbonded interactions are computed explicitly
-  regardless of the distance between the interacting particles. No
-  other scheme for computing the nonbonded interactions is currently
-  supported.
-\item[---] For a given system, only one functional form is accepted
-  for each type of bonded interaction. For example, if one
-  bond-stretching degree of freedom of the system is described by the
-  harmonic form, then all of them also must be. The only exception is
-  for proper dihedral restraints, which can be defined along with any
-  other form of proper dihedral.
-\end{itemize}
-
-\chapter{Energy Minimization}
+\section{Energy Minimization}
 \label{chap:minim}
 
-In this chapter, we briefly describe the energy minimization algorithms implemented in the program, namely
+In this section, we briefly describe the energy minimization algorithms implemented in \profilertools{}, namely
 \textit{steepest-descents} and
 \textit{conjugate-gradients}.
 Both implementations are based on the descriptions supplied in the GROMOS user manual\cite{GROMOS-doc}.
-The following notation will be used:
 
-\begin{itemize}
-\item [---] $\mathbf{r}(t_n) = (\rsub{1}(t_n),\rsub{2}(t_n)\ldots\rsub{N}(t_n))$
-  \par
-  \hspace{10ex}
-  Configuration of the system of $N$ particles at the $n$-th step of the algorithm.
-\item [---] $\mathbf{f}(t_n) = (\fsub{1}(t_n),\fsub{2}(t_n)\ldots\fsub{N}(t_n))$
-  \par
-  \hspace{10ex}
-  Configuration of the forces of the system of $N$ particles at the $n$-th step of the algorithm.
-\end{itemize}
-
-\section{Steepest-descents}
+\subsection{Steepest-descents}
 \label{sec:steep}
 
 In the steepest-descents energy minimization algorithm, one successively updates the configuration by moving along the direction of the gradient of the potential energy over the configurational space.
@@ -575,7 +561,7 @@ If the energy decreases in a given step $n$, $\Delta x(t_{n+1}) = \min{\{1.2\cdo
 If the energy increases, $\Delta x(t_{n+1}) = 0.5\cdot\Delta x(t_{n})$.
 The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the (absolute) energy difference between successive steps is less than the one specified in the input variable DELE.
 
-\section{Conjugate-gradients}
+\subsection{Conjugate-gradients}
 \label{sec:conjugate-gradients}
 
 In the conjugate-gradients energy minimization algorithm, one does not move strictly along the gradient of the potential energy over the configurational space.
@@ -637,6 +623,64 @@ In terms of these real functions, the $n$-th step of the algorithm involves two 
 
 The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the energy difference between successive steps is less than the value of the input variable DELE.
 
+\section{Torsional-scan Energy Profiles}
+\label{sec:ga-tpes}
+
+The central objects of all molecular-mechanics calculations of \profilertools{} are the torsional scan and the corresponding energy profile.
+%
+We define a \textit{torsional scan} as a sequence of concatenated molecular configurations (\textit{i.e.} a trajectory) in which a single dihedral angle [the \textit{reference dihedral} (RD)] is successively restrained to pre-defined values (the \textit{torsional-scan angles}), while all other internal degrees of freedom are relaxed.
+In many cases, \textit{torsional scan} may also refer to the process of obtaining these configurations.
+The sequence of the unrestrained potential energies of the configurations of the torsional scan is the \textit{torsional-scan energy profile} (or simply \textit{energy profile}).
+All energy profiles in \profilertools{} are shifted (\textit{i.e.} each energy of the sequence is subtracted by the same value) so that their minimum values are equal to 0.
+
+The torsional-scan angles $\phi_k$ are configured in the INP file for
+\profileropt{} (see \autoref{sec:inp-torsional_scan}) and in the
+command-line options for \profilergen{} (see\autoref{sec:program-gen})
+In practice, the torsional-scan energy profile $\mathcal{V}_s$ for a
+given system $s$ is obtained with the following scheme:
+\begin{enumerate}
+\item For each $\phi_k$:
+  \begin{enumerate}
+  \item[a.]  Apply a dihedral restraint with a reference angle of $\phi_k$ to the RD;
+  \item [b.] Perform a restrained energy minization;
+  \item [c.] Compute the value of the total potential energy
+    subtracted by the dihedral-restraint energy (\textit{i.e.} the
+    unrestrained potential energy), referred to as $\mathcal{V}_{sk}$;
+\end{enumerate}
+\item Subtract the unrestrained potential energies
+  $\mathcal{V}_{sk}$ by their minimum over the torsional scan:
+  \begin{equation}
+  \label{eq:ga-tors-scan}
+  \mathcal{V}_s = \{ \mathcal{V}_{sk} - \min_k{\mathcal{V}_{sk}},\ k=1\ldots N_K \} \quad ,
+\end{equation}
+where $N_K$ is the number of torsional-scan angles.
+\end{enumerate}
+
+% 2 settings for EM
+% - one is executed during the GA so should be cheaper
+% - one is executed only after the Ga for the optimal parameters to refine the final torsional data
+% configurations for each one are controlled in adnajskd block
+% for example bla bla
+
+\section{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}
+\item[---] Periodic boundary conditions are currently not taken into
+  account. Please make sure your systems fit entirely within the
+  central simulation box to avoid any problems.
+\item[---] The nonbonded interactions are computed explicitly
+  regardless of the distance between the interacting particles. No
+  other scheme for computing the nonbonded interactions is currently
+  supported.
+\item[---] For a given system, only one functional form is accepted
+  for each type of bonded interaction. For example, if one
+  bond-stretching degree of freedom of the system is described by the
+  harmonic form, then all of them also must be. The only exception is
+  for proper dihedral restraints, which can be defined along with any
+  other form of proper dihedral.
+\end{itemize}
+
 \chapter{Parameter Optimization}
 \label{chap:ga}
 
@@ -655,8 +699,7 @@ three main parts:
   the molecular systems of interest, whereby they acquire physical
   meaning as force-field parameters and their fitness can be assessed
   and used in the GA as feedback for the evolutionary process
-  (\autoref{sec:ga-opt-control}, \autoref{sec:ga-tpes},
-  \autoref{sec:ga-fitness-wei}).
+  (\autoref{sec:ga-opt-control}, \autoref{sec:ga-fitness-wei}).
   
 \item The generation and evolution of trial parameters, controlled by
   the details of the GA (\textit{e.g.} crossover and mutation operators)
@@ -694,55 +737,28 @@ should be replaced by the GA parameters. The specification of the OPs
 and ODs is performed in the STP file of each system, as described in
 \autoref{sec:stp-optterms}.
 
-\section{Torsional-scan Energy Profiles}
-\label{sec:ga-tpes}
+\section{Torsional-scan Performance Issues}
+\label{sec:torsional-scan-performance-issues}
 
-The central objects of all molecular-mechanics calculations of \profilertools{} are the torsional scan and the corresponding energy profile.
-%
-We define a \textit{torsional scan} as a sequence of concatenated molecular configurations (\textit{i.e.} a trajectory) in which a single dihedral angle [the \textit{reference dihedral} (RD)] is successively restrained to pre-defined values (the \textit{torsional-scan angles}), while all other internal degrees of freedom are relaxed.
-In many cases, \textit{torsional scan} may also refer to the process of obtaining these configurations.
-The sequence of the unrestrained potential energies of the configurations of the torsional scan is the \textit{torsional-scan energy profile} (or simply \textit{energy profile}).
-All energy profiles in \profilertools{} are shifted (\textit{i.e.} each energy of the sequence is subtracted by the same value) so that their minimum values are equal to 0.
-
-The torsional-scan angles $\phi_k$ are configured in the INP file for
-\profileropt{} (see \autoref{sec:inp-torsional_scan}) and in the
-command-line options for \profilergen{} (see\autoref{sec:program-gen})
-In practice, the torsional-scan energy profile $\mathcal{V}_s$ for a
-given system $s$ is obtained by the following scheme:
-\begin{enumerate}
-\item For each $\phi_k$:
-  \begin{enumerate}
-  \item[a.]  Apply a dihedral restraint with a reference angle of $\phi_k$ to the RD;
-  \item [b.] Perform a restrained energy minization;
-  \item [c.] Compute the value of the total potential energy
-    subtracted by the dihedral-restraint energy (\textit{i.e.} the
-    unrestrained potential energy), referred to as $\mathcal{V}_{sk}$;
-\end{enumerate}
-\item Subtract the unrestrained potential energies
-  $\mathcal{V}_{sk}$ by their minimum:
-  \begin{equation}
-  \label{eq:ga-tors-scan}
-  \mathcal{V}_s = \{ \mathcal{V}_{sk} - \min_k{\mathcal{V}_{sk}},\ k=1\ldots N_K \} \quad ,
-\end{equation}
-where $N_K$ is the number of dihedral angles of the torsional scan.
-\end{enumerate}
+The number of energy and force evaluations performed during one
+generation of the GA increase approximately linearly with the number
+of energy-minimization steps carried out in the torsional scans.  For
+this reason, it is important to try to reduce as much as possible the
+duration of the energy minimizations without significantly affecting
+the accuracy of the optimal torsional-scan energy profile.
 
 For \profileropt{}, two settings of energy minimization can be
-configured for the torsional scans.  The first is used during the GA
-run, every time a torsional scan is performed for an individual.
-Since thousands of torsional scans are executed in a typical GA run,
-this setting should not be very costly.  The second is used only once
-after the GA run to refine the torsional-scan energy profiles of the
-optimal individual. Both settings are specified in the INP file, as
-described in \autoref{sec:inp-minimization}. For \profilergen{}, only
-one setting is available, configured in the command-line options (see
-\autoref{sec:program-gen}).
-
-% 2 settings for EM
-% - one is executed during the GA so should be cheaper
-% - one is executed only after the Ga for the optimal parameters to refine the final torsional data
-% configurations for each one are controlled in adnajskd block
-% for example bla bla
+configured in the INP file for carrying out the torsional scans (see
+\autoref{sec:inp-minimization}). The first is the one used during the
+execution of the GA for every individual and every generation and is
+critical to performance.  The second is used only once after the GA
+has finished to refine the torsional-scan energy profiles of the
+optimal individual and barely affects performance. By comparing the
+energy profiles obtained with these two settings, one should be able
+to at least estimate the errors introduced by using time-saving
+configurations in the first. For \profilergen{}, only one
+energy-minimization setting is available, configured in the
+command-line options (see \autoref{sec:program-gen}).
 
 \section{Reference Data and Weights}
 \label{sec:ga-fitness-wei}
@@ -825,7 +841,7 @@ the number of generations reaches the maximal value specified in the
 INP file (\autoref{sec:inp-ga}).  At this point, the parameters of the
 best individual are written in the IFP output file, and its
 torsional-scan energy profiles are refined with enhanced energy
-minimization settings if so requested (\autoref{sec:ga-tpes}).
+minimization settings if so requested (\autoref{sec:torsional-scan-performance-issues}).
 
 \subsection{Population}
 \label{sec:ga-population}
@@ -1113,15 +1129,26 @@ consists of three steps:
   \autoref{sec:ga-parameter-randomization}.
 \end{enumerate}
 
-\chapter{Program Usage}
-\label{chap:program-usage}
 
-In this chapter, we describe the usage of the two main programs of the
-\profilertools{} package: \profilergen{}, used to perform torsional
-scans and calculate the corresponding energy profiles, and
+\chapter{Program Usage, Input Variables and File Formats}
+\label{chap:file-formats}
+
+
+In this chapter, we first describe the usage of the two programs of
+the \profilertools{} package: \profilergen{}, used to perform
+torsional scans and calculate the corresponding energy profiles, and
 \profileropt{}, used to optimize torsional and/or 1--4 Lennard-Jones
 parameters based on the reproduction of reference data of
-torsional-scan energy profiles.
+torsional-scan energy profiles.  The execution of \profileropt{} and
+\profilergen{} depends on several input variables and input data
+supplied either as command-line options or in input files with
+specified formats. The output data is also written to files with
+specified formats. In this chapter, we also describe the configuration
+of these input variables and the format of these input and output
+files.
+
+\section{Program Usage}
+\label{chap:program-usage}
 % The following convention will be
 % used.  When a command-line option and its value(s) are enclosed in
 % square brackets, this means they are not mandatory.  When the value
@@ -1129,7 +1156,7 @@ torsional-scan energy profiles.
 % it is a file; otherwise, it is an input variable
 % (\autoref{sec:file-formats-input-variables}).
 
-\section{Performing Torsional Scans: \profilergen{}}
+\subsection{Performing Torsional Scans: \profilergen{}}
 \label{sec:program-gen}
 
 To perform a torsional scan using \profilergen{}, the user must supply
@@ -1171,7 +1198,7 @@ where $K$ is the length of the torsional scan.
 
 For more details on the calculation of the energy profiles, see \autoref{sec:ga-tpes} and \autoref{chap:minim}.
 
-\section{Optimizing Parameters: \profileropt{}}
+\subsection{Optimizing Parameters: \profileropt{}}
 \label{sec:program-opt}
 
 To perform parameter optimization using \profileropt{}, the user has
@@ -1215,19 +1242,10 @@ The program will write the following files to disk:
 where $S$ is the number of systems.
 
 The refined quantities mentioned above are obtained based on enhanced
-energy minimization settings, as described in \autoref{sec:ga-tpes}.
+energy minimization settings, as described in \autoref{sec:torsional-scan-performance-issues}.
 The IFP, TRP, TRE and TRR output file formats are described in
 \autoref{sec:file-formats-file-formats}.
 
-\chapter{Input Variables and File Formats}
-\label{chap:file-formats}
-
-The execution of \profileropt{} and \profilergen{} depends on several
-input variables and input data supplied either as command-line options
-or in appropriate input files.  During execution, the output of these
-programs is written to the standard streams and to specific output
-files. In this chapter, we discuss the configuration of these input
-variables and the format of these input and output files.
 
 \section{Input Variables}
 \label{sec:file-formats-input-variables}
