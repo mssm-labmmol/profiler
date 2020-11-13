@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # This file is part of the profilerTools suite (see
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     if (ens.size() > 1):
         optMode = 'trajectory'
         if ens.size() != len(dihs):
-            err_msg("Number of configurations in input trajectory does not match required dihedral scan.")
+            err_msg("Number of configurations in input trajectory ({}) does not match required dihedral scan ({}).".format(ens.size(), len(dihs)))
         debug_msg("Optimizing from input trajectory.", stdout, True)
     else:
         optMode = 'configuration'

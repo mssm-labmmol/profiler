@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+#
 # -*- coding: utf-8 -*-
 #
 # This file is part of the profilerTools suite (see
@@ -61,7 +62,7 @@ def checkfiles (fnlist):
             raise IOError ("File {0} does not exist!".format(fn))
 
 def selectionWrapper (seltype):
-    elif (seltype) == 1:
+    if (seltype) == 1:
         return RoulettSelectionMethod
     elif (seltype) == 2:
         return RankSelectionMethod
@@ -179,7 +180,7 @@ if __name__ == '__main__':
     # now, update minim, do final optimization and save
     print("\nPerforming final optimization... ", file=stdout, end='')
     optind.resetMinim(lastMinimOpts.minimType, lastMinimOpts.dx0, lastMinimOpts.dxm, lastMinimOpts.dele, lastMinimOpts.maxSteps)
-    optind.minimizeProfiles()
+    optind.minimizeProfiles(useWei=False)
     optind.saveTraj(cmdlineOpts.outPrefix + '_minim', 'xyz')
     optind.saveProfile(cmdlineOpts.outPrefix + '_minim')
     print("Done.", file=stdout)

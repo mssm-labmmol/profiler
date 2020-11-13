@@ -77,6 +77,9 @@ class VBGA:
     def evaluateIndividual(self, individual):
         individual.fitValue = self.fitnessMethod(individual)
 
+    def getFitValue(self, individual):
+        return individual.fitValue
+
     def evaluatePopulation(self):
         for individual in self.population:
             self.evaluateIndividual(individual)
@@ -99,8 +102,8 @@ class VBGA:
         """
         Puts the NTEL best individuals in an array.
         """
-        self.population.sort(key=lambda x: x.fitValue)
-        elitized = copy.deepcopy(self.population[:self.numElitized])
+        self.population.sort(key=self.getFitValue)
+        elitized = self.population[:self.numElitized]
         return elitized
 
     def applySelectionMethod(self):
@@ -157,7 +160,7 @@ class VBGA:
             with Pool(self.numProc) as p:
                 childs = p.map(self.parallelCrossoverAndMutation, parents)
         else:
-            childs = [self.parallelCrossoverAndMutation(p) for p in parents]
+            childs = map(self.parallelCrossoverAndMutation, parents)
         # put childs in population cross
         for brothers in childs:
             populationCross.append(brothers[0])
@@ -180,7 +183,7 @@ class VBGA:
         bestFitness = self.bestFitness()
         avFitness = self.averageFitness()
         self.writer.write(-1, self.population, avFitness, bestFitness)
-        for i in range(0, maxIterations):
+        for i in range(maxIterations):
             print("Running generation {0}... ".format(i+1), file=stdout, end='')
             elitizedInds = self.hardElitism()
             self.inverseNormalizationFitness()
@@ -191,7 +194,7 @@ class VBGA:
             self.evaluatePopulation()
             bestFitness = self.bestFitness()
             avFitness = self.averageFitness()
-            self.population.sort(key=lambda x: x.fitValue)
+            self.population.sort(key=self.getFitValue)
             self.writer.write(i, self.population, avFitness, bestFitness)
             if(bestFitness<savePreviousFitness):
                 print("New best weighted RMSD => {0}".format(bestFitness))
@@ -210,7 +213,7 @@ def RoulettSelectionMethod(population, selectionSize=10):  # FitValue must be no
         for individual in population:
             fitPoint +=  individual.fitValue 
             if roulettPoint < fitPoint:
-                select.append(copy.deepcopy(individual))
+                select.append(individual)
                 break
     return select  # return 0,1,2....selectionSize
 
@@ -224,7 +227,7 @@ def TournamentSelectionMethod(population, tournamentSize=2, selectionSize=10):
             if (ind.fitValue > bestFitness):
                 bestFitness = ind.fitValue
                 bestInd = ind
-        select.append(copy.deepcopy(bestInd))
+        select.append(bestInd)
     return select
 
 def RankSelectionMethod(population, selectionSize=10):
@@ -237,7 +240,7 @@ def RankSelectionMethod(population, selectionSize=10):
         for i in range(popSize):
             fitPoint += 1.0 / ((i + 1) * normFactor)
             if roulettPoint < fitPoint:
-                select.append(copy.deepcopy(population[i]))
+                select.append(population[i])
                 break
     return select
 

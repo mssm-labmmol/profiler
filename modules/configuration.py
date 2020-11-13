@@ -71,16 +71,11 @@ class configuration (object):
             self.pos[i] = positions[i]
 
     def getDisplacement (self, i, j):
-        output = np.array([0.0,0.0,0.0])
-        output[:] = self.pos[i] - self.pos[j]
-        return output
+        return (self.pos[i,:] - self.pos[j,:])
 
     def getDisplacements (self, ilist, jlist):
         n = len(ilist)
-        out = np.zeros((n,3))
-        for i in range(n):
-            out[i,:] = self.getDisplacement(ilist[i], jlist[i])
-        return out
+        return np.array([self.pos[ilist[i],:] - self.pos[jlist[i],:] for i in range(n)])
 
     def getDistance (self, i, j):
         return calcDistance (self.pos[i][0], self.pos[i][1], self.pos[i][2],\

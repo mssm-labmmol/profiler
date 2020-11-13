@@ -89,18 +89,18 @@ class profile (object):
         else:
             raise ValueError("setLJParameters for {} is not supported.".format(self.optType))
 
-    def minimizeProfile (self):
+    def minimizeProfile (self, wei=None, veryLargeEnergy=1.0e+03):
         self.enerProfile = []
         for i,phi in enumerate(self.refPhi):
-            # set restraints in a push-pop fashion
-
-
-            self.mmCalc.pushDihedralRestraint (*self.refDih, phi_0=phi, k=self.restrConst)
-            # minimize
-            self.emAlgo.run(self.ensemble[i])
-            self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
-
-            self.mmCalc.popDihedralRestraint()
+            if (wei is None) or (wei[i] != 0):
+                # set restraints in a push-pop fashion
+                self.mmCalc.pushDihedralRestraint (*self.refDih, phi_0=phi, k=self.restrConst)
+                # minimize
+                self.emAlgo.run(self.ensemble[i])
+                self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
+                self.mmCalc.popDihedralRestraint()
+            else:
+                self.enerProfile.append(veryLargeEnergy)
         # shift to zero
         self.enerProfile = np.array(self.enerProfile) - np.min(self.enerProfile)
         return True
@@ -184,11 +184,17 @@ class multiProfile (object):
         for profile in self.profiles:
             profile.setLJParameters (cs6, cs12)
 
-    def minimizeProfiles (self):
-        for profile in self.profiles:
-            if not (profile.minimizeProfile()):
-                return False
-        return True
+    def minimizeProfiles (self, useWei=True):
+        if (useWei):
+            for i,profile in enumerate(self.profiles):
+                if not (profile.minimizeProfile(wei=optOpts.weiData[i][:])):
+                    return False
+            return True
+        else:
+            for i,profile in enumerate(self.profiles):
+                if not (profile.minimizeProfile()):
+                    return False
+            return True
 
     def genRandDihedralParameters (self, m):
         parameters = parameterRandomizer.randomizeDihedralMslots(
