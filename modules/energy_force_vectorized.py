@@ -22,13 +22,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import  numpy          as      np
+import  geometrypy      as      gp
+import  numpy           as      np
 from    .configuration  import  *
-from    .coordParser    import  wrapAngles, calcNorm
-from    math           import  sqrt
-from    sys  import  stderr
-from    copy import deepcopy
-from    .fastmath import fastCross
+from    .coordParser    import  wrapAngles,  calcNorm
+from    math            import  sqrt
+from    sys             import  stderr
+from    copy            import  deepcopy
+from    .fastmath       import  fastCross
 
 def c6c12_to_sigmaepsilon(c6, c12):
     return ((c12/c6)**(1.0/6), 0.25*(c6**2/c12))
@@ -78,8 +79,8 @@ class G96bondTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(size, dtype=np.uint8)
-        self.aj = np.zeros(size, dtype=np.uint8)
+        self.ai = np.zeros(size, dtype=np.int32)
+        self.aj = np.zeros(size, dtype=np.int32)
         self.k  = np.zeros(size)
         self.l  = np.zeros(size)
 
@@ -108,8 +109,8 @@ class harmonicBondTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(size, dtype=np.uint8)
-        self.aj = np.zeros(size, dtype=np.uint8)
+        self.ai = np.zeros(size, dtype=np.int32)
+        self.aj = np.zeros(size, dtype=np.int32)
         self.k  = np.zeros(size)
         self.l  = np.zeros(size)
 
@@ -140,9 +141,9 @@ class G96angleTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(size, dtype=np.uint8)
-        self.aj = np.zeros(size, dtype=np.uint8)
-        self.ak = np.zeros(size, dtype=np.uint8)
+        self.ai = np.zeros(size, dtype=np.int32)
+        self.aj = np.zeros(size, dtype=np.int32)
+        self.ak = np.zeros(size, dtype=np.int32)
         self.k  = np.zeros(size)
         self.theta = np.zeros(size)
 
@@ -177,9 +178,9 @@ class harmonicAngleTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(size, dtype=np.uint8)
-        self.aj = np.zeros(size, dtype=np.uint8)
-        self.ak = np.zeros(size, dtype=np.uint8)
+        self.ai = np.zeros(size, dtype=np.int32)
+        self.aj = np.zeros(size, dtype=np.int32)
+        self.ak = np.zeros(size, dtype=np.int32)
         self.k  = np.zeros(size)
         self.theta = np.zeros(size)
 
@@ -231,10 +232,10 @@ class dihedralTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(self.size, dtype=np.uint8)
-        self.aj = np.zeros(self.size, dtype=np.uint8)
-        self.ak = np.zeros(self.size, dtype=np.uint8)
-        self.al = np.zeros(self.size, dtype=np.uint8)
+        self.ai = np.zeros(self.size, dtype=np.int32)
+        self.aj = np.zeros(self.size, dtype=np.int32)
+        self.ak = np.zeros(self.size, dtype=np.int32)
+        self.al = np.zeros(self.size, dtype=np.int32)
         self.phi = np.zeros(self.size)
         self.k = np.zeros(self.size)
         self.m = np.zeros(self.size)
@@ -257,13 +258,13 @@ class dihedralTerms (object):
         self.verifyPhase(i)
 
     def duplicateDihedral (self, i):
-        self.ai = np.append(self.ai, np.array([self.ai[i]]))
-        self.aj = np.append(self.aj, np.array([self.aj[i]]))
-        self.ak = np.append(self.ak, np.array([self.ak[i]]))
-        self.al = np.append(self.al, np.array([self.al[i]]))
-        self.phi = np.append(self.phi, np.array([self.phi[i]]))
-        self.k = np.append(self.k, np.array([self.k[i]]))
-        self.m = np.append(self.m, np.array([self.m[i]]))
+        self.ai = np.insert(self.ai, self.size, self.size, self.ai[i], axis=0)
+        self.aj = np.insert(self.aj, self.size, self.aj[i], axis=0)
+        self.ak = np.insert(self.ak, self.size, self.ak[i], axis=0)
+        self.al = np.insert(self.al, self.size, self.al[i], axis=0)
+        self.phi = np.insert(self.phi, self.size, self.phi[i], axis=0)
+        self.k = np.insert(self.k, self.size, self.k[i], axis=0)
+        self.m = np.insert(self.m, self.size, self.m[i], axis=0)
         self.size += 1
         return self.size - 1
 
@@ -317,13 +318,13 @@ class dihedralTerms (object):
         rkl = conf.getDisplacements(self.ak, self.al)
         mod_rkj = conf.getDistances(self.ak, self.aj)
         mod_rkj2 = mod_rkj * mod_rkj
-        dot_ij_kj = np.einsum('ij,ij->i', rij, rkj)
-        dot_kl_kj = np.einsum('ij,ij->i', rkl, rkj)
+        dot_ij_kj = gp.einsum('ij,ij->i', rij, rkj)
+        dot_kl_kj = gp.einsum('ij,ij->i', rkl, rkj)
         # auxiliary vectors
         rim =  rij - (dot_ij_kj * (rkj).T / (mod_rkj2)).T
         rln = -rkl + (dot_kl_kj * (rkj).T / (mod_rkj2)).T
-        mod_rim = np.sqrt( np.einsum('ij,ij->i', rim, rim) )
-        mod_rln = np.sqrt( np.einsum('ij,ij->i', rln, rln) )
+        mod_rim = np.sqrt( gp.einsum('ij,ij->i', rim, rim) )
+        mod_rln = np.sqrt( gp.einsum('ij,ij->i', rln, rln) )
         rim_norm = (rim).T / mod_rim # ALREADY TRANSPOSED
         rln_norm = (rln).T / mod_rln # ALREADY TRANSPOSED
         #
@@ -355,10 +356,10 @@ class optDihedralTerms(object):
 
     def __init__(self, size):
         self.size   = size
-        self.ai     = np.zeros(self.size, dtype=np.uint8)
-        self.aj     = np.zeros(self.size, dtype=np.uint8)
-        self.ak     = np.zeros(self.size, dtype=np.uint8)
-        self.al     = np.zeros(self.size, dtype=np.uint8)
+        self.ai     = np.zeros(self.size, dtype=np.int32)
+        self.aj     = np.zeros(self.size, dtype=np.int32)
+        self.ak     = np.zeros(self.size, dtype=np.int32)
+        self.al     = np.zeros(self.size, dtype=np.int32)
         self.k      = np.zeros((6, self.size))
         self.phi    = np.zeros((6, self.size))
         self.m      = np.array([1,2,3,4,5,6], dtype=np.uint8)
@@ -391,20 +392,20 @@ class optDihedralTerms(object):
             return 0.0
         phi       = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
         cos_phi_0 = np.cos(np.radians(self.phi))
-        energies  = np.einsum('ij,ik->k', self.k, (1 + cos_phi_0 * np.cos(np.einsum('i,j->ij', self.m, phi))))
+        energies  = gp.einsum('ij,ij->j', self.k, (1 + cos_phi_0 * np.cos(gp.einsum('i,j->ij', self.m, phi))))
         # force
         rij = conf.getDisplacements(self.ai, self.aj)
         rkj = conf.getDisplacements(self.ak, self.aj)
         rkl = conf.getDisplacements(self.ak, self.al)
         mod_rkj = conf.getDistances(self.ak, self.aj)
         mod_rkj2 = mod_rkj * mod_rkj
-        dot_ij_kj = np.einsum('ij,ij->i', rij, rkj)
-        dot_kl_kj = np.einsum('ij,ij->i', rkl, rkj)
+        dot_ij_kj = gp.einsum('ij,ij->i', rij, rkj)
+        dot_kl_kj = gp.einsum('ij,ij->i', rkl, rkj)
         # auxiliary vectors
         rim =  rij - (dot_ij_kj * rkj.T / (mod_rkj2)).T
         rln = -rkl + (dot_kl_kj * rkj.T / (mod_rkj2)).T
-        mod_rim = np.sqrt( np.einsum('ij,ij->i', rim, rim) )
-        mod_rln = np.sqrt( np.einsum('ij,ij->i', rln, rln) )
+        mod_rim = np.sqrt( gp.einsum('ij,ij->i', rim, rim) )
+        mod_rln = np.sqrt( gp.einsum('ij,ij->i', rln, rln) )
         rim_norm = rim.T / mod_rim # ALREADY TRANSPOSED
         rln_norm = rln.T / mod_rln # ALREADY TRANSPOSED
         #
@@ -414,8 +415,8 @@ class optDihedralTerms(object):
         # forces
 
 
-        f_i = np.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rln_norm - cos_phi*rim_norm) / (mod_rim))
-        f_l = np.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rim_norm - cos_phi*rln_norm) / (mod_rln))
+        f_i = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rln_norm - cos_phi*rim_norm) / (mod_rim))
+        f_l = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rim_norm - cos_phi*rln_norm) / (mod_rln))
         f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
         f_k = -(f_i + f_l + f_j)
         for idih in range(len(phi)):
@@ -429,10 +430,10 @@ class RyckaertBellemansDihedralTerms(object):
 
     def __init__(self, size):
         self.size = size
-        self.ai = np.zeros(self.size, dtype=np.uint8)
-        self.aj = np.zeros(self.size, dtype=np.uint8)
-        self.ak = np.zeros(self.size, dtype=np.uint8)
-        self.al = np.zeros(self.size, dtype=np.uint8)
+        self.ai = np.zeros(self.size, dtype=np.int32)
+        self.aj = np.zeros(self.size, dtype=np.int32)
+        self.ak = np.zeros(self.size, dtype=np.int32)
+        self.al = np.zeros(self.size, dtype=np.int32)
         self.c0 = np.zeros(self.size)
         self.c1 = np.zeros(self.size)
         self.c2 = np.zeros(self.size)
@@ -497,7 +498,7 @@ class RyckaertBellemansDihedralTerms(object):
         # forces
         f_i = +force_pre_factor * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
         f_l = -force_pre_factor * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
-        f_j = ( (np.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (np.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
+        f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
         f_k = -(f_i + f_l + f_j) # no transpose
         for ir in range(self.size):
             forceConf[self.ai[ir],:] += (f_i).T[ir,:]
@@ -520,10 +521,10 @@ class improperTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(self.size, dtype=np.uint8)
-        self.aj = np.zeros(self.size, dtype=np.uint8)
-        self.ak = np.zeros(self.size, dtype=np.uint8)
-        self.al = np.zeros(self.size, dtype=np.uint8)
+        self.ai = np.zeros(self.size, dtype=np.int32)
+        self.aj = np.zeros(self.size, dtype=np.int32)
+        self.ak = np.zeros(self.size, dtype=np.int32)
+        self.al = np.zeros(self.size, dtype=np.int32)
         self.phi = np.zeros(self.size)
         self.k = np.zeros(self.size)
 
@@ -555,7 +556,7 @@ class improperTerms (object):
         # forces
         f_i = -self.k * angDiff * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
         f_l = +self.k * angDiff * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
-        f_j = ( (np.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (np.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
+        f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
         f_k = -(f_i + f_l + f_j) # no transpose
         for ir in range(self.size):
             forceConf[self.ai[ir],:] += (f_i).T[ir,:]
@@ -570,10 +571,10 @@ class dihedralRestraintTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(self.size, dtype=np.uint8)
-        self.aj = np.zeros(self.size, dtype=np.uint8)
-        self.ak = np.zeros(self.size, dtype=np.uint8)
-        self.al = np.zeros(self.size, dtype=np.uint8)
+        self.ai = np.zeros(self.size, dtype=np.int32)
+        self.aj = np.zeros(self.size, dtype=np.int32)
+        self.ak = np.zeros(self.size, dtype=np.int32)
+        self.al = np.zeros(self.size, dtype=np.int32)
         self.phi = np.zeros(self.size)
         self.k = np.zeros(self.size)
 
@@ -595,13 +596,13 @@ class dihedralRestraintTerms (object):
         self.k = np.delete(self.k, -1)
 
     def pushMember (self, ai, aj, ak, al, phi, k):
+        self.ai = np.insert(self.ai, self.size, 0, axis=0)
+        self.aj = np.insert(self.aj, self.size, 0, axis=0)
+        self.ak = np.insert(self.ak, self.size, 0, axis=0)
+        self.al = np.insert(self.al, self.size, 0, axis=0)
+        self.phi = np.insert(self.phi, self.size, 0, axis=0)
+        self.k = np.insert(self.k, self.size, 0, axis=0)
         self.size += 1
-        self.ai = np.append(self.ai, 0)
-        self.aj = np.append(self.aj, 0)
-        self.ak = np.append(self.ak, 0)
-        self.al = np.append(self.al, 0)
-        self.phi = np.append(self.phi, 0)
-        self.k = np.append(self.k, 0)
         self.setMember(self.size - 1, ai, aj, ak, al, phi, k)
 
     def print(self):
@@ -630,7 +631,7 @@ class dihedralRestraintTerms (object):
         # forces
         f_i = -self.k * angDiff * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
         f_l = +self.k * angDiff * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
-        f_j = ( (np.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (np.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
+        f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
         f_k = -(f_i + f_l + f_j) # no transpose
         for ir in range(self.size):
             forceConf[self.ai[ir],:] += (f_i).T[ir,:]
@@ -643,9 +644,9 @@ class LJTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(self.size, dtype=np.uint8)
-        self.aj = np.zeros(self.size, dtype=np.uint8)
-        self.type = np.zeros(self.size, dtype=np.uint8)
+        self.ai = np.zeros(self.size, dtype=np.int32)
+        self.aj = np.zeros(self.size, dtype=np.int32)
+        self.type = np.zeros(self.size, dtype=np.int32)
         self.c6 = np.zeros(self.size)
         self.c12 = np.zeros(self.size)
 
@@ -725,8 +726,8 @@ class coulombTerms (object):
 
     def __init__ (self, size):
         self.size = size
-        self.ai = np.zeros(self.size, dtype=np.uint8)
-        self.aj = np.zeros(self.size, dtype=np.uint8)
+        self.ai = np.zeros(self.size, dtype=np.int32)
+        self.aj = np.zeros(self.size, dtype=np.int32)
         self.qij = np.zeros(self.size)
 
     def setMember (self, i, ai, aj, qij):

@@ -75,17 +75,17 @@ class configuration (object):
         return (self.pos[i,:] - self.pos[j,:])
 
     def getDisplacements (self, ilist, jlist):
-        return gp.calculateDisplacements(self.pos, ilist.astype(np.int32), jlist.astype(np.int32))
+        return gp.calculateDisplacements(self.pos, ilist, jlist)
 
     def getDistance (self, i, j):
         return calcDistance (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
                 self.pos[j][0], self.pos[j][1], self.pos[j][2])
 
     def getDistances (self, ilist, jlist):
-        return gp.calculateDistances(self.pos, ilist.astype(np.int32), jlist.astype(np.int32))
+        return gp.calculateDistances(self.pos, ilist, jlist)
 
     def getDistances2 (self, ilist, jlist):
-        return gp.calculateDistances2(self.pos, ilist.astype(np.int32), jlist.astype(np.int32))
+        return gp.calculateDistances2(self.pos, ilist, jlist)
 
     def getAngle (self, i, j, k):
         return calcAngle (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -93,7 +93,7 @@ class configuration (object):
                 self.pos[k][0], self.pos[k][1], self.pos[k][2])
 
     def getAngles (self, ilist, jlist, klist):
-        return np.degrees(gp.calculateAngles(self.pos, ilist.astype(np.int32), jlist.astype(np.int32), klist.astype(np.int32)))
+        return np.degrees(gp.calculateAngles(self.pos, ilist, jlist, klist))
 
     def getCosine (self, i, j, k):
         return calcCosine (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -101,10 +101,10 @@ class configuration (object):
                 self.pos[k][0], self.pos[k][1], self.pos[k][2])
 
     def getSines (self, ilist, jlist, klist):
-        return gp.calculateSines(self.pos, ilist.astype(np.int32), jlist.astype(np.int32), klist.astype(np.int32))
+        return gp.calculateSines(self.pos, ilist, jlist, klist)
 
     def getCosines (self, ilist, jlist, klist):
-        return gp.calculateCosines(self.pos, ilist.astype(np.int32), jlist.astype(np.int32), klist.astype(np.int32))
+        return gp.calculateCosines(self.pos, ilist, jlist, klist)
 
     def getDihedral (self, i, j, k, l):
         return calcDihedral (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -113,7 +113,7 @@ class configuration (object):
                 self.pos[l][0], self.pos[l][1], self.pos[l][2])
 
     def getDihedrals (self, ilist, jlist, klist, llist):
-        return np.degrees(gp.calculateDihedrals(self.pos, ilist.astype(np.int32), jlist.astype(np.int32), klist.astype(np.int32), llist.astype(np.int32)))
+        return np.degrees(gp.calculateDihedrals(self.pos, ilist, jlist, klist, llist))
 
     def getImproper (self, i, j, k, l):
         return calcImproper (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -122,7 +122,7 @@ class configuration (object):
                 self.pos[l][0], self.pos[l][1], self.pos[l][2])
 
     def getImpropers (self, ilist, jlist, klist, llist):
-        return self.getDihedrals(ilist.astype(np.int32), jlist.astype(np.int32), klist.astype(np.int32), llist.astype(np.int32))
+        return self.getDihedrals(ilist, jlist, klist, llist)
 
     def shiftParticle (self, i, shiftVector):
         self.pos[i] += shiftVector
