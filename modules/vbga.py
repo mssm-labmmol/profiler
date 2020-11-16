@@ -24,11 +24,12 @@
 
 # -*- coding: utf-8 -*-
 import copy
+from  math import isnan
 from .opts import randOpts
 from random import uniform, random, randint
 from numpy import min,max, exp
 from multiprocessing import Pool
-from sys import stdout
+from sys import stdout, stderr 
 
 class VBGA:
     def __init__(self, individualClass, fitnessMethod, 
@@ -76,14 +77,20 @@ class VBGA:
     
     def evaluateIndividual(self, individual):
         individual.fitValue = self.fitnessMethod(individual)
+        return individual.fitValue
 
     def getFitValue(self, individual):
         return individual.fitValue
 
-    def evaluatePopulation(self):
-        for individual in self.population:
-            self.evaluateIndividual(individual)
-
+    def evaluatePopulation(self, replaceNan=False):
+        for i in range(len(self.population)):
+            if replaceNan:
+                while isnan(self.evaluateIndividual(self.population[i])):
+                    self.population[i] = self.createRandomIndividual()
+                    self.population[i].fitValue = self.fitnessMethod(self.population[i])
+            else:
+                self.evaluateIndividual(self.population[i])
+                
     def normalizationFitness(self):
         sumFitness = 0
         for individual in self.population:
@@ -160,7 +167,7 @@ class VBGA:
             with Pool(self.numProc) as p:
                 childs = p.map(self.parallelCrossoverAndMutation, parents)
         else:
-            childs = map(self.parallelCrossoverAndMutation, parents)
+            childs = [self.parallelCrossoverAndMutation(p) for p in parents]
         # put childs in population cross
         for brothers in childs:
             populationCross.append(brothers[0])
@@ -178,7 +185,7 @@ class VBGA:
 
     def run(self, maxIterations=100):
         self.createInitialPopulation()
-        self.evaluatePopulation()
+        self.evaluatePopulation(replaceNan=True)
         savePreviousFitness = 100000
         bestFitness = self.bestFitness()
         avFitness = self.averageFitness()
@@ -191,7 +198,7 @@ class VBGA:
             populationCross = self.applyCrossoverAndMutationMethod(selected)
             self.population = elitizedInds + populationCross
             print("Done.",file=stdout)
-            self.evaluatePopulation()
+            self.evaluatePopulation(replaceNan=True)
             bestFitness = self.bestFitness()
             avFitness = self.averageFitness()
             self.population.sort(key=self.getFitValue)
