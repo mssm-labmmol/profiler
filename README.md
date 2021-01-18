@@ -28,6 +28,16 @@ below:
 Note that, depending on your default installation path, you may need
 to run the last command with administrative privileges.
 
+You may face issues when installing `geometrypy` if your `numpy`
+installation did not include the C header files (e.g. when using
+`pip`). In this case, you may face compilation errors like
+
+	fatal errror: numpy/arrayobject.h: No such file or directory
+
+This can usually be remedied with
+
+	sudo apt install python-numpy
+
 `profilerTools` is composed of Python scripts, so no further
 installation steps are necessary. To execute a script, pass it to a
 Python interpreter with the appropriate arguments, as described in the
