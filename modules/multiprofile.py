@@ -28,6 +28,7 @@ from    .configuration            import  ensemble
 from    .randomizer               import  parameterRandomizer
 from    .opts                     import  *
 from    random                    import  choice,random
+from    copy                      import  deepcopy
 import  numpy                     as      np
 
 class profile (object):
@@ -183,6 +184,23 @@ class multiProfile (object):
             self.cs6 = 0
         for profile in self.profiles:
             profile.setLJParameters (cs6, cs12)
+
+    def getNonoptEnergy (self):
+        # Returns a matrix NSYSTEMS x NDIHS with unrestrained energies
+        # containing only the nonoptimized terms. For each system,
+        # data is shifted so that the average value is zero.
+        nonopt_energies = np.zeros((len(self.profiles), len(self.profiles[0].refPhi)))
+        ind_copy = deepcopy(self)
+        # zero out the parameters
+        if (optOpts.nLJ != 0):
+            ind_copy.setLJParameters(0, 0)
+        for i,k in enumerate(optOpts.optTors):
+            ind_copy.setDihedralParameters(i, 0.0, 0.0)
+        for i in range(nonopt_energies.shape[0]):
+            for j in range(nonopt_energies.shape[1]):
+                nonopt_energies[i,j] = ind_copy.profiles[i].mmCalc.calcForConf(ind_copy.profiles[i].ensemble[j], removeRestraintsFromTotal=True)[0]['total']
+        nonopt_energies[i,:] -= np.mean(nonopt_energies[i,:])
+        return nonopt_energies
 
     def minimizeProfiles (self, useWei=True):
         if (useWei):

@@ -76,7 +76,7 @@ def calcDihedral (x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4):
     # angle between v and w in a plane is the torsion angle
     # v and w may not be normalized but that's fine since tan is y/x
     x = np.dot(v, w)
-    y = np.dot(fastCross(b1, v), w)
+    y = np.dot(fastCross(np.array([b1,]), np.array([v,])), w)
     out = np.degrees(np.arctan2(y, x))
     return out
 

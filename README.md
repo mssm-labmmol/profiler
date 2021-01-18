@@ -17,9 +17,20 @@ consult the [documentation](./doc/src/doc.pdf).
 
 # Installation
 
-`profilerTools` is composed of Python scripts, so no installation is
-necessary. To execute a script, pass it to a Python interpreter with
-the appropriate arguments, as described in the
+To use `profilerTools`, you will need to first install the
+`geometrypy` Python library, the source code of which is provided in
+this repository.  This can be done *via* a`setuptools`script, as shown
+below:
+
+	cd geometrypy
+	python setup.py install
+
+Note that, depending on your default installation path, you may need
+to run the last command with administrative privileges.
+
+`profilerTools` is composed of Python scripts, so no further
+installation steps are necessary. To execute a script, pass it to a
+Python interpreter with the appropriate arguments, as described in the
 [documentation](./doc/src/doc.pdf).
 
 # Requirements

@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 import numpy as np
+import geometrypy as gp
 from .G96parser import parseG96traj
 from .XYZparser import parseXYZtraj
 from .GROparser import parseGROtraj
@@ -74,28 +75,17 @@ class configuration (object):
         return (self.pos[i,:] - self.pos[j,:])
 
     def getDisplacements (self, ilist, jlist):
-        n = len(ilist)
-        return np.array([self.pos[ilist[i],:] - self.pos[jlist[i],:] for i in range(n)])
+        return gp.calculateDisplacements(self.pos, ilist, jlist)
 
     def getDistance (self, i, j):
         return calcDistance (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
                 self.pos[j][0], self.pos[j][1], self.pos[j][2])
 
     def getDistances (self, ilist, jlist):
-        n = len(ilist)
-        out = np.zeros(n)
-        for i in range(n):
-            dij = self.pos[ilist[i],:] - self.pos[jlist[i],:]
-            out[i] = sqrt(np.dot(dij, dij))
-        return out
+        return gp.calculateDistances(self.pos, ilist, jlist)
 
     def getDistances2 (self, ilist, jlist):
-        n = len(ilist)
-        out = np.zeros(n)
-        for i in range(n):
-            dij = self.pos[ilist[i]] - self.pos[jlist[i]]
-            out[i] = np.dot(dij, dij)
-        return out
+        return gp.calculateDistances2(self.pos, ilist, jlist)
 
     def getAngle (self, i, j, k):
         return calcAngle (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -103,11 +93,7 @@ class configuration (object):
                 self.pos[k][0], self.pos[k][1], self.pos[k][2])
 
     def getAngles (self, ilist, jlist, klist):
-        n = len(ilist)
-        out = np.zeros(n)
-        for i in range(n):
-            out[i] = self.getAngle(ilist[i], jlist[i], klist[i])
-        return out
+        return np.degrees(gp.calculateAngles(self.pos, ilist, jlist, klist))
 
     def getCosine (self, i, j, k):
         return calcCosine (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -115,10 +101,10 @@ class configuration (object):
                 self.pos[k][0], self.pos[k][1], self.pos[k][2])
 
     def getSines (self, ilist, jlist, klist):
-        return np.sin(np.radians(self.getAngles(ilist, jlist, klist)))
+        return gp.calculateSines(self.pos, ilist, jlist, klist)
 
     def getCosines (self, ilist, jlist, klist):
-        return np.cos(np.radians(self.getAngles(ilist, jlist, klist)))
+        return gp.calculateCosines(self.pos, ilist, jlist, klist)
 
     def getDihedral (self, i, j, k, l):
         return calcDihedral (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -127,11 +113,7 @@ class configuration (object):
                 self.pos[l][0], self.pos[l][1], self.pos[l][2])
 
     def getDihedrals (self, ilist, jlist, klist, llist):
-        n = len(ilist)
-        out = np.zeros(n)
-        for i in range(n):
-            out[i] = self.getDihedral(ilist[i], jlist[i], klist[i], llist[i])
-        return out
+        return np.degrees(gp.calculateDihedrals(self.pos, ilist, jlist, klist, llist))
 
     def getImproper (self, i, j, k, l):
         return calcImproper (self.pos[i][0], self.pos[i][1], self.pos[i][2],\
@@ -140,11 +122,7 @@ class configuration (object):
                 self.pos[l][0], self.pos[l][1], self.pos[l][2])
 
     def getImpropers (self, ilist, jlist, klist, llist):
-        n = len(ilist)
-        out = np.zeros(n)
-        for i in range(n):
-            out[i] = self.getImproper(ilist[i], jlist[i], klist[i], llist[i])
-        return out
+        return self.getDihedrals(ilist, jlist, klist, llist)
 
     def shiftParticle (self, i, shiftVector):
         self.pos[i] += shiftVector

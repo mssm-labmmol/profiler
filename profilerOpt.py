@@ -25,6 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import profile
 import argparse
 from sys import argv, stdout, stderr
 from modules.readopts import preprocess_args, argparse2opts, readinput
@@ -168,8 +169,12 @@ if __name__ == '__main__':
           cmdlineOpts.nProcs,
           trajWriter)
 
+    def dummy_execute():
+        GA.run(vbgaOpts.nGens)
+
     # run GA
-    GA.run(vbgaOpts.nGens)
+    #profile.run('dummy_execute()')
+    dummy_execute()
 
     # write best ind
     optind = GA.getBest()
