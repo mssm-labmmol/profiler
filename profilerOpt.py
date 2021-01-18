@@ -121,6 +121,8 @@ if __name__ == '__main__':
     parser.add_argument('-op', metavar='PREFIX', dest='out', required=True, type=str, help=
                 "Prefix for output files.")
 
+    parser.add_argument('--debug-mm', dest='emm', default=False, action='store_true', help=argparse.SUPPRESS)
+
     args = parser.parse_args(preprocess_args(argv[1:]))
 
     # map arguments to xxxOpts
@@ -169,12 +171,14 @@ if __name__ == '__main__':
           cmdlineOpts.nProcs,
           trajWriter)
 
-    def dummy_execute():
-        GA.run(vbgaOpts.nGens)
+    GA.run(vbgaOpts.nGens)
 
-    # run GA
-    #profile.run('dummy_execute()')
-    dummy_execute()
+    # This is for debugging purposes - also write E_MM energies.
+    if (cmdlineOpts.debugEmm):
+        for i, ind in enumerate(GA.population):
+            nonOpt = ind.getNonoptEnergy()
+            for j in range(nonOpt.shape[0]):
+                np.savetxt(cmdlineOpts.outPrefix + '_' + str(i+1) + '_' + str(j+1) + '_mm.dat', nonOpt[j,:])
 
     # write best ind
     optind = GA.getBest()
@@ -189,5 +193,4 @@ if __name__ == '__main__':
     optind.saveTraj(cmdlineOpts.outPrefix + '_minim', 'xyz')
     optind.saveProfile(cmdlineOpts.outPrefix + '_minim')
     print("Done.", file=stdout)
-
     printfooter(stdout)

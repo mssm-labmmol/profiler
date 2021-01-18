@@ -251,6 +251,7 @@ def argparse2opts (args):
     cmdlineOpts.refFiles = args.ref
     cmdlineOpts.outPrefix = args.out
     cmdlineOpts.inputFile = args.input
+    cmdlineOpts.debugEmm = args.emm
     # consistency check
     nref = len(args.ref)
     ncoords = len(args.coords)

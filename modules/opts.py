@@ -31,6 +31,7 @@ class cmdlineOpts (object):
     refFiles = [] # Reference-data files. 
     inputFile = "" # Input parameters.
     outPrefix = "profopt" # Prefix for output files. 
+    debugEmm = False
 
 class optOpts (object):
 
