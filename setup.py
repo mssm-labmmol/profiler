@@ -10,27 +10,27 @@ extended_numpy = Extension(
 )
 
 setup (
-    name='ProfilerOpt',
+    name='profilerOpt',
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
     ],
     entry_points={
         'console_scripts': [
-            'ProfilerOpt=profilerOpt.profilerOpt:main',
+            'profilerOpt=profilerOpt.profilerOpt:main',
         ]
     }
 )
 
 setup (
-    name='ProfilereGen',
+    name='profilereGen',
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
     ],
     entry_points={
         'console_scripts': [
-            'ProfilerGen=profilerGen.profilerGen:main',
+            'profilerGen=profilerGen.profilerGen:main',
         ]
     }
 )
