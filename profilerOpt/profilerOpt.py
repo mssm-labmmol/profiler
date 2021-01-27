@@ -84,7 +84,7 @@ def crossWrapper (crosstype):
     else:
         raise RuntimeError ("Cross-over type {} not allowed.".format(crosstype))
 
-if __name__ == '__main__':
+def main():
 
     progdescr = """
     profilerOpt is a Python program for simultaneous optimization of
@@ -194,3 +194,6 @@ if __name__ == '__main__':
     optind.saveProfile(cmdlineOpts.outPrefix + '_minim')
     print("Done.", file=stdout)
     printfooter(stdout)
+
+if __name__ == '__main__':
+    main()

@@ -77,7 +77,7 @@ def debug_msg (msg, fp, verbose):
 def err_msg (msg):
     raise RuntimeError(msg)
 
-if __name__ == '__main__':
+def main():
     progdescr = """
     profilerGen computes torsional-scan trajectories and their corresponding energy profiles.
     """
@@ -179,3 +179,6 @@ if __name__ == '__main__':
 
     # end program
     printfooter(stdout)
+
+if __name__ == '__main__':
+    main()

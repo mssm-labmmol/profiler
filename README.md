@@ -17,31 +17,23 @@ consult the [documentation](./doc/src/doc.pdf).
 
 # Installation
 
-To use `profilerTools`, you will need to first install the
-`geometrypy` Python library, the source code of which is provided in
-this repository.  This can be done *via* a`setuptools`script, as shown
-below:
-
-	cd geometrypy
 	python setup.py install
 
-Note that, depending on your default installation path, you may need
-to run the last command with administrative privileges.
+After that, the two executables `profilerOpt` and `profilerGen` should
+be available as commands in your PATH.
 
-You may face issues when installing `geometrypy` if your `numpy`
-installation did not include the C header files (e.g. when using
-`pip`). In this case, you may face compilation errors like
+Note that, depending on your default installation path, you may need
+to run this command with administrative privileges.
+
+You may face issues when installing if your `numpy` installation did
+not include the C header files (e.g. when using `pip`). In this case,
+you may face compilation errors like
 
 	fatal errror: numpy/arrayobject.h: No such file or directory
 
 This can usually be remedied with
 
 	sudo apt install python-numpy
-
-`profilerTools` is composed of Python scripts, so no further
-installation steps are necessary. To execute a script, pass it to a
-Python interpreter with the appropriate arguments, as described in the
-[documentation](./doc/src/doc.pdf).
 
 # Requirements
 
