@@ -154,6 +154,47 @@
 
 \newcommand*{\profi}{\texttt{profilerOpt}}
 
+\chapter{Introduction}
+\label{chap:intro}
+
+\revyan{Importance of torsions, some literature--this will wait for the paper.}
+
+The influence of the 1,4 nonbonded interactions on the dihedral-angle
+torsion suggests that these two force-field terms should ideally be
+parameterized simultaneously.
+%
+With that in mind, we developed \profileropt{}, a Python program that
+allows this by means of a genetic-algorithm-driven optimization.
+%
+As usual, the optimization is based on the reproduction of relative
+conformational energies, also supporting the use of reference data for
+several molecules at once.
+%
+Together with \profilergen{}, an auxiliary Python program to execute
+molecular torsional scans, these two form the \profilertools{} suite.
+%
+
+More succinctly, the user-exposed part of \profilertools{} is composed
+of two scripts:
+
+\begin{itemize}
+\item \profilergen, for obtaining torsional-scan trajectories and
+  their energy profiles;
+\item \profileropt, for the parameterization of torsional terms and
+  the related 1,4 Lennard-Jones terms;
+\end{itemize}
+
+Another important feature of \profilertools{} is that it relies on its
+own library for carrying out molecular-mechanics calculations and
+energy minimizations. The mathematical formluae and the supported
+physical models are described in \autoref{chap:mm}. This library is
+based on \texttt{numpy} and on a \texttt{C} extension to
+\texttt{numpy} called \texttt{geometrypy}, which accelerates the
+calculation of geometric degrees of freedom (bond lengths, bond-angle
+angles, etc.) by transferring the loops over the involved atoms to the
+underlying \texttt{C} implementation, instead of carrying out these
+loops in Python (which is significantly slower).
+
 \chapter{Molecular Mechanics and Energy Minimization}
 \label{chap:mm}
 
