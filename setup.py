@@ -23,7 +23,7 @@ setup (
 )
 
 setup (
-    name='profilereGen',
+    name='profilerGen',
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
