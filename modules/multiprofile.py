@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from    .energy_force_vectorized  import  MMCalculator
+from    .energy_force_vectorized  import  MMCalculator, OptMMCalculator
 from    .minim                    import  steepestDescentsMinimizer,  conjugateGradientMinimizer
 from    .configuration            import  ensemble
 from    .randomizer               import  parameterRandomizer
@@ -35,10 +35,14 @@ class profile (object):
     
     def __init__ (self, stpData, trajFile,
                   scanFirst, scanStep, scanLast, restrConst,
-                  emAlgo, emDX0, emDXM, emDele, emSteps):
+                  emAlgo, emDX0, emDXM, emDele, emSteps, emmData=None):
             self.enerProfile        = []
             self.ensemble           = ensemble([])
-            self.mmCalc             = MMCalculator()
+            self.emmData = emmData
+            if (emmData) is None:
+                self.mmCalc             = MMCalculator() # no influence of E_MM data
+            else:
+                self.mmCalc             = OptMMCalculator() # has access to E_MM data and uses it
             if stpData['defaults']['comb-rule'] == 2:
                 self.mixType = 'arithmetic'
             else:
@@ -90,16 +94,21 @@ class profile (object):
         else:
             raise ValueError("setLJParameters for {} is not supported.".format(self.optType))
 
-    def minimizeProfile (self, wei=None, veryLargeEnergy=1.0e+03):
+    def minimizeProfile (self, wei=None, veryLargeEnergy=1.0e+05):
         self.enerProfile = []
         for i,phi in enumerate(self.refPhi):
             if (wei is None) or (wei[i] != 0):
-                # set restraints in a push-pop fashion
-                self.mmCalc.pushDihedralRestraint (*self.refDih, phi_0=phi, k=self.restrConst)
-                # minimize
-                self.emAlgo.run(self.ensemble[i])
-                self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
-                self.mmCalc.popDihedralRestraint()
+                if (self.emmData is None):
+                    # set restraints in a push-pop fashion
+                    self.mmCalc.pushDihedralRestraint (*self.refDih, phi_0=phi, k=self.restrConst)
+                    # minimize
+                    self.emAlgo.run(self.ensemble[i])
+                    self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
+                    self.mmCalc.popDihedralRestraint()
+                else:
+                    self.mmCalc.setEmm(self.emmData[i])
+                    self.emAlgo.run(self.ensemble[i])
+                    self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
             else:
                 self.enerProfile.append(veryLargeEnergy)
         # shift to zero
@@ -136,14 +145,20 @@ class multiProfile (object):
         for i in range(optOpts.nSystems):
             trajFile = cmdlineOpts.trajFiles[i]
             stpData  = optOpts.stpData[i]
+            if optOpts.emmData is None:
+                emmData = None
+            else:
+                emmData = optOpts.emmData[i,:]
             if (optOpts.dihType == 'standard'):
                 self.profiles.append(profile(stpData, trajFile,
                     dihrestrOpts.start, dihrestrOpts.step, dihrestrOpts.last, dihrestrOpts.k,
-                    minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps))
+                    minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps,
+                                             emmData=emmData))
             if (optOpts.dihType == 'ryckaert'):
                 self.profiles.append(profile(stpData, trajFile,
                     dihrestrOpts.start, dihrestrOpts.step, dihrestrOpts.last, dihrestrOpts.k,
-                    minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps))
+                                             minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps,
+                                             emmData=emmData))
 
     def __getitem__ (self, i):
         return self.profiles[i]

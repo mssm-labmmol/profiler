@@ -37,6 +37,14 @@ def c6c12_to_sigmaepsilon(c6, c12):
 def sigmaepsilon_to_c6c12(sigma, epsilon):
     return (4*epsilon*(sigma**6), 4*epsilon*(sigma**12))
 
+class NullInteraction:
+
+    def __init__(self):
+        return
+
+    def calcForConf(self, conf, forceConf, calcForce=True):
+        return 0
+    
 class atomTerms (object):
 
     def __init__ (self, size):
@@ -90,19 +98,20 @@ class G96bondTerms (object):
         self.k[i] = k
         self.l[i] = l
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0
         difference2  = conf.getDistances2(self.ai, self.aj)
         difference2 -= self.l * self.l
         energies = 0.25 * self.k * difference2 * difference2
-        rijs = conf.getDisplacements (self.ai, self.aj)
-        f_i  = (-self.k * difference2 * (rijs).T).T
-        for ib in range(self.size):
-            i = self.ai[ib]
-            j = self.aj[ib]
-            forceConf[i,:] +=  f_i[ib,:]
-            forceConf[j,:] += -f_i[ib,:]
+        if (calcForce):
+            rijs = conf.getDisplacements (self.ai, self.aj)
+            f_i  = (-self.k * difference2 * (rijs).T).T
+            for ib in range(self.size):
+                i = self.ai[ib]
+                j = self.aj[ib]
+                forceConf[i,:] +=  f_i[ib,:]
+                forceConf[j,:] += -f_i[ib,:]
         return energies
 
 class harmonicBondTerms (object):
@@ -120,7 +129,7 @@ class harmonicBondTerms (object):
         self.k[i] = k
         self.l[i] = l
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0
         difference  = conf.getDistances(self.ai, self.aj)
@@ -128,13 +137,14 @@ class harmonicBondTerms (object):
         rijs_m = deepcopy(difference)
         difference -= self.l
         energies = 0.5 * self.k * (difference ** 2)
-        rijs = conf.getDisplacements (self.ai, self.aj)
-        f_i  = (-self.k * difference * (rijs).T / rijs_m).T
-        for ib in range(self.size):
-            i = self.ai[ib]
-            j = self.aj[ib]
-            forceConf[i,:] +=  f_i[ib,:]
-            forceConf[j,:] += -f_i[ib,:]
+        if (calcForce):
+            rijs = conf.getDisplacements (self.ai, self.aj)
+            f_i  = (-self.k * difference * (rijs).T / rijs_m).T
+            for ib in range(self.size):
+                i = self.ai[ib]
+                j = self.aj[ib]
+                forceConf[i,:] +=  f_i[ib,:]
+                forceConf[j,:] += -f_i[ib,:]
         return energies
     
 class G96angleTerms (object):
@@ -154,24 +164,25 @@ class G96angleTerms (object):
         self.k[i]  = k
         self.theta[i] = theta
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0.0
         cos_theta0 = np.cos(np.radians(self.theta))
         cos_theta = conf.getCosines (self.ai, self.aj, self.ak)
         diff_cos = cos_theta - cos_theta0
         energies = 0.5 * self.k * diff_cos * diff_cos
-        # forces
-        mod_rij  = conf.getDistances(self.ai, self.aj)
-        mod_rkj  = conf.getDistances(self.ak, self.aj)
-        rij_norm = (conf.getDisplacements(self.ai, self.aj)).T / mod_rij
-        rkj_norm = (conf.getDisplacements(self.ak, self.aj)).T / mod_rkj
-        f_i = ( -self.k * diff_cos * (rkj_norm - cos_theta*(rij_norm)) / mod_rij ).T
-        f_k = ( -self.k * diff_cos * (rij_norm - cos_theta*(rkj_norm)) / mod_rkj ).T
-        for ia in range(self.size):
-            forceConf[self.ai[ia],:] += f_i[ia,:]
-            forceConf[self.ak[ia],:] += f_k[ia,:]
-            forceConf[self.aj[ia],:] += -(f_i[ia,:] + f_k[ia,:])
+        if (calcForce):
+            # forces
+            mod_rij  = conf.getDistances(self.ai, self.aj)
+            mod_rkj  = conf.getDistances(self.ak, self.aj)
+            rij_norm = (conf.getDisplacements(self.ai, self.aj)).T / mod_rij
+            rkj_norm = (conf.getDisplacements(self.ak, self.aj)).T / mod_rkj
+            f_i = ( -self.k * diff_cos * (rkj_norm - cos_theta*(rij_norm)) / mod_rij ).T
+            f_k = ( -self.k * diff_cos * (rij_norm - cos_theta*(rkj_norm)) / mod_rkj ).T
+            for ia in range(self.size):
+                forceConf[self.ai[ia],:] += f_i[ia,:]
+                forceConf[self.ak[ia],:] += f_k[ia,:]
+                forceConf[self.aj[ia],:] += -(f_i[ia,:] + f_k[ia,:])
         return energies
 
 class harmonicAngleTerms (object):
@@ -191,7 +202,7 @@ class harmonicAngleTerms (object):
         self.k[i]  = k
         self.theta[i] = theta
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0.0
         theta0 = np.radians(self.theta)
@@ -200,17 +211,18 @@ class harmonicAngleTerms (object):
         sin_theta    = conf.getSines(self.ai, self.aj, self.ak)
         diff_theta = (theta - theta0)
         energies = 0.5 * self.k * diff_theta * diff_theta
-        # forces
-        mod_rij  = conf.getDistances(self.ai, self.aj)
-        mod_rkj  = conf.getDistances(self.ak, self.aj)
-        rij_norm = (conf.getDisplacements(self.ai, self.aj)).T / mod_rij
-        rkj_norm = (conf.getDisplacements(self.ak, self.aj)).T / mod_rkj
-        f_i = ( self.k * (diff_theta/sin_theta) * (rkj_norm - cos_theta*(rij_norm)) / mod_rij ).T
-        f_k = ( self.k * (diff_theta/sin_theta) * (rij_norm - cos_theta*(rkj_norm)) / mod_rkj ).T
-        for ia in range(self.size):
-            forceConf[self.ai[ia],:] += f_i[ia,:]
-            forceConf[self.ak[ia],:] += f_k[ia,:]
-            forceConf[self.aj[ia],:] += -(f_i[ia,:] + f_k[ia,:])
+        if (calcForce):
+            # forces
+            mod_rij  = conf.getDistances(self.ai, self.aj)
+            mod_rkj  = conf.getDistances(self.ak, self.aj)
+            rij_norm = (conf.getDisplacements(self.ai, self.aj)).T / mod_rij
+            rkj_norm = (conf.getDisplacements(self.ak, self.aj)).T / mod_rkj
+            f_i = ( self.k * (diff_theta/sin_theta) * (rkj_norm - cos_theta*(rij_norm)) / mod_rij ).T
+            f_k = ( self.k * (diff_theta/sin_theta) * (rij_norm - cos_theta*(rkj_norm)) / mod_rkj ).T
+            for ia in range(self.size):
+                forceConf[self.ai[ia],:] += f_i[ia,:]
+                forceConf[self.ak[ia],:] += f_k[ia,:]
+                forceConf[self.aj[ia],:] += -(f_i[ia,:] + f_k[ia,:])
         return energies
 
 class RBAngleTerms (object):
@@ -223,9 +235,9 @@ class RBAngleTerms (object):
         self.harmonicAngleTerms.setMember(i, ai, aj, ak, k, theta)
         self.harmonicBondTerms.setMember(i, ai, ak, kub, r13)
 
-    def calcForConf (self, conf, forceConf):
-        ea = self.harmonicAngleTerms.calcForConf(conf, forceConf)
-        eb = self.harmonicBondTerms.calcForConf(conf, forceConf)
+    def calcForConf (self, conf, forceConf, calcForce=True):
+        ea = self.harmonicAngleTerms.calcForConf(conf, forceConf, calcForce)
+        eb = self.harmonicBondTerms.calcForConf(conf, forceConf, calcForce)
         return (ea + eb)
 
 class dihedralTerms (object):
@@ -306,42 +318,43 @@ class dihedralTerms (object):
         else:
             raise RuntimeError ("Only multiplicities 0-6 are supported.")
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0.0
         phi = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
         cos_phi_0 = np.cos(np.radians(self.phi))
         energies = self.k * (1 + cos_phi_0 * np.cos(self.m * phi))
-        # force
-        rij = conf.getDisplacements(self.ai, self.aj)
-        rkj = conf.getDisplacements(self.ak, self.aj)
-        rkl = conf.getDisplacements(self.ak, self.al)
-        mod_rkj = conf.getDistances(self.ak, self.aj)
-        mod_rkj2 = mod_rkj * mod_rkj
-        dot_ij_kj = gp.einsum('ij,ij->i', rij, rkj)
-        dot_kl_kj = gp.einsum('ij,ij->i', rkl, rkj)
-        # auxiliary vectors
-        rim =  rij - (dot_ij_kj * (rkj).T / (mod_rkj2)).T
-        rln = -rkl + (dot_kl_kj * (rkj).T / (mod_rkj2)).T
-        mod_rim = np.sqrt( gp.einsum('ij,ij->i', rim, rim) )
-        mod_rln = np.sqrt( gp.einsum('ij,ij->i', rln, rln) )
-        rim_norm = (rim).T / mod_rim # ALREADY TRANSPOSED
-        rln_norm = (rln).T / mod_rln # ALREADY TRANSPOSED
-        #
-        cos_phi = np.cos(phi)
-        # cosine derivatives
-        dcos = np.array([dihedralTerms.cosineDerivatives(cos_phi[i], self.m[i]) for
-            i in range(self.size)])
-        # forces
-        f_i = -self.k*cos_phi_0*dcos*(rln_norm - cos_phi*rim_norm) / (mod_rim)
-        f_l = -self.k*cos_phi_0*dcos*(rim_norm - cos_phi*rln_norm) / (mod_rln)
-        f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
-        f_k = -(f_i + f_l + f_j)
-        for idih in range(self.size):
-            forceConf[self.ai[idih],:] += (f_i).T[idih,:]
-            forceConf[self.aj[idih],:] += (f_j).T[idih,:]
-            forceConf[self.ak[idih],:] += (f_k).T[idih,:]
-            forceConf[self.al[idih],:] += (f_l).T[idih,:]
+        if (calcForce):
+            # force
+            rij = conf.getDisplacements(self.ai, self.aj)
+            rkj = conf.getDisplacements(self.ak, self.aj)
+            rkl = conf.getDisplacements(self.ak, self.al)
+            mod_rkj = conf.getDistances(self.ak, self.aj)
+            mod_rkj2 = mod_rkj * mod_rkj
+            dot_ij_kj = gp.einsum('ij,ij->i', rij, rkj)
+            dot_kl_kj = gp.einsum('ij,ij->i', rkl, rkj)
+            # auxiliary vectors
+            rim =  rij - (dot_ij_kj * (rkj).T / (mod_rkj2)).T
+            rln = -rkl + (dot_kl_kj * (rkj).T / (mod_rkj2)).T
+            mod_rim = np.sqrt( gp.einsum('ij,ij->i', rim, rim) )
+            mod_rln = np.sqrt( gp.einsum('ij,ij->i', rln, rln) )
+            rim_norm = (rim).T / mod_rim # ALREADY TRANSPOSED
+            rln_norm = (rln).T / mod_rln # ALREADY TRANSPOSED
+            #
+            cos_phi = np.cos(phi)
+            # cosine derivatives
+            dcos = np.array([dihedralTerms.cosineDerivatives(cos_phi[i], self.m[i]) for
+                i in range(self.size)])
+            # forces
+            f_i = -self.k*cos_phi_0*dcos*(rln_norm - cos_phi*rim_norm) / (mod_rim)
+            f_l = -self.k*cos_phi_0*dcos*(rim_norm - cos_phi*rln_norm) / (mod_rln)
+            f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
+            f_k = -(f_i + f_l + f_j)
+            for idih in range(self.size):
+                forceConf[self.ai[idih],:] += (f_i).T[idih,:]
+                forceConf[self.aj[idih],:] += (f_j).T[idih,:]
+                forceConf[self.ak[idih],:] += (f_k).T[idih,:]
+                forceConf[self.al[idih],:] += (f_l).T[idih,:]
         return energies
 
 class optDihedralTerms(object):
@@ -387,43 +400,44 @@ class optDihedralTerms(object):
             self.phi[m-1,:] = phi
         self.verifyPhase()
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0.0
         phi       = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
         cos_phi_0 = np.cos(np.radians(self.phi))
         energies  = gp.einsum('ij,ij->j', self.k, (1 + cos_phi_0 * np.cos(gp.einsum('i,j->ij', self.m, phi))))
-        # force
-        rij = conf.getDisplacements(self.ai, self.aj)
-        rkj = conf.getDisplacements(self.ak, self.aj)
-        rkl = conf.getDisplacements(self.ak, self.al)
-        mod_rkj = conf.getDistances(self.ak, self.aj)
-        mod_rkj2 = mod_rkj * mod_rkj
-        dot_ij_kj = gp.einsum('ij,ij->i', rij, rkj)
-        dot_kl_kj = gp.einsum('ij,ij->i', rkl, rkj)
-        # auxiliary vectors
-        rim =  rij - (dot_ij_kj * rkj.T / (mod_rkj2)).T
-        rln = -rkl + (dot_kl_kj * rkj.T / (mod_rkj2)).T
-        mod_rim = np.sqrt( gp.einsum('ij,ij->i', rim, rim) )
-        mod_rln = np.sqrt( gp.einsum('ij,ij->i', rln, rln) )
-        rim_norm = rim.T / mod_rim # ALREADY TRANSPOSED
-        rln_norm = rln.T / mod_rln # ALREADY TRANSPOSED
-        #
-        cos_phi = np.cos(phi)
-        # cosine derivatives
-        dcos = np.array([[dihedralTerms.cosineDerivatives(cos_phi[j], m) for j in range(self.size)] for m in self.m])
-        # forces
+        if (calcForce):
+            # force
+            rij = conf.getDisplacements(self.ai, self.aj)
+            rkj = conf.getDisplacements(self.ak, self.aj)
+            rkl = conf.getDisplacements(self.ak, self.al)
+            mod_rkj = conf.getDistances(self.ak, self.aj)
+            mod_rkj2 = mod_rkj * mod_rkj
+            dot_ij_kj = gp.einsum('ij,ij->i', rij, rkj)
+            dot_kl_kj = gp.einsum('ij,ij->i', rkl, rkj)
+            # auxiliary vectors
+            rim =  rij - (dot_ij_kj * rkj.T / (mod_rkj2)).T
+            rln = -rkl + (dot_kl_kj * rkj.T / (mod_rkj2)).T
+            mod_rim = np.sqrt( gp.einsum('ij,ij->i', rim, rim) )
+            mod_rln = np.sqrt( gp.einsum('ij,ij->i', rln, rln) )
+            rim_norm = rim.T / mod_rim # ALREADY TRANSPOSED
+            rln_norm = rln.T / mod_rln # ALREADY TRANSPOSED
+            #
+            cos_phi = np.cos(phi)
+            # cosine derivatives
+            dcos = np.array([[dihedralTerms.cosineDerivatives(cos_phi[j], m) for j in range(self.size)] for m in self.m])
+            # forces
 
 
-        f_i = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rln_norm - cos_phi*rim_norm) / (mod_rim))
-        f_l = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rim_norm - cos_phi*rln_norm) / (mod_rln))
-        f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
-        f_k = -(f_i + f_l + f_j)
-        for idih in range(len(phi)):
-            forceConf[self.ai[idih],:] += f_i.T[idih,:]
-            forceConf[self.aj[idih],:] += f_j.T[idih,:]
-            forceConf[self.ak[idih],:] += f_k.T[idih,:]
-            forceConf[self.al[idih],:] += f_l.T[idih,:]
+            f_i = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rln_norm - cos_phi*rim_norm) / (mod_rim))
+            f_l = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rim_norm - cos_phi*rln_norm) / (mod_rln))
+            f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
+            f_k = -(f_i + f_l + f_j)
+            for idih in range(len(phi)):
+                forceConf[self.ai[idih],:] += f_i.T[idih,:]
+                forceConf[self.aj[idih],:] += f_j.T[idih,:]
+                forceConf[self.ak[idih],:] += f_k.T[idih,:]
+                forceConf[self.al[idih],:] += f_l.T[idih,:]
         return energies
 
 class RyckaertBellemansDihedralTerms(object):
@@ -473,7 +487,7 @@ class RyckaertBellemansDihedralTerms(object):
             if j == 5:
                 self.c5[i] = c
 
-    def calcForConf(self, conf, forceConf):
+    def calcForConf(self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0
         
@@ -482,29 +496,30 @@ class RyckaertBellemansDihedralTerms(object):
         sin = np.sin(phi)
 
         energies = self.c0 - self.c1 * cos + self.c2 * (cos**2) - self.c3 * (cos**3) + self.c4 * (cos**4) - self.c5 * (cos**5)
-        # force
-        force_pre_factor = sin * (-self.c1 + 2*self.c2*cos -3*self.c3*(cos**2) + 4*self.c4*(cos**3) -5*self.c5*(cos**4))
-        rij = conf.getDisplacements(self.ai, self.aj)
-        rkj = conf.getDisplacements(self.ak, self.aj)
-        rkl = conf.getDisplacements(self.ak, self.al)
-        # cross products - works for arrays of vectors too!
-        rmj = fastCross(rij, rkj)
-        rnk = fastCross(rkj, rkl)
-        # norms
-        mod_rmj = np.linalg.norm(rmj, axis=1)
-        mod_rnk = np.linalg.norm(rnk, axis=1)
-        mod_rkj = np.linalg.norm(rkj, axis=1)
-        mod_rkj2 = mod_rkj * mod_rkj
-        # forces
-        f_i = +force_pre_factor * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
-        f_l = -force_pre_factor * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
-        f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
-        f_k = -(f_i + f_l + f_j) # no transpose
-        for ir in range(self.size):
-            forceConf[self.ai[ir],:] += (f_i).T[ir,:]
-            forceConf[self.aj[ir],:] += (f_j).T[ir,:]
-            forceConf[self.ak[ir],:] += (f_k).T[ir,:]
-            forceConf[self.al[ir],:] += (f_l).T[ir,:]
+        if (calcForce):
+            # force
+            force_pre_factor = sin * (-self.c1 + 2*self.c2*cos -3*self.c3*(cos**2) + 4*self.c4*(cos**3) -5*self.c5*(cos**4))
+            rij = conf.getDisplacements(self.ai, self.aj)
+            rkj = conf.getDisplacements(self.ak, self.aj)
+            rkl = conf.getDisplacements(self.ak, self.al)
+            # cross products - works for arrays of vectors too!
+            rmj = fastCross(rij, rkj)
+            rnk = fastCross(rkj, rkl)
+            # norms
+            mod_rmj = np.linalg.norm(rmj, axis=1)
+            mod_rnk = np.linalg.norm(rnk, axis=1)
+            mod_rkj = np.linalg.norm(rkj, axis=1)
+            mod_rkj2 = mod_rkj * mod_rkj
+            # forces
+            f_i = +force_pre_factor * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
+            f_l = -force_pre_factor * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
+            f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
+            f_k = -(f_i + f_l + f_j) # no transpose
+            for ir in range(self.size):
+                forceConf[self.ai[ir],:] += (f_i).T[ir,:]
+                forceConf[self.aj[ir],:] += (f_j).T[ir,:]
+                forceConf[self.ak[ir],:] += (f_k).T[ir,:]
+                forceConf[self.al[ir],:] += (f_l).T[ir,:]
         return energies
 
 class FourierDihedralTerms(RyckaertBellemansDihedralTerms):
@@ -536,33 +551,34 @@ class improperTerms (object):
         self.phi[i] = phi
         self.k[i] = k
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0
         angDiff = wrapAngles(conf.getImpropers(self.ai, self.aj, self.ak, self.al) - self.phi)
         energies = 0.50 * self.k * angDiff * angDiff
-        # force
-        rij = conf.getDisplacements(self.ai, self.aj)
-        rkj = conf.getDisplacements(self.ak, self.aj)
-        rkl = conf.getDisplacements(self.ak, self.al)
-        # cross products - works for arrays of vectors too!
-        rmj = fastCross(rij, rkj)
-        rnk = fastCross(rkj, rkl)
-        # norms
-        mod_rmj = np.linalg.norm(rmj, axis=1)
-        mod_rnk = np.linalg.norm(rnk, axis=1)
-        mod_rkj = np.linalg.norm(rkj, axis=1)
-        mod_rkj2 = mod_rkj * mod_rkj
-        # forces
-        f_i = -self.k * angDiff * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
-        f_l = +self.k * angDiff * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
-        f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
-        f_k = -(f_i + f_l + f_j) # no transpose
-        for ir in range(self.size):
-            forceConf[self.ai[ir],:] += (f_i).T[ir,:]
-            forceConf[self.aj[ir],:] += (f_j).T[ir,:]
-            forceConf[self.ak[ir],:] += (f_k).T[ir,:]
-            forceConf[self.al[ir],:] += (f_l).T[ir,:]
+        if (calcForce):
+            # force
+            rij = conf.getDisplacements(self.ai, self.aj)
+            rkj = conf.getDisplacements(self.ak, self.aj)
+            rkl = conf.getDisplacements(self.ak, self.al)
+            # cross products - works for arrays of vectors too!
+            rmj = fastCross(rij, rkj)
+            rnk = fastCross(rkj, rkl)
+            # norms
+            mod_rmj = np.linalg.norm(rmj, axis=1)
+            mod_rnk = np.linalg.norm(rnk, axis=1)
+            mod_rkj = np.linalg.norm(rkj, axis=1)
+            mod_rkj2 = mod_rkj * mod_rkj
+            # forces
+            f_i = -self.k * angDiff * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
+            f_l = +self.k * angDiff * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
+            f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
+            f_k = -(f_i + f_l + f_j) # no transpose
+            for ir in range(self.size):
+                forceConf[self.ai[ir],:] += (f_i).T[ir,:]
+                forceConf[self.aj[ir],:] += (f_j).T[ir,:]
+                forceConf[self.ak[ir],:] += (f_k).T[ir,:]
+                forceConf[self.al[ir],:] += (f_l).T[ir,:]
         return energies
 
 class periodicImproperTerms (dihedralTerms): pass
@@ -611,33 +627,34 @@ class dihedralRestraintTerms (object):
             print("ai = {}, aj = {}, ak = {}, al = {}, phi = {}, k = {}".format(
                 self.ai[i], self.aj[i], self.ak[i], self.al[i], self.phi[i], self.k[i]))
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0
         angDiff = wrapAngles(conf.getImpropers(self.ai, self.aj, self.ak, self.al) - self.phi)
         energies = 0.50 * self.k * angDiff * angDiff
-        # force
-        rij = conf.getDisplacements(self.ai, self.aj)
-        rkj = conf.getDisplacements(self.ak, self.aj)
-        rkl = conf.getDisplacements(self.ak, self.al)
-        # cross products - works for arrays of vectors too!
-        rmj = fastCross(rij, rkj)
-        rnk = fastCross(rkj, rkl)
-        # norms
-        mod_rmj = np.linalg.norm(rmj, axis=1)
-        mod_rnk = np.linalg.norm(rnk, axis=1)
-        mod_rkj = np.linalg.norm(rkj, axis=1)
-        mod_rkj2 = mod_rkj * mod_rkj
-        # forces
-        f_i = -self.k * angDiff * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
-        f_l = +self.k * angDiff * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
-        f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
-        f_k = -(f_i + f_l + f_j) # no transpose
-        for ir in range(self.size):
-            forceConf[self.ai[ir],:] += (f_i).T[ir,:]
-            forceConf[self.aj[ir],:] += (f_j).T[ir,:]
-            forceConf[self.ak[ir],:] += (f_k).T[ir,:]
-            forceConf[self.al[ir],:] += (f_l).T[ir,:]
+        if (calcForce):
+            # force
+            rij = conf.getDisplacements(self.ai, self.aj)
+            rkj = conf.getDisplacements(self.ak, self.aj)
+            rkl = conf.getDisplacements(self.ak, self.al)
+            # cross products - works for arrays of vectors too!
+            rmj = fastCross(rij, rkj)
+            rnk = fastCross(rkj, rkl)
+            # norms
+            mod_rmj = np.linalg.norm(rmj, axis=1)
+            mod_rnk = np.linalg.norm(rnk, axis=1)
+            mod_rkj = np.linalg.norm(rkj, axis=1)
+            mod_rkj2 = mod_rkj * mod_rkj
+            # forces
+            f_i = -self.k * angDiff * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
+            f_l = +self.k * angDiff * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T # transpose!
+            f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
+            f_k = -(f_i + f_l + f_j) # no transpose
+            for ir in range(self.size):
+                forceConf[self.ai[ir],:] += (f_i).T[ir,:]
+                forceConf[self.aj[ir],:] += (f_j).T[ir,:]
+                forceConf[self.ak[ir],:] += (f_k).T[ir,:]
+                forceConf[self.al[ir],:] += (f_l).T[ir,:]
         return energies
 
 class LJTerms (object):
@@ -674,7 +691,7 @@ class LJTerms (object):
             self.c6[i] = pars[0]
             self.c12[i] = pars[1]
 
-    def calcForConf (self, conf, forceConf, debug=False):
+    def calcForConf (self, conf, forceConf, debug=False, calcForce=True):
         if (self.size == 0):
             return 0
         dist = conf.getDistances (self.ai, self.aj)
@@ -712,14 +729,15 @@ class LJTerms (object):
                 print("sum_14 = %18.7e" % sum_14, file=stderr)
                 print("sum    = %18.7e" % sum_totl, file=stderr)
 
-        # force 
-        rij = conf.getDisplacements(self.ai, self.aj)
-        invDist8 = dist ** (-8)
-        f_i = 6 * (2*self.c12*invDist6 - self.c6) * (rij).T * invDist8
-        f_j = -f_i
-        for i in range(self.size):
-            forceConf[self.ai[i],:] += (f_i).T[i,:]
-            forceConf[self.aj[i],:] += (f_j).T[i,:]
+        if (calcForce):
+            # force 
+            rij = conf.getDisplacements(self.ai, self.aj)
+            invDist8 = dist ** (-8)
+            f_i = 6 * (2*self.c12*invDist6 - self.c6) * (rij).T * invDist8
+            f_j = -f_i
+            for i in range(self.size):
+                forceConf[self.ai[i],:] += (f_i).T[i,:]
+                forceConf[self.aj[i],:] += (f_j).T[i,:]
         return energies
 
 class coulombTerms (object):
@@ -735,19 +753,20 @@ class coulombTerms (object):
         self.aj[i] = aj - 1
         self.qij[i] = qij
 
-    def calcForConf (self, conf, forceConf):
+    def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0
         dist = conf.getDistances (self.ai, self.aj)
         invDist1 = dist ** (-1)
         energies = 138.9354 * self.qij * invDist1
         # force 
-        rij = conf.getDisplacements(self.ai, self.aj)
-        f_i = (energies / (dist * dist)) * (rij).T
-        f_j = -f_i
-        for i in range(self.size):
-            forceConf[self.ai[i],:] += (f_i).T[i,:]
-            forceConf[self.aj[i],:] += (f_j).T[i,:]
+        if (calcForce):
+            rij = conf.getDisplacements(self.ai, self.aj)
+            f_i = (energies / (dist * dist)) * (rij).T
+            f_j = -f_i
+            for i in range(self.size):
+                forceConf[self.ai[i],:] += (f_i).T[i,:]
+                forceConf[self.aj[i],:] += (f_j).T[i,:]
         return energies
 
 class MMCalculator (object):
@@ -947,23 +966,23 @@ class MMCalculator (object):
     def duplicateDihedral (self, i):
         return self.dihedralTerms.duplicateDihedral(i)
 
-    def calcForConf (self, conf, removeRestraintsFromTotal=False, debug=False):
+    def calcForConf (self, conf, removeRestraintsFromTotal=False, debug=False, calcForce=True):
         self.clearForces()
         outputDict = {}
         outputDict['total'] = 0.0
-        outputDict['bonds'] = np.sum(self.bondTerms.calcForConf(conf, self.forceConf))
-        outputDict['angles'] = np.sum(self.angleTerms.calcForConf(conf, self.forceConf))
-        outputDict['propers'] = np.sum(self.dihedralTerms.calcForConf(conf, self.forceConf)) + np.sum(self.optDihedralTerms.calcForConf(conf, self.forceConf))
-        outputDict['impropers'] = np.sum(self.improperTerms.calcForConf(conf, self.forceConf))
-        outputDict['lj'] = np.sum(self.LJTerms.calcForConf(conf, self.forceConf, debug=debug))
-        outputDict['coulomb'] = np.sum(self.coulombTerms.calcForConf(conf, self.forceConf))
-        outputDict['restraints'] = np.sum(self.dihedralRestraintTerms.calcForConf(conf, self.forceConf))
+        outputDict['bonds'] = np.sum(self.bondTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
+        outputDict['angles'] = np.sum(self.angleTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
+        outputDict['propers'] = np.sum(self.dihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce)) + np.sum(self.optDihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
+        outputDict['impropers'] = np.sum(self.improperTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
+        outputDict['lj'] = np.sum(self.LJTerms.calcForConf(conf, self.forceConf, debug=debug, calcForce=calcForce))
+        outputDict['coulomb'] = np.sum(self.coulombTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
+        outputDict['restraints'] = np.sum(self.dihedralRestraintTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
         outputDict['total'] = sum(outputDict.values())
         if (removeRestraintsFromTotal):
             outputDict['total'] -= outputDict['restraints']
         return (outputDict, self.forceConf.copy())
 
-    def calcForEnsemble (self, ens, shiftToZero=True, removeRestraintsFromTotal=True, debug=False):
+    def calcForEnsemble (self, ens, shiftToZero=True, removeRestraintsFromTotal=True, debug=False, calcForce=True):
         outputDict = {}
         outputDict['bonds'] = []
         outputDict['angles'] = []
@@ -974,7 +993,7 @@ class MMCalculator (object):
         outputDict['coulomb'] = []
         outputDict['total'] = []
         for conf in ens:
-            thisMember = self.calcForConf (conf, removeRestraintsFromTotal, debug=debug)[0]
+            thisMember = self.calcForConf (conf, removeRestraintsFromTotal, debug=debug, calcForce=calcForce)[0]
             for key in outputDict:
                 outputDict[key].append(thisMember[key])
         if (shiftToZero):
@@ -1009,3 +1028,140 @@ class MMCalculator (object):
                         fp.write("%18.7e" % data[key][i])
                 fp.write("\n")
             fp.close()
+
+
+class OptMMCalculator:
+
+    def __init__ (self):
+        self.atomTerms                  = None
+        self.dihedralTerms           = None
+        self.LJTerms                    = None
+        self.forceConf                  = None
+        self.setCorrespondenceDihedrals = {}
+        self.setCorrespondencePairs     = {}
+
+    def createFromStpDictionary (self, stpDict):
+        key   = 'atoms'
+        ndofs = len(stpDict[key])
+        natoms = ndofs
+        self.atomTerms = atomTerms (natoms)
+        for i in range(ndofs):
+            info = stpDict[key][i]
+            self.atomTerms.setMember (i, info['c6'], info['c12'], info['cs6'], info['cs12'], info['q'])
+        key   = 'propers'
+        noptimized = len(stpDict['optdihedrals'])
+        ndofs = len(stpDict[key][0])
+        if (ndofs != 0):
+            # check if all types are the same
+            dihtypes = [stpDict[key][0][i][4] for i in range(ndofs)]
+            dihtype  = dihtypes[0]
+            if dihtypes.count(dihtype) != ndofs:
+                raise Exception("Not all proper dihedrals are of the same type. Check your .stp files.")
+            if (dihtype == 1) or (dihtype == 9):
+                # Periodic proper
+                self.dihedralTerms = optDihedralTerms(noptimized)
+                for j,i in enumerate(stpDict['optdihedrals']):
+                    self.dihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3])
+            elif (dihtype == 3):
+                # Ryckaert-Bellemanns
+                self.dihedralTerms = RyckaertBellemansDihedralTerms(noptimized)
+                for j,i in enumerate(stpDict['optdihedrals']):
+                    self.setCorrespondenceDihedrals[i] = j 
+                    self.dihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
+                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i], stpDict[key][5][i], stpDict[key][6][i])
+            elif (dihtype == 5):
+                # Fourier
+                self.dihedralTerms = FourierDihedralTerms(noptimized)
+                for j,i in enumerate(stpDict['optdihedrals']):
+                    self.setCorrespondenceDihedrals[i] = j 
+                    self.dihedralTerms.setMember(i, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
+                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i])
+        key   = 'nb'
+        if (stpDict['opttype'] == 'pair'):
+            optPairs = stpDict['optpairs']
+        elif (stpDict['opttype'] == 'atom'):
+            optPairs = []
+            for i in range(len(stpDict[key][0])):
+                if (stpDict[key][0][i][0] in stpDict['optatoms']) or (stpDict[key][0][i][1] in stpDict['optatoms']):
+                    # this means this pair is included
+                    optPairs.append(i)
+        noptimized = len(optPairs)
+        self.LJTerms = LJTerms(noptimized)
+        for j, i in enumerate(optPairs):
+            self.setCorrespondencePairs[i] = j
+            self.LJTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2],
+                stpDict[key][1][i], stpDict[key][2][i] ) 
+        # also initialize force configuration
+        self.forceConf = np.zeros((natoms,3))
+
+    def clearForces (self):
+        self.forceConf = np.zeros(self.forceConf.shape)
+
+    def forceNorm (self):
+        return np.linalg.norm(self.forceConf)
+
+    def getForceConf (self):
+        return self.forceConf.copy()
+
+    def setForces (self, forceconf):
+        self.forceConf = forceconf.copy()
+
+    def normalizeForces (self):
+        norm = self.forceNorm()
+        self.forceConf /= norm
+
+    def applyForcesToConfWithFactor (self, conf, factor, force=None):
+        if (force is None):
+            conf += (factor * self.forceConf)
+        else:
+            conf += (factor * force)
+            
+    def setSingleDihedralRestraint (self, ai, aj, ak, al, phi_0, k):
+        pass
+
+    def popDihedralRestraint (self):
+        pass
+
+    def pushDihedralRestraint (self, ai, aj, ak, al, phi_0, k):
+        pass
+
+    def setLJParametersForAtom (self, i, cs6=None, cs12=None, mixtype='geometric'):
+        if cs6 is not None:
+            self.atomTerms.cs6[i] = cs6
+        if cs12 is not None:
+            self.atomTerms.cs12[i] = cs12
+        # now update the LJ terms based on these new values
+        self.LJTerms.setFromAtoms(self.atomTerms, mixtype)
+
+    def setLJParametersForPair(self, i, cs6=None, cs12=None):
+        j = self.setCorrespondencePairs[i]
+        self.LJTerms.setParameters(j, cs6, cs12)
+
+    def setDihedralParameters (self, i, phi=None, k=None, m=None):
+        j = self.setCorrespondenceDihedrals[i]
+        self.dihedralTerms.setParameters(j,phi,k,m)
+
+    def setOptDihedralParameters(self, m, phi=None, k=None):
+        self.dihedralTerms.setParameters(m, phi, k)
+
+    def setDihedralParametersRyck (self, i, j, k):
+        p = self.setCorrespondenceDihedrals[i]
+        self.dihedralTerms.setParameters(p, j, k)
+
+    # duplicates dihedral term "i" and puts copy at the end of the dihedral terms
+    # returns index of the new dihedral
+    def duplicateDihedral (self, i):
+        return self.dihedralTerms.duplicateDihedral(i)
+
+    def setEmm(self, emm):
+        # emm is a float
+        self.emm = emm
+
+    def calcForConf (self, conf, removeRestraintsFromTotal=False, debug=False, calcForce=True):
+        self.clearForces()
+        outputDict = {}
+        outputDict['restraints'] = 0.0
+        outputDict['propers'] = np.sum(self.dihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
+        outputDict['lj'] = np.sum(self.LJTerms.calcForConf(conf, self.forceConf, debug=debug, calcForce=calcForce))
+        outputDict['total'] = self.emm + sum(outputDict.values())
+        return (outputDict, self.forceConf.copy())

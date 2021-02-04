@@ -162,6 +162,15 @@ def main():
     fit_fn = "{}.trr".format(cmdlineOpts.outPrefix)
     trajWriter = writer(pars_fn, ene_fn, fit_fn, writetrajOpts.nstp, writetrajOpts.nste)
 
+    # if no minimization is requested during the GA execution,
+    # calculate the MM energies of nonoptimized terms and store them
+    # globally
+    if (minimOpts.maxSteps == 0):
+        # Create a dummy individual.
+        dummyIndividual = multiProfile()
+        # Get nonOpt energies
+        optOpts.emmData = dummyIndividual.getNonoptEnergy()
+        
     # initialize GA
     GA = VBGA(multiProfile, multiProfile.rmsdToData,
           selectionWrapper(vbgaOpts.selectType), vbgaOpts.selectNum, vbgaOpts.ntel,

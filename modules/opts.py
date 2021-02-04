@@ -44,6 +44,7 @@ class optOpts (object):
     weiData = [] # Weight data.
     refData = [] # Reference data.
     stpData = [] # Stp data.
+    emmData = None
 
 class randOpts (object):
 

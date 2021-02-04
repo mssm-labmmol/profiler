@@ -53,7 +53,7 @@ class steepestDescentsMinimizer (object):
         dx = self.dx0
         dele = self.dele + 10
         iteration = 0
-        (curr_ene, curr_f) = self.mmCalc.calcForConf(conf)
+        (curr_ene, curr_f) = self.mmCalc.calcForConf(conf, calcForce=(self.maxSteps != 0))
         self.appendEneConf(curr_ene, conf)
         while (True):
             if (iteration == self.maxSteps):
