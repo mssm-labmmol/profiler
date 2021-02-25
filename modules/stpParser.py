@@ -265,8 +265,8 @@ def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='a
             # this is a standard type, get c6 and c12 from line or atoms
             if (nflds == 3):
                 # from atoms
-                c6 = np.sqrt(atomicParameters[ai_idx]['c6']) * np.sqrt(atomicParameters[aj_idx]['c6'])
-                c12 = np.sqrt(atomicParameters[ai_idx]['c12']) * np.sqrt(atomicParameters[aj_idx]['c12'])
+                c6 = np.sqrt(atomicParameters[ai_idx]['c6'] * atomicParameters[aj_idx]['c6'])
+                c12 = np.sqrt(atomicParameters[ai_idx]['c12'] * atomicParameters[aj_idx]['c12'])
             else:
                 # from line
                 if (comb_rule == 1):
@@ -289,8 +289,8 @@ def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='a
                 if (gen_pairs == 'atomic'):
                     # mix atomic parameters
                     if (comb_rule == 1) or (comb_rule == 3):
-                        c6 = np.sqrt(atomicParameters[ai_idx]['cs6']) * np.sqrt(atomicParameters[aj_idx]['cs6'])
-                        c12 = np.sqrt(atomicParameters[ai_idx]['cs12']) * np.sqrt(atomicParameters[aj_idx]['cs12'])
+                        c6 = np.sqrt(atomicParameters[ai_idx]['cs6'] * atomicParameters[aj_idx]['cs6'])
+                        c12 = np.sqrt(atomicParameters[ai_idx]['cs12'] * atomicParameters[aj_idx]['cs12'])
                     elif (comb_rule == 2):
                         c6i = atomicParameters[ai_idx]['cs6']
                         c12i = atomicParameters[ai_idx]['cs12']
@@ -306,8 +306,8 @@ def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='a
                         c12 = 4 * epsilon * (sigma ** 12)
                 elif (gen_pairs == 'fudge'):
                     if (comb_rule == 1) or (comb_rule == 3):
-                        c6 = fudgeLJ * np.sqrt(atomicParameters[ai_idx]['c6']) * np.sqrt(atomicParameters[aj_idx]['c6'])
-                        c12 = fudgeLJ * np.sqrt(atomicParameters[ai_idx]['c12']) * np.sqrt(atomicParameters[aj_idx]['c12'])
+                        c6 = fudgeLJ * np.sqrt(atomicParameters[ai_idx]['c6'] * atomicParameters[aj_idx]['c6'])
+                        c12 = fudgeLJ * np.sqrt(atomicParameters[ai_idx]['c12'] * atomicParameters[aj_idx]['c12'])
                     elif (comb_rule == 2):
                         c6i = atomicParameters[ai_idx]['c6']
                         c12i = atomicParameters[ai_idx]['c12']
