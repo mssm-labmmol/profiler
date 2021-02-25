@@ -67,6 +67,15 @@ class profile (object):
         elif (emAlgo == 2): # CGEM
             self.emAlgo = conjugateGradientMinimizer(dx0=emDX0, nsteps=emSteps, dxm=emDXM, prec=emDele, calc=self.mmCalc)
 
+    def resetMMCalcForMinim(self, stpData):
+        self.emmData = None
+        self.mmCalc = MMCalculator()
+        self.mmCalc.createFromStpDictionary(stpData)
+
+    def prepareMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps, stpData):
+        self.resetMMCalcForMinim(stpData)
+        self.resetMinim(emAlgo, emDX0, emDXM, emDele, emSteps)
+
     def setDihedralParameters (self, whichTorsion, phi=None, k=None):
         if (optOpts.dihType == 'standard'):
             if (self.mmCalc.dihedralTerms.getType() == 'standard'):
@@ -163,9 +172,12 @@ class multiProfile (object):
     def __getitem__ (self, i):
         return self.profiles[i]
 
-    def resetMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps):
-        for profile in self.profiles:
-            profile.resetMinim(emAlgo, emDX0, emDXM, emDele, emSteps)
+    def prepareMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps):
+        for i, profile in enumerate(self.profiles):
+            profile.prepareMinim(emAlgo, emDX0, emDXM, emDele, emSteps, optOpts.stpData[i])
+        self.setLJParameters(self.cs6, self.cs12)
+        for i, k in enumerate(optOpts.optTors):
+            self.setDihedralParameters(i, self.phi[i], self.k[i])
 
     def setDihedralParameters (self, whichTorsion, phi=None, k=None):
         if (optOpts.dihType == 'standard'):

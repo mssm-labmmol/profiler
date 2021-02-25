@@ -197,7 +197,7 @@ def main():
     
     # now, update minim, do final optimization and save
     print("\nPerforming final optimization... ", file=stdout, end='')
-    optind.resetMinim(lastMinimOpts.minimType, lastMinimOpts.dx0, lastMinimOpts.dxm, lastMinimOpts.dele, lastMinimOpts.maxSteps)
+    optind.prepareMinim(lastMinimOpts.minimType, lastMinimOpts.dx0, lastMinimOpts.dxm, lastMinimOpts.dele, lastMinimOpts.maxSteps)
     optind.minimizeProfiles(useWei=False)
     optind.saveTraj(cmdlineOpts.outPrefix + '_minim', 'xyz')
     optind.saveProfile(cmdlineOpts.outPrefix + '_minim')
