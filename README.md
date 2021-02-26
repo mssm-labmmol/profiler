@@ -66,5 +66,5 @@ format. They are
 
 * `gromos_top_to_stp`, to convert from GROMOS .top files;
 
-These programs, each in a separate directory, can be found in the
-directory `utils`. For usage instructions, consult their README files.
+These programs, each in a separate directory, can be found in the directory
+`utils`. For usage instructions, please consult their README files.
