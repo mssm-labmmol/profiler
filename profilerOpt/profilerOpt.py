@@ -152,6 +152,8 @@ def main():
         weiCalcObj = initializeWeightCalculator(optOpts.wTemp)
         weiCalcObj.setEnergiesFromFiles(cmdlineOpts.refFiles)
         optOpts.weiData = weiCalcObj.computeWeights()
+    # put ref data at zero average
+    optOpts.refData = [r - np.mean(r) for r in optOpts.refData]
 
     # read stp data into xxxOpts class
     optOpts.stpData = [parseStpFile(s, prepareOpt=True) for s in cmdlineOpts.stpFiles]

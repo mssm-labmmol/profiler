@@ -121,7 +121,7 @@ class profile (object):
             else:
                 self.enerProfile.append(veryLargeEnergy)
         # shift to zero
-        self.enerProfile = np.array(self.enerProfile) - np.min(self.enerProfile)
+        self.enerProfile = np.array(self.enerProfile) - np.mean(self.enerProfile)
         return True
 
     def rmsdToData (self, data, wei):
