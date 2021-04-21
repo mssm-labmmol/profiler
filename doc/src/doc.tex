@@ -725,6 +725,24 @@ where $N_K$ is the number of torsional-scan angles.
 \chapter{Parameter Optimization}
 \label{chap:ga}
 
+% TODO:
+%
+% Right now, we only allow specification of the population, the number of
+% generations and the probabilities of cross-over and mutation. If the user is
+% interested in tweaking with details of the operators, we suggest taking a look
+% at the modules/deap_ga.py source file.
+%
+% The usage of operators that are implemented in the DEAP library is pretty
+% straightforward--one only has to use them appropriately in the initialization
+% of the DEAP_GA class. Usage of functools.partial is encouraged to freeze
+% arguments.
+%
+% To create your own operators, bear in mind that the Invidual class, as seen by
+% the GA, is the list of parameters in the following order: CS_6, CS_{12}, then
+% the force constants in order of increasing multiplicities. Terms that are not
+% being optimized are *NOT* considered in this list. For instance, it might
+% consist of only [CS_{12}, k_1, k_5]. 
+
 In this chapter, we describe the structure of the parameter
 optimization and how it is carried out in the context of a simple
 genetic algorithm (GA) method implemented in the \profileropt{}

@@ -172,6 +172,50 @@ class multiProfile (object):
     def __getitem__ (self, i):
         return self.profiles[i]
 
+    def getOptimizableParameters(self):
+        if (optOpts.nLJ == -2):
+            return [self.cs12, *self.k]
+        if (optOpts.nLJ == -1):
+            return [self.cs6, *self.k]
+        if (optOpts.nLJ == 0):
+            return self.k
+        if (optOpts.nLJ == 1):
+            return [self.cs6, self.cs12, *self.k]
+        raise Exception("Invalid NLJ.")
+
+    def getNumberOfOptimizableParameters(self):
+        return len(self.getOptimizableParameters())
+
+    def setSingleOptimizableParameter(self, k, val):
+        if (optOpts.nLJ == -2):
+            if (k == 0):
+                self.setLJParameters(cs12=val)
+            else:
+                self.setDihedralParameters(k - 1, k=val)
+        elif (optOpts.nLJ == -1):
+            if (k == 0):
+                self.setLJParameters(cs6=val)
+            else:
+                self.setDihedralParameters(k - 1, k=val)
+        elif (optOpts.nLJ == 0):
+            self.setDihedralParameters(k, k=val)
+        elif (optOpts.nLJ == 1):
+            if (k == 0):
+                self.setLJParameters(cs6=val)
+            elif (k == 1):
+                self.setLJParameters(cs12=val)
+            else:
+                self.setDihedralParameters(k - 2, k=val)
+        else:
+            raise Exception("Invalid NLJ.")
+
+    def setOptimizableParameters(self, ks, vals):
+        if (type(ks) is slice):
+            for k, v in zip(range(ks.start or 0, ks.stop or self.getNumberOfOptimizableParameters(), ks.step or 1), vals):
+                self.setSingleOptimizableParameter(k, v)
+        else:
+            self.setSingleOptimizableParameter(ks, vals)
+
     def prepareMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps):
         for i, profile in enumerate(self.profiles):
             profile.prepareMinim(emAlgo, emDX0, emDXM, emDele, emSteps, optOpts.stpData[i])
@@ -549,3 +593,24 @@ class multiProfile (object):
             fp.write("#{:>17}\n".format("WRMSD"))
             fp.write("{:>18.7e}\n".format(self.rmsdToData()))
 
+
+class mpDEAPDecorator(multiProfile):
+
+    def __init__(self, fitness):
+        self.mp = multiProfile()
+
+    def __getitem__(self, k):
+        if (type(k) is slice):
+            return [self.mp.getOptimizableParameters()[ks] for ks in range(k.start or 0, k.stop or len(self), k.step or 1)]
+        else:
+            return self.mp.getOptimizableParameters()[k]
+
+    def __setitem__(self, k, val):
+        self.mp.setOptimizableParameter(k, val)
+
+    def __len__(self):
+        return len(self.mp.getOptimizableParameters())
+
+    def evaluate(self):
+        self.mp.minimizeProfiles()
+        return self.mp.rmsdToData()

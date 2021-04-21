@@ -30,7 +30,6 @@ import argparse
 from sys import argv, stdout, stderr
 from modules.readopts import preprocess_args, argparse2opts, readinput
 from modules.opts import *
-from modules.vbga import VBGA, DefaultSelectionMethod, RoulettSelectionMethod, RankSelectionMethod, TournamentSelectionMethod
 from modules.stpParser import parseStpFile
 from modules.multiprofile import multiProfile
 from modules.configuration import ensemble
@@ -41,6 +40,7 @@ from platform import platform, python_version
 from os.path import isfile
 from random import seed
 import numpy as np
+from modules.deap_ga import *
 
 def printheader (fp):
     version = '1.0'
@@ -174,15 +174,9 @@ def main():
         optOpts.emmData = dummyIndividual.getNonoptEnergy()
         
     # initialize GA
-    GA = VBGA(multiProfile, multiProfile.rmsdToData,
-          selectionWrapper(vbgaOpts.selectType), vbgaOpts.selectNum, vbgaOpts.ntel,
-          crossWrapper(vbgaOpts.crossType), vbgaOpts.crossRate,
-          multiProfile.mutate, vbgaOpts.mutRate,
-          vbgaOpts.popSize,
-          cmdlineOpts.nProcs,
-          trajWriter)
+    GA = DEAP_GA(popSize=vbgaOpts.popSize)
 
-    GA.run(vbgaOpts.nGens)
+    GA.run(vbgaOpts.nGens, nprocs=cmdlineOpts.nProcs)
 
     # This is for debugging purposes - also write E_MM energies.
     if (cmdlineOpts.debugEmm):
