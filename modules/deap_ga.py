@@ -22,16 +22,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import sys
+
 from deap import base
 from deap import creator
 from deap import tools
 from deap import algorithms
+from deap import cma
 
-import sys
+from sklearn.preprocessing import MaxAbsScaler
 
-from .multiprofile import multiProfile
 import multiprocessing
 import numpy as np
+
+from .multiprofile import multiProfile
 
 def defaultInitializer():
     # Create first a multiprofile instance.
@@ -42,11 +46,18 @@ def defaultInitializer():
     out = mp.getOptimizableParameters()
     return out
 
-def defaultEvaluate(individual):
+def defaultEvaluate(individual, scaler=None):
+    if (scaler is not None):
+        pars = scaler.inverse_transform([list(individual),])[0]
+    else:
+        pars = individual
     mp = multiProfile()
-    mp.setOptimizableParameters(slice(0, len(individual), 1), list(individual))
-    mp.minimizeProfiles()
-    out = mp.rmsdToData()
+    mp.setOptimizableParameters(slice(0, len(pars), 1), list(pars))
+    if mp.areThereUnphysicalParameters():
+        out = 1.0e+03 # large RMSD
+    else:
+        mp.minimizeProfiles()
+        out = mp.rmsdToData()
     return 1.0/out,
 
 def defaultMut(individual, indpb=0.26, stdperc=0.1):
@@ -56,6 +67,7 @@ def defaultMut(individual, indpb=0.26, stdperc=0.1):
     """ 
     mu = [0 for i in range(len(individual))]
     sigma = [stdperc * x for x in individual]
+    # TODO: Only return if parameters are Physical!!!!
     return tools.mutGaussian(individual, mu, sigma, indpb)
 
 def defaultCx(mother, father):
@@ -65,7 +77,6 @@ def defaultSel(population, howMany):
     return tools.selRoulette(individuals=population,
                                k=howMany, 
                                fit_attr='fitness')
-
 class DEAP_GA:
 
     def __init__(self,
@@ -77,8 +88,7 @@ class DEAP_GA:
                  mutFunc=defaultMut,
                  cxpb=0.23,
                  mutpb=0.39,
-                 hofn=5,
-                 nprocs=1):
+                 hofn=5):
 
         self.popSize = popSize
         self.cxpb = cxpb
@@ -101,8 +111,7 @@ class DEAP_GA:
         creator.create("FitnessMin", base.Fitness, weights=(1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMin)
         toolbox.register("randomize", initFunc)
-        toolbox.register("individual", tools.initIterate, creator.Individual,
-                toolbox.randomize)
+        toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.randomize)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
         toolbox.register("mate", cxFunc)
@@ -130,3 +139,67 @@ class DEAP_GA:
         mp.minimizeProfiles()
         return mp
 
+class DEAP_CMAES:
+
+    def __init__(self,
+                 centroid=None,
+                 sigma=None,
+                 popSize=200, # lambda_ in the algorithm
+                 evalFunc=defaultEvaluate,
+                 hofn=5):
+
+        if (centroid is None):
+            centroid = defaultInitializer()
+        if (sigma is None):
+            sigma = 0.20
+
+        self.scaler = MaxAbsScaler()
+        self.scaler.fit([centroid,])
+
+        # Reset centroid
+        centroid = self.scaler.transform([centroid,])[0]
+
+        hof = tools.HallOfFame(hofn)
+        self.hof = hof
+
+        self.popSize = popSize
+
+        toolbox = base.Toolbox()
+        
+        stats = tools.Statistics(key=lambda ind: 1.0/ind.fitness.values[0])
+        stats.register("avg", np.mean)
+        stats.register("std", np.std)
+        stats.register("min", np.min)
+        stats.register("max", np.max)
+        self.stats = stats
+
+        # Our fitness already takes into account all the molecules simultaneously.
+        # Therefore, there is no need for a multi-objective optimization.
+        creator.create("FitnessMin", base.Fitness, weights=(1.0,))
+        creator.create("Individual", list, fitness=creator.FitnessMin)
+        toolbox.register("evaluate", evalFunc, scaler=self.scaler)
+
+        strategy = cma.Strategy(centroid=centroid, sigma=sigma, lambda_=popSize)
+        toolbox.register("generate", strategy.generate, creator.Individual)
+        toolbox.register("update", strategy.update)
+
+        self.toolbox = toolbox
+
+    def run(self, nGens, nprocs=1):
+        # Start processes
+        if (nprocs > 1):
+            pool = multiprocessing.Pool(processes=nprocs)
+            self.toolbox.register("map", pool.map)
+
+        # Run CMA-ES and store final things
+        self.output = algorithms.eaGenerateUpdate(self.toolbox,
+                                    ngen=nGens, stats=self.stats,
+                                    halloffame=self.hof, verbose=True)
+    def getBest(self):
+        # Return best multiprofile
+        best = self.hof[0]
+        best = self.scaler.inverse_transform([best,])[0]
+        mp = multiProfile()
+        mp.setOptimizableParameters(slice(0, len(best), 1), list(best))
+        mp.minimizeProfiles()
+        return mp

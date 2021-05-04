@@ -42,6 +42,13 @@ from random import seed
 import numpy as np
 from modules.deap_ga import *
 
+evolutionaryStrategy = "CMA-ES"
+def evolStratFactory(*args, **kargs):
+    if (evolutionaryStrategy == "GA"):
+        return DEAP_GA(*args, **kargs)
+    if (evolutionaryStrategy == "CMA-ES"):
+        return DEAP_CMAES(*args, **kargs)
+
 def printheader (fp):
     version = '1.0'
     prog    = 'profilerOpt'
@@ -173,9 +180,10 @@ def main():
         # Get nonOpt energies
         optOpts.emmData = dummyIndividual.getNonoptEnergy()
         
-    # initialize GA
-    GA = DEAP_GA(popSize=vbgaOpts.popSize)
+    # initialize strategy
+    GA = evolStratFactory(popSize=vbgaOpts.popSize)
 
+    # run
     GA.run(vbgaOpts.nGens, nprocs=cmdlineOpts.nProcs)
 
     # This is for debugging purposes - also write E_MM energies.
