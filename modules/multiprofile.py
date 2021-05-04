@@ -95,8 +95,7 @@ class profile (object):
         # If an input parameter is None, it will keep its current value.
         # This behavior is implemented in the setLJParametersForAtom methods.
         if (self.optType == 'atom'):
-            for idx in self.optAtomIdxs:
-                self.mmCalc.setLJParametersForAtom(idx, cs6, cs12, self.mixType)
+            self.mmCalc.setLJParametersForAtoms(self.optAtomIdxs, cs6, cs12, self.mixType)
         elif (self.optType == 'pair'):
             for idx in self.optPairIdxs:
                 self.mmCalc.setLJParametersForPair(idx, cs6, cs12)
@@ -182,6 +181,9 @@ class multiProfile (object):
         if (optOpts.nLJ == 1):
             return [self.cs6, self.cs12, *self.k]
         raise Exception("Invalid NLJ.")
+
+    def areThereUnphysicalParameters(self):
+        return ((self.cs6 < 0) or (self.cs12 < 0))
 
     def getNumberOfOptimizableParameters(self):
         return len(self.getOptimizableParameters())

@@ -67,7 +67,11 @@ class atomTerms (object):
             if (type == 1):
                 return (sqrt(self.c6[i]*self.c6[j]), sqrt(self.c12[i]*self.c12[j]))
             if (type == 2):
-                return (sqrt(self.cs6[i]*self.cs6[j]), sqrt(self.cs12[i]*self.cs12[j]))
+                try:
+                    return (sqrt(self.cs6[i]*self.cs6[j]), sqrt(self.cs12[i]*self.cs12[j]))
+                except ValueError:
+                    raise ValueError("cs6_i = {}, cs6_j = {}, cs12_i = {}, cs12_j = {}".format(
+                        self.cs6[i], self.cs6[j], self.cs12[i], self.cs12[j]))
         if (mixtype == 'arithmetic'):
             if (type == 1):
                 sigma_i, epsilon_i = c6c12_to_sigmaepsilon(self.c6[i], self.c12[i])
@@ -941,11 +945,12 @@ class MMCalculator (object):
     def pushDihedralRestraint (self, ai, aj, ak, al, phi_0, k):
         self.dihedralRestraintTerms.pushMember(ai, aj, ak, al, phi_0, k)
 
-    def setLJParametersForAtom (self, i, cs6=None, cs12=None, mixtype='geometric'):
-        if cs6 is not None:
-            self.atomTerms.cs6[i] = cs6
-        if cs12 is not None:
-            self.atomTerms.cs12[i] = cs12
+    def setLJParametersForAtoms (self, ilist, cs6=None, cs12=None, mixtype='geometric'):
+        for i in ilist:
+            if cs6 is not None:
+                self.atomTerms.cs6[i] = cs6
+            if cs12 is not None:
+                self.atomTerms.cs12[i] = cs12
         # now update the LJ terms based on these new values
         self.LJTerms.setFromAtoms(self.atomTerms, mixtype)
 
