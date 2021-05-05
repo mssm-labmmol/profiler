@@ -119,25 +119,20 @@ def read_SEED(blockdict):
     blocklist = blockdict[blockname]
     randOpts.seed = int(blocklist.pop(0))
 
-def read_WRITETRAJ (blockdict):
-    blockname = 'writetraj'
+def read_EVOLUTIONARYSTRAT (blockdict):
+    blockname = 'evolutionary_strat'
     blocklist = blockdict[blockname]
-    writetrajOpts.nste =   int(blocklist.pop(0))
-    writetrajOpts.nstp =   int(blocklist.pop(0))
-
-def read_GENETICALGORITHM (blockdict):
-    blockname = 'genetic_algorithm'
-    blocklist = blockdict[blockname]
+    strategy_switch = int(blocklist.pop(0))
+    if strategy_switch == 1:
+        vbgaOpts.strategy = 'CMA-ES'
+    elif strategy_switch == 2:
+        vbgaOpts.strategy = 'GA'
+    else:
+        raise ValueError
     vbgaOpts.popSize = int(blocklist.pop(0))
     if (vbgaOpts.popSize <= 0):
         raise Exception("Population size must be a positive number.")
     vbgaOpts.nGens = int(blocklist.pop(0))
-    vbgaOpts.selectType = int(blocklist.pop(0))
-    vbgaOpts.ntel = int(blocklist.pop(0))
-    vbgaOpts.crossType = int(blocklist.pop(0))
-    vbgaOpts.crossRate = int(blocklist.pop(0))
-    vbgaOpts.mutRate = int(blocklist.pop(0))
-    vbgaOpts.selectNum  = vbgaOpts.popSize - vbgaOpts.ntel
 
 def read_MINIMIZATION (blockdict):
     blockname = 'minimization'
@@ -201,8 +196,7 @@ def readinput (fn):
     outdict = input2dict(fn)
     read_PARAMETEROPTIMIZATION (outdict)
     read_PARAMETERRANDOMIZATION (outdict)
-    read_WRITETRAJ (outdict)
-    read_GENETICALGORITHM (outdict)
+    read_EVOLUTIONARYSTRAT (outdict)
     read_MINIMIZATION (outdict)
     read_TORSIONALSCAN (outdict)
     read_SEED(outdict)

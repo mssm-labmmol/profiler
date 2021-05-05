@@ -42,8 +42,8 @@ from random import seed
 import numpy as np
 from modules.deap_ga import *
 
-evolutionaryStrategy = "CMA-ES"
 def evolStratFactory(*args, **kargs):
+    evolutionaryStrategy = vbgaOpts.strategy
     if (evolutionaryStrategy == "GA"):
         return DEAP_GA(*args, **kargs)
     if (evolutionaryStrategy == "CMA-ES"):
@@ -164,12 +164,6 @@ def main():
 
     # read stp data into xxxOpts class
     optOpts.stpData = [parseStpFile(s, prepareOpt=True) for s in cmdlineOpts.stpFiles]
-
-    # initialize writeTraj
-    pars_fn = "{}.trp".format(cmdlineOpts.outPrefix)
-    ene_fn  = "{}".format(cmdlineOpts.outPrefix)
-    fit_fn = "{}.trr".format(cmdlineOpts.outPrefix)
-    trajWriter = writer(pars_fn, ene_fn, fit_fn, writetrajOpts.nstp, writetrajOpts.nste)
 
     # if no minimization is requested during the GA execution,
     # calculate the MM energies of nonoptimized terms and store them

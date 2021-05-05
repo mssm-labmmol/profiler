@@ -72,14 +72,9 @@ class randOpts (object):
 
 class vbgaOpts (object):
 
+    strategy = "CMA-ES" # Method 
     popSize = -1 # Population size. 
     nGens = 50 # Number of generations. 
-    selectType = 0 # Selection operator. 
-    selectNum  = 10 # Number of selected individuals. 
-    ntel = 4 # Number of elitized individuals.
-    crossType = 0 # Crossover operator. 
-    crossRate = 20 # Crossover rate. 
-    mutRate = 5 # Mutation rate. 
 
 class writetrajOpts (object):
 
