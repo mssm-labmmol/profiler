@@ -22,13 +22,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
-
 from deap import base
 from deap import creator
 from deap import tools
 from deap import algorithms
 from deap import cma
+
+from .readopts import InitRandomizers
 
 from sklearn.preprocessing import MaxAbsScaler
 
@@ -37,14 +37,14 @@ import numpy as np
 
 from .multiprofile import multiProfile
 
+# ======================= Module-wide variables ======================
+
+randomizers = None # Will be initialized withing each strategy
+
+# ======================== Functions for DEAP ========================
+
 def defaultInitializer():
-    # Create first a multiprofile instance.
-    mp = multiProfile()
-    # Randomize it according to input.
-    mp.randomize()
-    # Return parameters.
-    out = mp.getOptimizableParameters()
-    return out
+    return [r.random() for r in randomizers]
 
 def defaultEvaluate(individual, scaler=None):
     if (scaler is not None):
@@ -77,6 +77,9 @@ def defaultSel(population, howMany):
     return tools.selRoulette(individuals=population,
                                k=howMany, 
                                fit_attr='fitness')
+
+# ======================== DEAP child classes ========================
+
 class DEAP_GA:
 
     def __init__(self,
@@ -89,6 +92,9 @@ class DEAP_GA:
                  cxpb=0.23,
                  mutpb=0.39,
                  hofn=5):
+
+        global randomizers
+        randomizers = InitRandomizers()
 
         self.popSize = popSize
         self.cxpb = cxpb
@@ -147,6 +153,9 @@ class DEAP_CMAES:
                  popSize=200, # lambda_ in the algorithm
                  evalFunc=defaultEvaluate,
                  hofn=5):
+
+        global randomizers
+        randomizers = InitRandomizers()
 
         if (centroid is None):
             centroid = defaultInitializer()

@@ -35,16 +35,21 @@ class cmdlineOpts (object):
 
 class optOpts (object):
 
-    nTors = 1 # Controls optimization of dihedrals 
+    nTors = 1  # Controls optimization of dihedrals ; >0 is the number of torsional types.
+    bOptPhase = False # Controls optimization of phases when dihType == 'standard'
     optTors = [1, 2, 3, 4, 5, 6] # List of terms to be optimized
+    LJMask = [] # Mask of LJ terms to be optimized.
+    kMask = [] # Mask of force constants to be optimized.
+    phiMask = [] # Mask of phases to be optimized.
     dihType = 'standard' # Dihedral type ('standard' or 'ryckaert')
     wTemp = 0.0 # Temperature for Boltzmann weight calculation. 0 = infinity.
-    nLJ = 1 # Controls optimization of Lennard-Jones parameters 
+    nLJ = 1  # Controls optimization of Lennard-Jones parameters; >0 is the number of LJ types.
     nSystems = 1 # Number of systems.
     weiData = [] # Weight data.
     refData = [] # Reference data.
     stpData = [] # Stp data.
     emmData = None
+    indexList = []  # 
 
 class randOpts (object):
 

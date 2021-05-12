@@ -22,27 +22,176 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from    .energy_force_vectorized  import  MMCalculator, OptMMCalculator
+from .energy_force_vectorized import MMCalculator
 from    .minim                    import  steepestDescentsMinimizer,  conjugateGradientMinimizer
 from    .configuration            import  ensemble
-from    .randomizer               import  parameterRandomizer
-from    .opts                     import  *
-from    random                    import  choice,random
-from    copy                      import  deepcopy
+from .opts import cmdlineOpts, optOpts, minimOpts, dihrestrOpts
 import  numpy                     as      np
+from abc import ABC
+from .readopts import MaskLooper, IndexListCreator
+
+class MaybeConditionedParameter:
+    def __init__(self, value, cond_func=None):
+        self.value = value
+        self.cond_func = cond_func
+    def check(self):
+        if self.cond_func is None:
+            return True
+        return self.cond_func(self.value)
+    def set(self, value):
+        self.value = value
+    def get_string(self):
+        return self.id_string
+    def __float__(self):
+        return float(self.value)
+    def __repr__(self):
+        return "{:>8} = {:<18.7e}\n".format(self.get_string(), self.value)
+                 
+class NonNegativeConditionedParameter(MaybeConditionedParameter):
+    @staticmethod
+    def positive_check(value):
+        return value >= 0
+    def __init__(self, value):
+        super().__init__(value, cond_func=NonNegativeConditionedParameter.positive_check)
+        self.id_string = "nnpar"
+
+class DihedralForceConstant(MaybeConditionedParameter):
+    def __init__(self, value, m=None):
+        super().__init__(value)
+        if (m is not None):
+            self.m = m
+        self.id_string = "k"
+    def __repr__(self):
+        return "{:>8}_{} = {:<18.7e}\n".format(self.get_string(), self.m, self.value)
+
+class DihedralPhase(MaybeConditionedParameter):
+    def __init__(self, value, m=None):
+        super().__init__(value)
+        if (m is not None):
+            self.m = m
+        self.id_string = "phi"
+    def __repr__(self):
+        return "{:>8}_{} = {:<18.7e}\n".format(self.get_string(), self.m, self.value)
+
+class LJC6(NonNegativeConditionedParameter):
+    def __init__(self, value):
+        super().__init__(value)
+        self.id_string = "cs6"
+
+class LJC12(NonNegativeConditionedParameter):
+    def __init__(self, value):
+        super().__init__(value)
+        self.id_string = "cs12"
+
+def ParameterFactory(typestr, m=None):
+    if (typestr == 'c6'):
+        return LJC6(0.0)
+    elif (typestr == 'c12'):
+        return LJC12(0.0)
+    elif (typestr == 'k'):
+        return DihedralForceConstant(0.0, m)
+    elif (typestr == 'phi'):
+        return DihedralPhase(0.0, m)
+
+class IOptimizableParameters(ABC):
+
+    def get(self, k):
+        return float(self._data[k])
+
+    def get_object(self, k):
+        return self._data[k]
+
+    def set(self, k, val):
+        self._data[k].set(val)
+
+    def set_type(self, type_, vals):
+        i = 0
+        for t, v in zip(self._types, vals):
+            if (t == type_):
+                self._data[i].set(v)
+            i += 1
+
+    def get_type(self, type_):
+        out = []
+        for t, v in zip(self._types, self._data):
+            if (t == type_):
+                out.append(float(v))
+        return out
+
+    def get_type_objects(self, type_):
+        out = []
+        for t, v in zip(self._types, self._data):
+            if (t == type_):
+                out.append(v)
+        return out
+
+    def get_type_as_dict(self, type_):
+        out = []
+        for t, v in zip(self._types, self._data):
+            if (t == type_):
+                out.append( {v.get_string(): float(v)} )
+        return out
+
+    def to_list(self):
+        return [float(x) for x in self._data]
+
+    def is_unphysical(self):
+        for x in self._data:
+            if not (x.check()):
+                return True
+        return False
+
+    def writeToStream(self, fp):
+        last_type = -1
+        for x, t in zip(self._data, self._types):
+            if (t != last_type):
+                fp.write("Type {}\n".format(t))
+                last_type = t
+            fp.write(x.__repr__())
+         # if (optOpts.nLJ != 0):
+         #     if (optOpts.nLJ == -2):
+         #         fp.write("# {:>16}\n".format("CS12"))
+         #         fp.write("{:>18.7e}\n".format(self.cs12)) 
+         #     if (optOpts.nLJ == -1):
+         #         fp.write("# {:>16}\n".format("CS6"))
+         #         fp.write("{:>18.7e}\n".format(self.cs6)) 
+         #     if (optOpts.nLJ == 1):
+         #         fp.write("# {:>16}{:>18}\n".format("CS6", "CS12"))
+         #         fp.write("{:>18.7e}{:>18.7e}\n".format(self.cs6, self.cs12))
+         # if (optOpts.nTors != 0):
+         #     if (optOpts.dihType == 'standard'):
+         #         fp.write("# {:>16}{:>18}{:>5}\n".format("PHI", "K", "M"))
+         #         j = 0
+         #         for i in range(6):
+         #             if i in (optOpts.optTors):
+         #                 fp.write("{:>18.2f}{:>18.7f}{:>5}\n".format(self.phi[j], self.k[j], self.m[j]))
+         #                 j += 1
+         #             else:
+         #                 fp.write("{:>18.2f}{:>18.7f}{:>5}\n".format(0, 0, i+1))
+         #     elif (optOpts.dihType == 'ryckaert'):
+         #         fp.write("#{:>17}{:>18}{:>18}{:>18}{:>18}{:>18}\n".format('C0','C1','C2','C3','C4','C5'))
+         #         for i in range(6):
+         #             if (i in optOpts.optTors):
+         #                 fp.write("{:>18.7e}".format(self.k[np.argwhere(optOpts.optTors == i)[0][0]]))
+         #             else:
+         #                 fp.write("{:>18.7e}".format(0.0))
+         #         fp.write("\n")
+         # fp.write("#{:>17}\n".format("WRMSD"))
+         # fp.write("{:>18.7e}\n".format(self.rmsdToData()))
+
+class FullOptimizableParameters(IOptimizableParameters):
+    def __init__(self, LJMasks=None, kMasks=None, phiMasks=None):
+        self._data, self._types = MaskLooper(ParameterFactory, LJMasks, kMasks, phiMasks)
+
+# End of new content
 
 class profile (object):
     
-    def __init__ (self, stpData, trajFile,
-                  scanFirst, scanStep, scanLast, restrConst,
-                  emAlgo, emDX0, emDXM, emDele, emSteps, emmData=None):
+    def __init__ (self, stpData, trajFile, scanFirst, scanStep, scanLast, restrConst, emAlgo, emDX0, emDXM, emDele, emSteps, emmData=None):
             self.enerProfile        = []
             self.ensemble           = ensemble([])
             self.emmData = emmData
-            if (emmData) is None:
-                self.mmCalc             = MMCalculator() # no influence of E_MM data
-            else:
-                self.mmCalc             = OptMMCalculator() # has access to E_MM data and uses it
+            self.mmCalc             = MMCalculator()
             if stpData['defaults']['comb-rule'] == 2:
                 self.mixType = 'arithmetic'
             else:
@@ -51,15 +200,12 @@ class profile (object):
             self.refDih             = stpData['propers'][0][stpData['refdihedral']][:4] # (ai, aj, ak, al) quadruple
             self.restrConst         = restrConst
             self.refPhi             = [scanFirst + i*scanStep for i in range(int((scanLast-scanFirst)/scanStep)+1)]
-            self.optDihIdxs         = stpData['optdihedrals'].copy()
             self.optType            = stpData['opttype']
-            if self.optType == 'atom':
-                self.optAtomIdxs = stpData['optatoms'].copy()
-            elif self.optType == 'pair':
-                self.optPairIdxs = stpData['optpairs'].copy() 
             # initialize data
             self.ensemble.readFromTrajectory(trajFile)
             self.mmCalc.createFromStpDictionary(stpData)
+            # index list creator
+            self.indexList = IndexListCreator(self.optType, stpData['optatoms'], stpData['optpairs'], stpData['optdihedrals'])
 
     def resetMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps):
         if (emAlgo == 1): # SDEM
@@ -76,31 +222,38 @@ class profile (object):
         self.resetMMCalcForMinim(stpData)
         self.resetMinim(emAlgo, emDX0, emDXM, emDele, emSteps)
 
-    def setDihedralParameters (self, whichTorsion, phi=None, k=None):
+    def setDihedralParameters (self, whichOpt, m, phi=None, k=None):
+        # FIXME: This needs to be refactored.
         if (optOpts.dihType == 'standard'):
-            if (self.mmCalc.dihedralTerms.getType() == 'standard'):
-                self.mmCalc.setOptDihedralParameters(optOpts.optTors[whichTorsion]+1, phi, k)
-            else:
+            for idx in range(len(self.indexList.get(whichOpt))): # Note the range(len(
+                if (self.mmCalc.dihedralTerms.getType() == 'standard'):
+                    self.mmCalc.setOptDihedralParameters(idx, m, phi, k)
+                else:
                     raise Exception(".inp requests standard dihedrals, but .stp specifies another type")
         elif (optOpts.dihType == 'ryckaert'):
-            for idx in (self.optDihIdxs):
+            for idx in self.indexList.get(whichOpt): # Note the absence of range(len(
                 if (self.mmCalc.dihedralTerms.getType() == 'ryckaert'):
-                    self.mmCalc.setDihedralParametersRyck(idx, optOpts.optTors[whichTorsion], k)
+                    self.mmCalc.setDihedralParametersRyck(idx, m-1, k)
                 else:
                     raise Exception(".inp requests Ryckaert-Bellemanns dihedrals, but .stp specifies another type")
         else:
             raise Exception()
 
-    def setLJParameters (self, cs6=None, cs12=None):
+    def setLJParameters (self, type_, cs6=None, cs12=None):
         # If an input parameter is None, it will keep its current value.
         # This behavior is implemented in the setLJParametersForAtom methods.
+        indexList = self.indexList.get(type_)
         if (self.optType == 'atom'):
-            self.mmCalc.setLJParametersForAtoms(self.optAtomIdxs, cs6, cs12, self.mixType)
+            self.mmCalc.setLJParametersForAtoms(indexList, cs6, cs12, self.mixType)
         elif (self.optType == 'pair'):
-            for idx in self.optPairIdxs:
+            for idx in indexList:
                 self.mmCalc.setLJParametersForPair(idx, cs6, cs12)
         else:
             raise ValueError("setLJParameters for {} is not supported.".format(self.optType))
+
+    def setParameters(self, type_, cs6=None, cs12=None, m=None, phi=None, k=None):
+        self.setLJParameters(type_, cs6, cs12)
+        self.setDihedralParameters(type_, m, phi, k)
 
     def minimizeProfile (self, wei=None, veryLargeEnergy=1.0e+05):
         self.enerProfile = []
@@ -142,13 +295,9 @@ class profile (object):
 class multiProfile (object):
 
     def __init__ (self):
-
         self.profiles = []
-        self.cs6      = 0.0
-        self.cs12     = 0.0
-        self.phi      = [0.0] * len(optOpts.optTors)
-        self.k        = [0.0] * len(optOpts.optTors)
-        self.m        = optOpts.optTors + 1
+        #self.m        = [[s + 1 for s in multSwitches] for multSwitches in optOpts.optTors]
+        self.optPars  = None  # It will be initialized separately for each dihedral type.
 
         for i in range(optOpts.nSystems):
             trajFile = cmdlineOpts.trajFiles[i]
@@ -162,54 +311,33 @@ class multiProfile (object):
                     dihrestrOpts.start, dihrestrOpts.step, dihrestrOpts.last, dihrestrOpts.k,
                     minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps,
                                              emmData=emmData))
+
+                self.optPars = FullOptimizableParameters(LJMasks=optOpts.LJMask, kMasks=optOpts.kMask, phiMasks=optOpts.phiMask)
+
             if (optOpts.dihType == 'ryckaert'):
                 self.profiles.append(profile(stpData, trajFile,
                     dihrestrOpts.start, dihrestrOpts.step, dihrestrOpts.last, dihrestrOpts.k,
                                              minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps,
                                              emmData=emmData))
 
+                # ignores mask for optimization of phases
+                self.optPars = FullOptimizableParameters(LJMasks=optOpts.LJMask, kMasks=optOpts.kMask)
+
     def __getitem__ (self, i):
         return self.profiles[i]
 
     def getOptimizableParameters(self):
-        if (optOpts.nLJ == -2):
-            return [self.cs12, *self.k]
-        if (optOpts.nLJ == -1):
-            return [self.cs6, *self.k]
-        if (optOpts.nLJ == 0):
-            return self.k
-        if (optOpts.nLJ == 1):
-            return [self.cs6, self.cs12, *self.k]
-        raise Exception("Invalid NLJ.")
+        return self.optPars.to_list()
 
     def areThereUnphysicalParameters(self):
-        return ((self.cs6 < 0) or (self.cs12 < 0))
+        return self.optPars.is_unphysical()
 
     def getNumberOfOptimizableParameters(self):
-        return len(self.getOptimizableParameters())
+        return len(self.optPars.to_list())
 
     def setSingleOptimizableParameter(self, k, val):
-        if (optOpts.nLJ == -2):
-            if (k == 0):
-                self.setLJParameters(cs12=val)
-            else:
-                self.setDihedralParameters(k - 1, k=val)
-        elif (optOpts.nLJ == -1):
-            if (k == 0):
-                self.setLJParameters(cs6=val)
-            else:
-                self.setDihedralParameters(k - 1, k=val)
-        elif (optOpts.nLJ == 0):
-            self.setDihedralParameters(k, k=val)
-        elif (optOpts.nLJ == 1):
-            if (k == 0):
-                self.setLJParameters(cs6=val)
-            elif (k == 1):
-                self.setLJParameters(cs12=val)
-            else:
-                self.setDihedralParameters(k - 2, k=val)
-        else:
-            raise Exception("Invalid NLJ.")
+        self.optPars.set(k, val)
+        self.applyParameters()
 
     def setOptimizableParameters(self, ks, vals):
         if (type(ks) is slice):
@@ -221,322 +349,48 @@ class multiProfile (object):
     def prepareMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps):
         for i, profile in enumerate(self.profiles):
             profile.prepareMinim(emAlgo, emDX0, emDXM, emDele, emSteps, optOpts.stpData[i])
-        self.setLJParameters(self.cs6, self.cs12)
-        for i, k in enumerate(optOpts.optTors):
-            self.setDihedralParameters(i, self.phi[i], self.k[i])
+        self.applyParameters()
 
-    def setDihedralParameters (self, whichTorsion, phi=None, k=None):
-        if (optOpts.dihType == 'standard'):
-            if phi is not None:
-                self.phi[whichTorsion] = phi
-            if k is not None:
-                self.k[whichTorsion] = k
-            for profile in self.profiles:
-                profile.setDihedralParameters (whichTorsion, phi, k)
-        if (optOpts.dihType == 'ryckaert'):
-            if k is not None:
-                self.k[whichTorsion] = k
-            for profile in self.profiles:
-                profile.setDihedralParameters (whichTorsion, phi, k)
-
-    def setLJParameters (self, cs6=None, cs12=None):
-        if cs6 is not None:
-            self.cs6 = cs6
-        if cs12 is not None:
-            self.cs12 = cs12
-        if (optOpts.nLJ == 0):
-            self.cs6 = 0
-            self.cs12 = 0
-            cs6 = None
-            cs12 = None
-        elif (optOpts.nLJ == -1):
-            cs12 = None
-            self.cs12 = 0
-        elif (optOpts.nLJ == -2):
-            cs6 = None
-            self.cs6 = 0
+    def applyParameters(self):
+        """Applies current optimizable parameters to the member profiles."""
         for profile in self.profiles:
-            profile.setLJParameters (cs6, cs12)
+            for i in range(optOpts.nLJ):
+                for p in self.optPars.get_type_as_dict(i):
+                    profile.setParameters(i, **p)
+            for i in range(optOpts.nLJ, optOpts.nLJ + optOpts.nTors):
+                for p, obj in zip(self.optPars.get_type_as_dict(i), self.optPars.get_type_objects(i)):
+                    profile.setParameters(i, m=obj.m, **p)
 
     def getNonoptEnergy (self):
-        # Returns a matrix NSYSTEMS x NDIHS with unrestrained energies
-        # containing only the nonoptimized terms. For each system,
-        # data is shifted so that the average value is zero.
-        nonopt_energies = np.zeros((len(self.profiles), len(self.profiles[0].refPhi)))
-        ind_copy = deepcopy(self)
-        # zero out the parameters
-        if (optOpts.nLJ != 0):
-            ind_copy.setLJParameters(0, 0)
-        for i,k in enumerate(optOpts.optTors):
-            ind_copy.setDihedralParameters(i, 0.0, 0.0)
-        for i in range(nonopt_energies.shape[0]):
-            for j in range(nonopt_energies.shape[1]):
-                nonopt_energies[i,j] = ind_copy.profiles[i].mmCalc.calcForConf(ind_copy.profiles[i].ensemble[j], removeRestraintsFromTotal=True)[0]['total']
-        nonopt_energies[i,:] -= np.mean(nonopt_energies[i,:])
-        return nonopt_energies
+        raise NotImplementedError()
+        # # Returns a matrix NSYSTEMS x NDIHS with unrestrained energies
+        # # containing only the nonoptimized terms. For each system,
+        # # data is shifted so that the average value is zero.
+        # nonopt_energies = np.zeros((len(self.profiles), len(self.profiles[0].refPhi)))
+        # ind_copy = deepcopy(self)
+        # # zero out the parameters
+        # if (optOpts.nLJ != 0):
+        #     ind_copy.setLJParameters(0, 0)
+        # for i,k in enumerate(optOpts.optTors):
+        #     ind_copy.setDihedralParameters(i, 0.0, 0.0)
+        # for i in range(nonopt_energies.shape[0]):
+        #     for j in range(nonopt_energies.shape[1]):
+        #         nonopt_energies[i,j] = ind_copy.profiles[i].mmCalc.calcForConf(ind_copy.profiles[i].ensemble[j], removeRestraintsFromTotal=True)[0]['total']
+        # nonopt_energies[i,:] -= np.mean(nonopt_energies[i,:])
+        # return nonopt_energies
 
-    def minimizeProfiles (self, useWei=True):
+    def minimizeProfiles (self, useWei=False):
         if (useWei):
-            for i,profile in enumerate(self.profiles):
-                if not (profile.minimizeProfile(wei=optOpts.weiData[i][:])):
-                    return False
-            return True
+            raise Exception("useWei is dangerous")
+            #for i,profile in enumerate(self.profiles):
+            #    if not (profile.minimizeProfile(wei=optOpts.weiData[i][:])):
+            #        return False
+            #return True
         else:
             for i,profile in enumerate(self.profiles):
                 if not (profile.minimizeProfile()):
                     return False
             return True
-
-    def genRandDihedralParameters (self, m):
-        parameters = parameterRandomizer.randomizeDihedralMslots(
-            randOpts.torsDist, randOpts.torsMin, randOpts.torsMax, randOpts.torsMean, randOpts.torsStddev,
-            randOpts.torsPinv, optOpts.dihType)
-        if (optOpts.dihType == 'standard'):
-            if (m is not None):
-                # force 'm' and 'phi' values
-                parameters[0] = randOpts.mslots_phi
-                parameters[2] = m
-        elif (optOpts.dihType == 'ryckaert'):
-            pass
-        return parameters
-
-    def genRandLJParameters (self):
-        return parameterRandomizer.randomizeLJ(
-            randOpts.cs6Dist, randOpts.cs6Min, randOpts.cs6Max, randOpts.cs6Mean, randOpts.cs6Stddev,
-            randOpts.cs12Dist, randOpts.cs12Min, randOpts.cs12Max, randOpts.cs12Mean, randOpts.cs12Stddev)
-
-    def randomizeDihedralParameters (self):
-        for i,k in enumerate(optOpts.optTors):
-            randomPars = self.genRandDihedralParameters(k+1)
-            if optOpts.dihType == 'standard':
-                self.setDihedralParameters(i, k=randomPars[1], phi=randomPars[0])
-            if optOpts.dihType == 'ryckaert':
-                self.setDihedralParameters(i, k=randomPars)
-                
-    def randomizeLJParameters (self):
-        if (optOpts.nLJ != 0):
-            randomPars = self.genRandLJParameters()
-            if (optOpts.nLJ == -1):
-                randomPars[1] = None
-            if (optOpts.nLJ == -2):
-                randomPars[0] = None
-            self.setLJParameters (*randomPars)
-
-    def mutateLJ (self):
-        if (optOpts.nLJ != 0):
-            mutPars = self.genRandLJParameters()
-            if (optOpts.nLJ == -1):
-                chosen = 0
-            if (optOpts.nLJ == -2):
-                chosen = 1
-            if (optOpts.nLJ == 1):
-                chosen  = choice(range(len(mutPars)))
-            mutPars = [x if i == chosen else None for i,x in enumerate(mutPars)]
-            self.setLJParameters (*mutPars)
-
-    def mutateDihedral (self):
-        if (optOpts.nTors == 0):
-            return
-        chosenTorsion = choice(optOpts.optTors)
-        mutPars       = self.genRandDihedralParameters(chosenTorsion+1)
-        if (optOpts.dihType == 'standard'):
-            # i == 1 means you only get 'k'
-            mutPars = [x if i == 1 else None for i,x in enumerate(mutPars)]
-            self.setDihedralParameters (np.argwhere(optOpts.optTors == chosenTorsion)[0][0], k=mutPars[1], phi=mutPars[0])
-        if (optOpts.dihType == 'ryckaert'):
-            self.setDihedralParameters (np.argwhere(optOpts.optTors == chosenTorsion)[0][0], k=mutPars)
-
-    @staticmethod
-    def uniformCrossover (father, mother, childOne, childTwo):
-        chosen   =  choice([0,1])
-        if (chosen == 0):
-            cs6one   =  father.cs6
-            cs6two   =  mother.cs6
-        else:
-            cs6one   =  mother.cs6
-            cs6two   =  father.cs6
-        chosen  =  choice([0,1])
-        if (chosen == 0):
-            cs12one  =  father.cs12
-            cs12two  =  mother.cs12
-        else:
-            cs12one  =  mother.cs12
-            cs12two  =  father.cs12
-        childOne.setLJParameters (cs6one, cs12one)
-        childTwo.setLJParameters (cs6two, cs12two)
-        for i in range(len(optOpts.optTors)):
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                k_1    =  father.k[i]
-                k_2    =  mother.k[i]
-            else:
-                k_1    =  mother.k[i]
-                k_2    =  father.k[i]
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                m_1    =  father.m[i]
-                m_2    =  mother.m[i]
-            else:
-                m_1    =  mother.m[i]
-                m_2    =  father.m[i]
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                phi_1  =  father.phi[i]
-                phi_2  =  mother.phi[i]
-            else:
-                phi_1  =  mother.phi[i]
-                phi_2  =  father.phi[i]
-
-            if (optOpts.dihType == 'standard'):
-                childOne.setDihedralParameters(i, phi_1, k_1)
-                childTwo.setDihedralParameters(i, phi_2, k_2)
-            elif (optOpts.dihType == 'ryckaert'):
-                childOne.setDihedralParameters(i, k=k_1)
-                childTwo.setDihedralParameters(i, k=k_2)
-        childOne.minimizeProfiles()
-        childTwo.minimizeProfiles()
-        return [childOne, childTwo]
-
-    @staticmethod
-    def averageCrossover (father, mother, childOne, childTwo):
-        cs6one   =  0.50     *  (father.cs6   +  mother.cs6)
-        cs12one  =  0.50     *  (father.cs12  +  mother.cs12)
-        childOne.setLJParameters (cs6one, cs12one)
-        childTwo.setLJParameters (cs6one, cs12one)
-        for i in range(len(optOpts.optTors)):
-            k_1    =  0.50 * (father.k[i] + mother.k[i])
-            k_2    =  0.50 * (father.k[i] + mother.k[i])
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                m_1    =  father.m[i]
-                m_2    =  mother.m[i]
-            else:
-                m_1    =  mother.m[i]
-                m_2    =  father.m[i]
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                phi_1  =  father.phi[i]
-                phi_2  =  mother.phi[i]
-            else:
-                phi_1  =  mother.phi[i]
-                phi_2  =  father.phi[i]
-            if (optOpts.dihType == 'standard'):
-                childOne.setDihedralParameters(i, phi_1, k_1)
-                childTwo.setDihedralParameters(i, phi_2, k_2)
-            elif (optOpts.dihType == 'ryckaert'):
-                childOne.setDihedralParameters(i, k=k_1)
-                childTwo.setDihedralParameters(i, k=k_2)
-        childOne.minimizeProfiles()
-        childTwo.minimizeProfiles()
-        return [childOne, childTwo]
-
-    @staticmethod
-    def arithmeticCrossover (father, mother, childOne, childTwo):
-        r = random()
-        cs6one   = r * father.cs6  + (1 - r) *  mother.cs6
-        cs12one  = r * father.cs12 + (1 - r) *  mother.cs12
-        cs6two   = (1 - r) * father.cs6  + r * mother.cs6
-        cs12two  = (1 - r) * father.cs12 + r * mother.cs12
-        childOne.setLJParameters (cs6one, cs12one)
-        childTwo.setLJParameters (cs6two, cs12two)
-        for i in range(len(optOpts.optTors)):
-            k_1    =  r * father.k[i] + (1 - r) * mother.k[i]
-            k_2    =  r * mother.k[i] + (1 - r) * father.k[i]
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                m_1    =  father.m[i]
-                m_2    =  mother.m[i]
-            else:
-                m_1    =  mother.m[i]
-                m_2    =  father.m[i]
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                phi_1  =  father.phi[i]
-                phi_2  =  mother.phi[i]
-            else:
-                phi_1  =  mother.phi[i]
-                phi_2  =  father.phi[i]
-            if (optOpts.dihType == 'standard'):
-                childOne.setDihedralParameters(i, phi_1, k_1)
-                childTwo.setDihedralParameters(i, phi_2, k_2)
-            elif (optOpts.dihType == 'ryckaert'):
-                childOne.setDihedralParameters(i, k=k_1)
-                childTwo.setDihedralParameters(i, k=k_2)
-        childOne.minimizeProfiles()
-        childTwo.minimizeProfiles()
-        return [childOne, childTwo]
-
-    @staticmethod
-    def heuristicCrossover (bestParent, worstParent, childOne, childTwo, limit=500):
-        r = random()
-
-        nlimits = 0
-        while True:
-            nlimits += 1
-            cs6_1 = bestParent.cs6 + r * (bestParent.cs6 - worstParent.cs6)
-            cs12_1 = bestParent.cs12 + r * (bestParent.cs12 - worstParent.cs12)
-            cs6_2  = r * bestParent.cs6  + (1 - r) *  worstParent.cs6
-            cs12_2 = r * bestParent.cs12 + (1 - r) *  worstParent.cs12
-            if (optOpts.nLJ == 1):
-                testValue = (cs6_1 > 0) and (cs6_2 > 0) and (cs12_1 > 0) and (cs12_2 > 0)
-            elif (optOpts.nLJ == 0):
-                testValue = True
-            elif (optOpts.nLJ == -1):
-                testValue = (cs6_1 > 0) and (cs6_2 > 0)
-            elif (optOpts.nLJ == -2):
-                testValue = (cs12_1 > 0) and (cs12_2 > 0)
-            if (testValue):
-                break
-            else:
-                r *= 0.50
-            if nlimits >= limit:
-                raise Exception("Heuristic crossover failed with cs6 = {:e} and cs12 = {:e}.".format(cs6_1, cs12_1))
-        childOne.setLJParameters (cs6_1, cs12_1)
-        childTwo.setLJParameters (cs6_2, cs12_2)
-        for i in range(len(optOpts.optTors)):
-            k_1 = bestParent.k[i] + r * (bestParent.k[i] - worstParent.k[i])
-            k_2 = bestParent.k[i] * r + (1 - r) * worstParent.k[i]
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                m_1    =  bestParent.m[i]
-                m_2    =  worstParent.m[i]
-            else:
-                m_1    =  worstParent.m[i]
-                m_2    =  bestParent.m[i]
-            chosen  =  choice([0,1])
-            if (chosen == 0):
-                phi_1  =  bestParent.phi[i]
-                phi_2  =  worstParent.phi[i]
-            else:
-                phi_1  =  worstParent.phi[i]
-                phi_2  =  bestParent.phi[i]
-            if (optOpts.dihType == 'standard'):
-                childOne.setDihedralParameters(i, phi_1, k_1)
-                childTwo.setDihedralParameters(i, phi_2, k_2)
-            elif (optOpts.dihType == 'ryckaert'):
-                childOne.setDihedralParameters(i, k=k_1)
-                childTwo.setDihedralParameters(i, k=k_2)
-        childOne.minimizeProfiles()
-        childTwo.minimizeProfiles()
-        return [childOne, childTwo]
-
-    def randomize (self):
-        self.randomizeDihedralParameters()
-        self.randomizeLJParameters()
-        return self.minimizeProfiles()
-
-    def mutate (self):
-        if (optOpts.nTors == 0):
-            self.mutateLJ()
-        elif (optOpts.nLJ == 0):
-            self.mutateDihedral()
-        else:
-            if (choice([0,1]) == 0):
-                self.mutateDihedral()
-            else:
-                self.mutateLJ()
-        self.minimizeProfiles()
-        return self
 
     def rmsdToData (self):
         rmsd = 0
@@ -562,57 +416,4 @@ class multiProfile (object):
 
     def saveParameters (self, fn):
         with open(fn,'w') as fp:
-            if (optOpts.nLJ != 0):
-                if (optOpts.nLJ == -2):
-                    fp.write("# {:>16}\n".format("CS12"))
-                    fp.write("{:>18.7e}\n".format(self.cs12)) 
-                if (optOpts.nLJ == -1):
-                    fp.write("# {:>16}\n".format("CS6"))
-                    fp.write("{:>18.7e}\n".format(self.cs6)) 
-                if (optOpts.nLJ == 1):
-                    fp.write("# {:>16}{:>18}\n".format("CS6", "CS12"))
-                    fp.write("{:>18.7e}{:>18.7e}\n".format(self.cs6, self.cs12))
-                    
-            if (optOpts.nTors != 0):
-                if (optOpts.dihType == 'standard'):
-                    fp.write("# {:>16}{:>18}{:>5}\n".format("PHI", "K", "M"))
-                    j = 0
-                    for i in range(6):
-                        if i in (optOpts.optTors):
-                            fp.write("{:>18.2f}{:>18.7f}{:>5}\n".format(self.phi[j], self.k[j], self.m[j]))
-                            j += 1
-                        else:
-                            fp.write("{:>18.2f}{:>18.7f}{:>5}\n".format(0, 0, i+1))
-                elif (optOpts.dihType == 'ryckaert'):
-                    fp.write("#{:>17}{:>18}{:>18}{:>18}{:>18}{:>18}\n".format('C0','C1','C2','C3','C4','C5'))
-                    for i in range(6):
-                        if (i in optOpts.optTors):
-                            fp.write("{:>18.7e}".format(self.k[np.argwhere(optOpts.optTors == i)[0][0]]))
-                        else:
-                            fp.write("{:>18.7e}".format(0.0))
-                    fp.write("\n")
-                    
-            fp.write("#{:>17}\n".format("WRMSD"))
-            fp.write("{:>18.7e}\n".format(self.rmsdToData()))
-
-
-class mpDEAPDecorator(multiProfile):
-
-    def __init__(self, fitness):
-        self.mp = multiProfile()
-
-    def __getitem__(self, k):
-        if (type(k) is slice):
-            return [self.mp.getOptimizableParameters()[ks] for ks in range(k.start or 0, k.stop or len(self), k.step or 1)]
-        else:
-            return self.mp.getOptimizableParameters()[k]
-
-    def __setitem__(self, k, val):
-        self.mp.setOptimizableParameter(k, val)
-
-    def __len__(self):
-        return len(self.mp.getOptimizableParameters())
-
-    def evaluate(self):
-        self.mp.minimizeProfiles()
-        return self.mp.rmsdToData()
+            self.optPars.writeToStream(fp)

@@ -416,7 +416,7 @@ def parseStpFile (filename, prepareOpt=False):
     optDihIdxs = []
     reflist = []
     optType = None
-    optPairIdxs = None
+    optPairIdxs = []
     fp = createStreamAfterPreprocessing(filename)
     while True:
         bn = gotoNextBlock(fp)
@@ -472,8 +472,8 @@ def parseStpFile (filename, prepareOpt=False):
                 nbC12= np.append(nbC12,pars[:,1])
                 nbQIJ = np.append(nbQIJ,pars[:,2])
         elif(bn == "optatoms"):
-            if optType is None:
-                optAtomsIdxs = readListFromStreamAndSubtractOne (fp)
+            if not (optType == 'pair'):
+                optAtomsIdxs.append( readListFromStreamAndSubtractOne (fp) )
                 optType = 'atom'
                 if (defaults['gen-pairs'] == 'no') and (prepareOpt):
                     err_str = "Cannot perform optimization of atomic 1,4 parameters with gen-pairs = no.\n"
@@ -481,16 +481,17 @@ def parseStpFile (filename, prepareOpt=False):
             else:
                 raise ValueError("Can only set one optType.")
         elif(bn == 'optpairs'):
-            if optType is None:
-                optPairIdxs = readOptpairBlock(fp, nbParticles)
+            if not (optType == 'atom'):
+                optPairIdxs.append( readOptpairBlock(fp, nbParticles) )
                 optType = 'pair'
             else:
                 raise ValueError("Can only set one optType.")
         elif(bn == "optdihedrals"):
-            optDihIdxs = readDihedralBlock (fp)
+            optDihIdxs.append(readDihedralBlock (fp))
             # check if they belong
             dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
-            for dih in optDihIdxs:
+            lastType = optDihIdxs[-1]
+            for dih in lastType:
                 if dih not in dihparticles:
                     raise RuntimeError("Optimized dihedral not found in [ dihedrals ].")
         elif(bn == "refdihedral"):
@@ -525,7 +526,7 @@ def parseStpFile (filename, prepareOpt=False):
                     dihedralC5 = np.delete(dihedralC5, x)
         # Recover indices.
         refDihIdx = dihparticles.index(refDihIdx)
-        optDihIdxs = [dihparticles.index(d) for d in optDihIdxs]
+        optDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in optDihIdxs]
     else:
         optAtomsIdxs = []
         optPairIdxs = []

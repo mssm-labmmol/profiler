@@ -22,9 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .opts import *
+from .opts import optOpts, randOpts, minimOpts, lastMinimOpts, vbgaOpts, dihrestrOpts, geomcheckOpts, cmdlineOpts
+from .randomizer import RandomizerFactory, LimiterDecorator, SignReverserDecorator
 from sys import stderr
 import numpy as np
+from functools import partial
 
 def getline (stream, comm = ';'):
     buff = ''
@@ -68,28 +70,41 @@ def read_PARAMETEROPTIMIZATION (blockdict):
     optOpts.dihType = {1: 'standard', 2: 'ryckaert'}[int(blocklist.pop(0))]
     randOpts.mslots = True
     optOpts.optTors = []
-    for i in range(6):
-        nt = int(blocklist.pop(0))
-        if (nt == 0):
-            pass
-        elif (nt == 1):
-            optOpts.optTors.append(i)
-        else:
-            raise Exception()
+    for j in range(optOpts.nTors):
+        currKMask = [0, 0, 0, 0, 0, 0]
+        currPhiMask = [0, 0, 0, 0, 0, 0]
+        optTorsMask = [0, 0, 0, 0, 0, 0]
+        for i in range(6):
+            nt = int(blocklist.pop(0))
+            if (nt == 0):
+                pass
+            elif (nt == 1):
+                currKMask[i] = 1
+                optTorsMask[i] = 1
+            elif (nt == 2):
+                currKMask[i] = 1
+                currPhiMask[i] = 1
+                optTorsMask[i] = 1
+            else:
+                raise Exception()
+        optOpts.kMask.append(currKMask)
+        optOpts.phiMask.append(currPhiMask)
+        optOpts.optTors.append(optTorsMask)
     optOpts.optTors = np.array(optOpts.optTors, dtype=np.uint8)
-    optOpts.cs6switch = int(blocklist.pop(0))
-    optOpts.cs12switch = int(blocklist.pop(0))
-    if optOpts.nLJ == 1:
-        if optOpts.cs6switch ==  1:
-            if optOpts.cs12switch == 1:
-                optOpts.nLJ = 1 # redundant, but yeah...
-            else:
-                optOpts.nLJ = -1
-        else:
-            if optOpts.cs12switch == 1:
-                optOpts.nLJ = -2
-            else:
-                optOpts.nLJ = 0            
+
+
+    for j in range(optOpts.nLJ):
+        cs6switch = int(blocklist.pop(0))
+        cs12switch = int(blocklist.pop(0))
+        optOpts.LJMask.append((cs6switch, cs12switch))
+
+    if (len(optOpts.LJMask) == 0):
+        optOpts.LJMask = None
+    if (len(optOpts.kMask) == 0):
+        optOpts.kMask = None
+    if (len(optOpts.phiMask) == 0):
+        optOpts.phiMask = None
+        
     optOpts.wTemp = float(blocklist.pop(0))
 
 def read_PARAMETERRANDOMIZATION (blockdict):
@@ -256,3 +271,113 @@ def argparse2opts (args):
     else:
         raise RuntimeError("Number of reference files, coordinate files, parameter files and "
                 "weight files (if supplied) do not match.")
+
+# ====================================================================
+# Factories/other utils for initializing objects based on input
+# parameters.
+# ====================================================================
+
+def MaskLooper(loop_func, LJMasks=None, kMasks=None, phiMasks=None):
+    if not (len(kMasks) == len(phiMasks)):
+        raise ValueError()
+    type_count = 0
+    out = []
+    types = []
+    if (LJMasks is not None):
+        for C6Switch, C12Switch in LJMasks:
+            if C6Switch != 0:
+                out.append(loop_func('c6'))
+                types.append(type_count)
+            if C12Switch != 0:
+                out.append(loop_func('c12'))
+                types.append(type_count)
+            type_count += 1
+    type_count_save = type_count
+    if (kMasks is not None):
+        for sArr in kMasks:
+            for m,s in enumerate(sArr):
+                if s != 0:
+                    out.append(loop_func('k', m+1))
+                    types.append(type_count)
+            type_count += 1
+    type_count = type_count_save
+    if (phiMasks is not None):
+        for sArr in phiMasks:
+            for m,s in enumerate(sArr):
+                if s != 0:
+                    out.append(loop_func('phi', m+1))
+                    types.append(type_count)
+            type_count += 1
+    return out, types
+
+class IndexListCreator:
+    def __init__(self, optType, optAtoms, optPairs, optDihs):
+        self.optType = optType
+        self.optAtoms = optAtoms
+        self.optPairs = optPairs
+        self.optDihs = optDihs
+        self.lenLJ = self._getLenLJ()
+
+    def _getAtomOrPair(self, i):
+        if (self.optType == 'atom'):
+            return self.optAtoms[i]
+        elif (self.optType == 'pair'):
+            return self.optPairs[i]
+        else:
+            raise ValueError
+
+    def _getLenLJ(self):
+        if (self.optType == 'atom'):
+            return len(self.optAtoms)
+        elif (self.optType == 'pair'):
+            return len(self.optPairs)
+        else:
+            raise ValueError
+        
+    def _getDih(self, i):
+        return self.optDihs[i]
+
+    def get(self, idx):
+        if idx >= self.lenLJ:
+            return self._getDih(idx - self.lenLJ)
+        else:
+            return self._getAtomOrPair(idx)
+
+def RandomizerSwitch2Type(sw):
+    switch2type = {
+        1: 'uniform',
+        2: 'lognormal',
+        3: 'gaussian',
+        4: 'uniform_dim',
+    }
+    return switch2type[sw]
+
+def RandomizerSwitch2Parameters(sw, min_, max_, mean, stdev):
+    switch2pars = {
+        1: {'min': min_, 'max': max_},
+        2: {'mean': mean, 'stdev': stdev},
+        3: {'mean': mean, 'stdev': stdev},
+        4: {'min': min_, 'max': max_},
+    }
+    return switch2pars[sw]
+
+def _InitRandomizerCore(typestr, m=None):
+    if (typestr == 'c6'):
+        return LimiterDecorator(RandomizerFactory(RandomizerSwitch2Type(randOpts.cs6Dist), **RandomizerSwitch2Parameters(randOpts.cs6Dist, randOpts.cs6Min, randOpts.cs6Max, randOpts.cs6Mean, randOpts.cs6Stddev)),
+                         randOpts.cs6Min, randOpts.cs6Max)
+    elif (typestr == 'c12'):
+        return LimiterDecorator(RandomizerFactory(RandomizerSwitch2Type(randOpts.cs12Dist), **RandomizerSwitch2Parameters(randOpts.cs12Dist, randOpts.cs12Min, randOpts.cs12Max, randOpts.cs12Mean, randOpts.cs12Stddev)),
+                         randOpts.cs12Min, randOpts.cs12Max)
+    elif (typestr == 'k'):
+        return SignReverserDecorator(LimiterDecorator(RandomizerFactory(RandomizerSwitch2Type(randOpts.torsDist), **RandomizerSwitch2Parameters(randOpts.torsDist, randOpts.torsMin, randOpts.torsMax, randOpts.torsMean, randOpts.torsStddev)), randOpts.torsMin, randOpts.torsMax), randOpts.torsPinv)
+    elif (typestr == 'phi'):
+        return RandomizerFactory('uniform', low=-180.00, up=+180.00)
+        
+def InitRandomizers():
+    LJMasks  = optOpts.LJMask
+    kMasks   = optOpts.kMask
+    phiMasks = optOpts.phiMask
+    
+    rds = MaskLooper(_InitRandomizerCore, LJMasks, kMasks, phiMasks)[0]
+    return rds
+

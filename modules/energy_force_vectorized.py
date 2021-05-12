@@ -24,12 +24,12 @@
 
 import  geometrypy      as      gp
 import  numpy           as      np
-from    .configuration  import  *
-from    .coordParser    import  wrapAngles,  calcNorm
+from    .coordParser import wrapAngles
 from    math            import  sqrt
 from    sys             import  stderr
-from    copy            import  deepcopy
-from    .fastmath       import  fastCross
+from copy import deepcopy
+from .configuration import *
+from .fastmath import fastCross
 
 def c6c12_to_sigmaepsilon(c6, c12):
     return ((c12/c6)**(1.0/6), 0.25*(c6**2/c12))
@@ -137,7 +137,6 @@ class harmonicBondTerms (object):
         if (self.size == 0):
             return 0
         difference  = conf.getDistances(self.ai, self.aj)
-        difference2 = conf.getDistances2(self.ai, self.aj)
         rijs_m = deepcopy(difference)
         difference -= self.l
         energies = 0.5 * self.k * (difference ** 2)
@@ -285,7 +284,7 @@ class dihedralTerms (object):
         return self.size - 1
 
     def copy (self):
-        newTerm = dihedralTerm (self.size)
+        newTerm = dihedralTerms (self.size)
         for i in range(self.size):
             newTerm.setMember(i, self.ai[i], self.aj[i], self.ak[i], self.al[i],
                     self.phi[i], self.k[i], self.m[i])
@@ -382,9 +381,10 @@ class optDihedralTerms(object):
         self.m      = np.array([1,2,3,4,5,6], dtype=np.uint8)
 
     def verifyPhase (self):
-        for phi in self.phi.flatten():
+        flattened = self.phi.flatten()
+        for i, phi in enumerate(flattened):
             if (phi != 0) and (phi != 180.00):
-                raise RuntimeError ("For symmetric dihedral, phase must be 0 or 180.0 deg; it is {:.2f}".format(self.phi[i]))
+                raise RuntimeError ("For symmetric dihedral, phase must be 0 or 180.0 deg; it is {:.2f}".format(flattened[i]))
 
     def getType(self):
         return "standard"
@@ -395,13 +395,14 @@ class optDihedralTerms(object):
         self.ak[i] = ak - 1
         self.al[i] = al - 1
 
-    def setParameters (self, m, phi, k):
-        if m < 1:
-            raise Exception
+    def setParameters (self, i, m, phi, k):
+        if (m is not None):
+            if m < 1:
+                raise Exception
         if k is not None:
-            self.k[m-1,:] = k
+            self.k[m-1,i] = k
         if phi is not None:
-            self.phi[m-1,:] = phi
+            self.phi[m-1,i] = phi
         self.verifyPhase()
 
     def calcForConf (self, conf, forceConf, calcForce=True):
@@ -846,17 +847,18 @@ class MMCalculator (object):
                 raise Exception("Not all proper dihedrals are of the same type. Check your .stp files.")
             if (dihtype == 1) or (dihtype == 9):
                 # Periodic proper
-                noptimized = len(stpDict['optdihedrals'])
+                optdihedrals = np.ravel(stpDict['optdihedrals'])
+                noptimized = len(optdihedrals)
                 self.dihedralTerms    = dihedralTerms(ndofs - noptimized)
                 self.optDihedralTerms = optDihedralTerms(noptimized)
                 j = 0
                 for i in range(ndofs):
-                    if i not in stpDict['optdihedrals']:
+                    if i not in optdihedrals:
                         self.dihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
                                                      stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i])
                         j += 1
                 # now Opt
-                for j,i in enumerate(stpDict['optdihedrals']):
+                for j,i in enumerate(optdihedrals):
                     self.optDihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3])
                     
             elif (dihtype == 3):
@@ -952,7 +954,8 @@ class MMCalculator (object):
             if cs12 is not None:
                 self.atomTerms.cs12[i] = cs12
         # now update the LJ terms based on these new values
-        self.LJTerms.setFromAtoms(self.atomTerms, mixtype)
+        if (cs6 is not None) or (cs12 is not None):
+            self.LJTerms.setFromAtoms(self.atomTerms, mixtype)
 
     def setLJParametersForPair(self, i, cs6=None, cs12=None):
         self.LJTerms.setParameters(i, cs6, cs12)
@@ -960,8 +963,8 @@ class MMCalculator (object):
     def setDihedralParameters (self, i, phi=None, k=None, m=None):
         self.dihedralTerms.setParameters(i,phi,k,m)
 
-    def setOptDihedralParameters(self, m, phi=None, k=None):
-        self.optDihedralTerms.setParameters(m, phi, k)
+    def setOptDihedralParameters(self, which, m, phi=None, k=None):
+        self.optDihedralTerms.setParameters(which, m, phi, k)
 
     def setDihedralParametersRyck (self, i, j, k):
         self.dihedralTerms.setParameters(i, j, k)
@@ -1033,140 +1036,3 @@ class MMCalculator (object):
                         fp.write("%18.7e" % data[key][i])
                 fp.write("\n")
             fp.close()
-
-
-class OptMMCalculator:
-
-    def __init__ (self):
-        self.atomTerms                  = None
-        self.dihedralTerms           = None
-        self.LJTerms                    = None
-        self.forceConf                  = None
-        self.setCorrespondenceDihedrals = {}
-        self.setCorrespondencePairs     = {}
-
-    def createFromStpDictionary (self, stpDict):
-        key   = 'atoms'
-        ndofs = len(stpDict[key])
-        natoms = ndofs
-        self.atomTerms = atomTerms (natoms)
-        for i in range(ndofs):
-            info = stpDict[key][i]
-            self.atomTerms.setMember (i, info['c6'], info['c12'], info['cs6'], info['cs12'], info['q'])
-        key   = 'propers'
-        noptimized = len(stpDict['optdihedrals'])
-        ndofs = len(stpDict[key][0])
-        if (ndofs != 0):
-            # check if all types are the same
-            dihtypes = [stpDict[key][0][i][4] for i in range(ndofs)]
-            dihtype  = dihtypes[0]
-            if dihtypes.count(dihtype) != ndofs:
-                raise Exception("Not all proper dihedrals are of the same type. Check your .stp files.")
-            if (dihtype == 1) or (dihtype == 9):
-                # Periodic proper
-                self.dihedralTerms = optDihedralTerms(noptimized)
-                for j,i in enumerate(stpDict['optdihedrals']):
-                    self.dihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3])
-            elif (dihtype == 3):
-                # Ryckaert-Bellemanns
-                self.dihedralTerms = RyckaertBellemansDihedralTerms(noptimized)
-                for j,i in enumerate(stpDict['optdihedrals']):
-                    self.setCorrespondenceDihedrals[i] = j 
-                    self.dihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
-                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i], stpDict[key][5][i], stpDict[key][6][i])
-            elif (dihtype == 5):
-                # Fourier
-                self.dihedralTerms = FourierDihedralTerms(noptimized)
-                for j,i in enumerate(stpDict['optdihedrals']):
-                    self.setCorrespondenceDihedrals[i] = j 
-                    self.dihedralTerms.setMember(i, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
-                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i])
-        key   = 'nb'
-        if (stpDict['opttype'] == 'pair'):
-            optPairs = stpDict['optpairs']
-        elif (stpDict['opttype'] == 'atom'):
-            optPairs = []
-            for i in range(len(stpDict[key][0])):
-                if (stpDict[key][0][i][0] in stpDict['optatoms']) or (stpDict[key][0][i][1] in stpDict['optatoms']):
-                    # this means this pair is included
-                    optPairs.append(i)
-        noptimized = len(optPairs)
-        self.LJTerms = LJTerms(noptimized)
-        for j, i in enumerate(optPairs):
-            self.setCorrespondencePairs[i] = j
-            self.LJTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2],
-                stpDict[key][1][i], stpDict[key][2][i] ) 
-        # also initialize force configuration
-        self.forceConf = np.zeros((natoms,3))
-
-    def clearForces (self):
-        self.forceConf = np.zeros(self.forceConf.shape)
-
-    def forceNorm (self):
-        return np.linalg.norm(self.forceConf)
-
-    def getForceConf (self):
-        return self.forceConf.copy()
-
-    def setForces (self, forceconf):
-        self.forceConf = forceconf.copy()
-
-    def normalizeForces (self):
-        norm = self.forceNorm()
-        self.forceConf /= norm
-
-    def applyForcesToConfWithFactor (self, conf, factor, force=None):
-        if (force is None):
-            conf += (factor * self.forceConf)
-        else:
-            conf += (factor * force)
-            
-    def setSingleDihedralRestraint (self, ai, aj, ak, al, phi_0, k):
-        pass
-
-    def popDihedralRestraint (self):
-        pass
-
-    def pushDihedralRestraint (self, ai, aj, ak, al, phi_0, k):
-        pass
-
-    def setLJParametersForAtom (self, i, cs6=None, cs12=None, mixtype='geometric'):
-        if cs6 is not None:
-            self.atomTerms.cs6[i] = cs6
-        if cs12 is not None:
-            self.atomTerms.cs12[i] = cs12
-        # now update the LJ terms based on these new values
-        self.LJTerms.setFromAtoms(self.atomTerms, mixtype)
-
-    def setLJParametersForPair(self, i, cs6=None, cs12=None):
-        j = self.setCorrespondencePairs[i]
-        self.LJTerms.setParameters(j, cs6, cs12)
-
-    def setDihedralParameters (self, i, phi=None, k=None, m=None):
-        j = self.setCorrespondenceDihedrals[i]
-        self.dihedralTerms.setParameters(j,phi,k,m)
-
-    def setOptDihedralParameters(self, m, phi=None, k=None):
-        self.dihedralTerms.setParameters(m, phi, k)
-
-    def setDihedralParametersRyck (self, i, j, k):
-        p = self.setCorrespondenceDihedrals[i]
-        self.dihedralTerms.setParameters(p, j, k)
-
-    # duplicates dihedral term "i" and puts copy at the end of the dihedral terms
-    # returns index of the new dihedral
-    def duplicateDihedral (self, i):
-        return self.dihedralTerms.duplicateDihedral(i)
-
-    def setEmm(self, emm):
-        # emm is a float
-        self.emm = emm
-
-    def calcForConf (self, conf, removeRestraintsFromTotal=False, debug=False, calcForce=True):
-        self.clearForces()
-        outputDict = {}
-        outputDict['restraints'] = 0.0
-        outputDict['propers'] = np.sum(self.dihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
-        outputDict['lj'] = np.sum(self.LJTerms.calcForConf(conf, self.forceConf, debug=debug, calcForce=calcForce))
-        outputDict['total'] = self.emm + sum(outputDict.values())
-        return (outputDict, self.forceConf.copy())
