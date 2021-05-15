@@ -252,8 +252,8 @@ class profile (object):
             raise ValueError("setLJParameters for {} is not supported.".format(self.optType))
 
     def setParameters(self, type_, cs6=None, cs12=None, m=None, phi=None, k=None):
-        self.setLJParameters(type_, cs6, cs12)
-        self.setDihedralParameters(type_, m, phi, k)
+        self.setLJParameters(type_, cs6=cs6, cs12=cs12)
+        self.setDihedralParameters(type_, m, phi=phi, k=k)
 
     def minimizeProfile (self, wei=None, veryLargeEnergy=1.0e+05):
         self.enerProfile = []

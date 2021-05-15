@@ -847,7 +847,10 @@ class MMCalculator (object):
                 raise Exception("Not all proper dihedrals are of the same type. Check your .stp files.")
             if (dihtype == 1) or (dihtype == 9):
                 # Periodic proper
-                optdihedrals = np.ravel(stpDict['optdihedrals'])
+                optdihedrals = []
+                for opt_t in stpDict['optdihedrals']:
+                    for opt_t_i in opt_t:
+                        optdihedrals.append(opt_t_i)
                 noptimized = len(optdihedrals)
                 self.dihedralTerms    = dihedralTerms(ndofs - noptimized)
                 self.optDihedralTerms = optDihedralTerms(noptimized)
