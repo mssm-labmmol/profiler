@@ -935,8 +935,8 @@ class MMCalculator (object):
                     for opt_t_i in opt_t:
                         optdihedrals.append(opt_t_i)
                 noptimized = len(optdihedrals)
-                self.dihedralTerms    = dihedralTerms(ndofs - noptimized)
-                self.optDihedralTerms = optDihedralTerms(noptimized)
+                self.dihedralTerms    = generalizedDihedralTerms(ndofs - noptimized)
+                self.optDihedralTerms = generalizedOptDihedralTerms(noptimized)
                 j = 0
                 for i in range(ndofs):
                     if i not in optdihedrals:
