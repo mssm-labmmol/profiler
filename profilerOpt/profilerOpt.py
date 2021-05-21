@@ -146,6 +146,7 @@ def main():
         seed()
     else:
         seed(randOpts.seed)
+        np.random.seed(randOpts.seed)
 
     # check if files exist or raise IOError
     checkfiles (cmdlineOpts.stpFiles + cmdlineOpts.refFiles + cmdlineOpts.trajFiles + cmdlineOpts.weiFiles)
