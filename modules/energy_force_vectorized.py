@@ -243,7 +243,7 @@ class RBAngleTerms (object):
         eb = self.harmonicBondTerms.calcForConf(conf, forceConf, calcForce)
         return (ea + eb)
 
-class dihedralTerms (object):
+class generalizedDihedralTerms (object):
 
     def __init__ (self, size):
         self.size = size
@@ -259,8 +259,7 @@ class dihedralTerms (object):
         return "standard"
 
     def verifyPhase (self, i):
-        if (self.phi[i] != 0) and (self.phi[i] != 180.00):
-            raise RuntimeError ("For symmetric dihedral, phase must be 0 or 180.0 deg; it is {:.2f}".format(self.phi[i]))
+        return True
 
     def setMember (self, i, ai, aj, ak, al, phi, k, m):
         self.ai[i] = ai - 1
@@ -298,6 +297,44 @@ class dihedralTerms (object):
             self.k[i] = k
         if m is not None:
             self.m[i] = m
+
+    def calcForConf (self, conf, forceConf, calcForce=True):
+        if (self.size == 0):
+            return 0.0
+        phi = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
+        argument = self.m * phi - np.radians(self.phi)
+        energies = self.k * (1 + np.cos(argument))
+        if (calcForce):
+            # force
+            rij = conf.getDisplacements(self.ai, self.aj)
+            rkj = conf.getDisplacements(self.ak, self.aj)
+            rkl = conf.getDisplacements(self.ak, self.al)
+            # cross products - works for arrays of vectors too!
+            rmj = fastCross(rij, rkj)
+            rnk = fastCross(rkj, rkl)
+            # norms
+            mod_rmj = np.linalg.norm(rmj, axis=1)
+            mod_rnk = np.linalg.norm(rnk, axis=1)
+            mod_rkj = np.linalg.norm(rkj, axis=1)
+            mod_rkj2 = mod_rkj * mod_rkj
+            # forces
+            f_i =  self.k * self.m * np.sin(argument) * (mod_rkj / ((mod_rmj * mod_rmj))) * (rmj).T # transpose!
+            f_l = -self.k * self.m * np.sin(argument) * (mod_rkj / ((mod_rnk * mod_rnk))) * (rnk).T  # transpose!
+            f_j = ( (gp.einsum('ij,ij->i',rij,rkj)/(mod_rkj2)) - 1 ) * f_i - (gp.einsum('ij,ij->i',rkl,rkj)/(mod_rkj2)) * f_l # NO transpose
+            f_k = -(f_i + f_l + f_j) # no transpose
+            for ir in range(self.size):
+                forceConf[self.ai[ir],:] += (f_i).T[ir,:]
+                forceConf[self.aj[ir],:] += (f_j).T[ir,:]
+                forceConf[self.ak[ir],:] += (f_k).T[ir,:]
+                forceConf[self.al[ir],:] += (f_l).T[ir,:]
+        return energies
+
+class dihedralTerms (generalizedDihedralTerms):
+
+    # Overwrite
+    def verifyPhase (self, i):
+        if (self.phi[i] != 0) and (self.phi[i] != 180.00):
+            raise RuntimeError ("For symmetric dihedral, phase must be 0 or 180.0 deg; it is {:.2f}".format(self.phi[i]))
 
     # this auxiliary function returns the value of 
     # d(cos(m*phi))/d(cos(phi))
@@ -358,9 +395,9 @@ class dihedralTerms (object):
                 forceConf[self.aj[idih],:] += (f_j).T[idih,:]
                 forceConf[self.ak[idih],:] += (f_k).T[idih,:]
                 forceConf[self.al[idih],:] += (f_l).T[idih,:]
-        return energies
+        return energies    
 
-class optDihedralTerms(object):
+class generalizedOptDihedralTerms(object):
     """
     Special optDihedralTerm for optimized dihedrals.
 
@@ -381,10 +418,7 @@ class optDihedralTerms(object):
         self.m      = np.array([1,2,3,4,5,6], dtype=np.uint8)
 
     def verifyPhase (self):
-        flattened = self.phi.flatten()
-        for i, phi in enumerate(flattened):
-            if (phi != 0) and (phi != 180.00):
-                raise RuntimeError ("For symmetric dihedral, phase must be 0 or 180.0 deg; it is {:.2f}".format(flattened[i]))
+        return True
 
     def getType(self):
         return "standard"
@@ -405,6 +439,56 @@ class optDihedralTerms(object):
             self.phi[m-1,i] = phi
         self.verifyPhase()
 
+    def calcForConf (self, conf, forceConf, calcForce=True):
+        if (self.size == 0):
+            return 0.0
+        phi       = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
+        argument = gp.einsum('i,j->ij', self.m, phi) - np.radians(self.phi)
+        energies  = gp.einsum('ij,ij->j', self.k, (1 + np.cos(argument)))
+        if (calcForce):
+            # force
+            rij = conf.getDisplacements(self.ai, self.aj)
+            rkj = conf.getDisplacements(self.ak, self.aj)
+            rkl = conf.getDisplacements(self.ak, self.al)
+            mod_rkj = conf.getDistances(self.ak, self.aj)
+            mod_rkj2 = mod_rkj * mod_rkj
+            dot_ij_kj = gp.einsum('ij,ij->i', rij, rkj)
+            dot_kl_kj = gp.einsum('ij,ij->i', rkl, rkj)
+            # auxiliary vectors
+            rim =  rij - (dot_ij_kj * rkj.T / (mod_rkj2)).T
+            rln = -rkl + (dot_kl_kj * rkj.T / (mod_rkj2)).T
+            mod_rim = np.sqrt( gp.einsum('ij,ij->i', rim, rim) )
+            mod_rln = np.sqrt( gp.einsum('ij,ij->i', rln, rln) )
+            rim_norm = rim.T / mod_rim # ALREADY TRANSPOSED
+            rln_norm = rln.T / mod_rln # ALREADY TRANSPOSED
+            # cross products - works for arrays of vectors too!
+            rmj = fastCross(rij, rkj)
+            rnk = fastCross(rkj, rkl)
+            # norms
+            mod_rmj = np.linalg.norm(rmj, axis=1)
+            mod_rmj2 = mod_rmj * mod_rmj
+            mod_rnk = np.linalg.norm(rnk, axis=1)
+            mod_rnk2 = mod_rnk * mod_rnk
+            m_in_columns = self.m.reshape(-1,1)
+            # forces
+            f_i = gp.einsum('ij,kj->kj',  self.k * m_in_columns * np.sin(argument), ((rkj/(mod_rmj2)) * rmj).T)
+            f_l = gp.einsum('ij,kj->kj', -self.k * m_in_columns * np.sin(argument), ((rkj/(mod_rnk2)) * rnk).T)
+            f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
+            f_k = -(f_i + f_l + f_j)
+            for idih in range(len(phi)):
+                forceConf[self.ai[idih],:] += f_i.T[idih,:]
+                forceConf[self.aj[idih],:] += f_j.T[idih,:]
+                forceConf[self.ak[idih],:] += f_k.T[idih,:]
+                forceConf[self.al[idih],:] += f_l.T[idih,:]
+        return energies
+
+class optDihedralTerms(generalizedOptDihedralTerms):
+    def verifyPhase (self):
+        flattened = self.phi.flatten()
+        for i, phi in enumerate(flattened):
+            if (phi != 0) and (phi != 180.00):
+                raise RuntimeError ("For symmetric dihedral, phase must be 0 or 180.0 deg; it is {:.2f}".format(flattened[i]))
+    
     def calcForConf (self, conf, forceConf, calcForce=True):
         if (self.size == 0):
             return 0.0
@@ -432,8 +516,6 @@ class optDihedralTerms(object):
             # cosine derivatives
             dcos = np.array([[dihedralTerms.cosineDerivatives(cos_phi[j], m) for j in range(self.size)] for m in self.m])
             # forces
-
-
             f_i = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rln_norm - cos_phi*rim_norm) / (mod_rim))
             f_l = gp.einsum('ij,kj->kj', -self.k*cos_phi_0*dcos, (rim_norm - cos_phi*rln_norm) / (mod_rln))
             f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
@@ -445,6 +527,7 @@ class optDihedralTerms(object):
                 forceConf[self.al[idih],:] += f_l.T[idih,:]
         return energies
 
+    
 class RyckaertBellemansDihedralTerms(object):
 
     def __init__(self, size):
