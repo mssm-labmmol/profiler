@@ -509,29 +509,37 @@ def parseStpFile (filename, prepareOpt=False):
     if (prepareOpt):
         dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
         # For each dihedral in [ optdihedrals ], remove multiple instances from stp data.
-        for dihAtoms in optDihIdxs:
+        for dihtype_ in optDihIdxs:
             idxInPropers = []
-            for i,dih in enumerate(dihparticles):
-                if (dihAtoms == dih):
-                    idxInPropers.append(i)
-            if len(idxInPropers) > 1:
-                for x in sorted(idxInPropers[1:], reverse=True):
-                    del dihedralParticles[x]
-                    del dihparticles[x]
-                    dihedralPhi = np.delete(dihedralPhi, x)
-                    dihedralK = np.delete(dihedralK, x)
-                    dihedralM = np.delete(dihedralM, x)
-                    dihedralC3 = np.delete(dihedralC3, x)
-                    dihedralC4 = np.delete(dihedralC4, x)
-                    dihedralC5 = np.delete(dihedralC5, x)
+            for dihAtoms in dihtype_:
+                for i,dih in enumerate(dihparticles):
+                    if (dihAtoms == dih):
+                        idxInPropers.append(i)
+        if len(idxInPropers) > 1:
+            for x in sorted(idxInPropers[1:], reverse=True):
+                del dihedralParticles[x]
+                del dihparticles[x]
+                dihedralPhi = np.delete(dihedralPhi, x)
+                dihedralK = np.delete(dihedralK, x)
+                dihedralM = np.delete(dihedralM, x)
+                dihedralC3 = np.delete(dihedralC3, x)
+                dihedralC4 = np.delete(dihedralC4, x)
+                dihedralC5 = np.delete(dihedralC5, x)
         # Recover indices.
         refDihIdx = dihparticles.index(refDihIdx)
         optDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in optDihIdxs]
+
+        dihedralK[refDihIdx] = 0.0
+        for i in optDihIdxs:
+            dihedralK[i] = 0.0
+        
     else:
         optAtomsIdxs = []
         optPairIdxs = []
         optDihIdxs = []
         refDihIdx = dihparticles.index(refDihIdx)
+
+        dihedralK[refDihIdx] = 0.0
     out = {
         'defaults': defaults,
         'atoms': atoms,
