@@ -552,7 +552,8 @@ def parseStpFile (filename, prepareOpt=False):
         'optatoms': optAtomsIdxs,
         'optpairs': optPairIdxs,
         'optdihedrals': optDihIdxs,
-        'refdihedral': refDihIdx, 
+        'refdihedral': refDihIdx,
+        'refdihedral_bools': [(dihparticles[refDihIdx] == d) for d in dihparticles],
         'opttype': optType
     }
     return out

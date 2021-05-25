@@ -264,15 +264,18 @@ class profile (object):
                     self.mmCalc.pushDihedralRestraint (*self.refDih, phi_0=phi, k=self.restrConst)
                     # minimize
                     self.emAlgo.run(self.ensemble[i])
-                    self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
                     self.mmCalc.popDihedralRestraint()
+                    self.enerProfile.append(
+                        self.mmCalc.calcForConf(self.ensemble[i], removeRestraintsFromTotal=True, calcForce=False, minim=False)[0]['total']
+                    )
                 else:
-                    self.mmCalc.setEmm(self.emmData[i])
-                    self.emAlgo.run(self.ensemble[i])
-                    self.enerProfile.append(self.emAlgo.getUnrestrainedEnergy())
+                    raise Exception("In new code versions, this branch shouldn't be executed.")
+                    # self.mmCalc.setEmm(self.emmData[i])
+                    # self.emAlgo.run(self.ensemble[i])
+                    # self.enerProfile.append(self.mmCalc.calcForConf(self.ensemble[i], calcForce=False, minim=False))
             else:
                 self.enerProfile.append(veryLargeEnergy)
-        # shift to zero
+        # shift to zero mean
         self.enerProfile = np.array(self.enerProfile) - np.mean(self.enerProfile)
         return True
 
@@ -417,3 +420,4 @@ class multiProfile (object):
     def saveParameters (self, fn):
         with open(fn,'w') as fp:
             self.optPars.writeToStream(fp)
+        fp.write("rmsd = {}".format(self.rmsdToData()))

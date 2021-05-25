@@ -254,14 +254,25 @@ class generalizedDihedralTerms (object):
         self.phi = np.zeros(self.size)
         self.k = np.zeros(self.size)
         self.m = np.zeros(self.size)
+        self.isRef = [False for i in range(size)]
 
+    def print(self, fp, minim=False):
+        if (minim):
+            self._prepareKminim()
+        fp.write("Dihedral terms:\n")
+        for i in range(self.size):
+            fp.write("ai={}, aj={}, ak={}, al={}, k={}, phi={}, m={}\n".format(
+                self.ai[i], self.aj[i], self.ak[i], self.al[i], self.k[i], self.phi[i], self.m[i]))
+        if (minim):
+            self._restoreKminim()
+        
     def getType(self):
         return "standard"
 
     def verifyPhase (self, i):
         return True
 
-    def setMember (self, i, ai, aj, ak, al, phi, k, m):
+    def setMember (self, i, ai, aj, ak, al, phi, k, m, isRef):
         self.ai[i] = ai - 1
         self.aj[i] = aj - 1
         self.ak[i] = ak - 1
@@ -269,6 +280,7 @@ class generalizedDihedralTerms (object):
         self.phi[i] = phi
         self.k[i] = k
         self.m[i] = m
+        self.isRef[i] = isRef
         self.verifyPhase(i)
 
     def duplicateDihedral (self, i):
@@ -289,6 +301,15 @@ class generalizedDihedralTerms (object):
                     self.phi[i], self.k[i], self.m[i])
         return newTerm
 
+    def _prepareKminim(self):
+        self.k_minim = np.copy(self.k)
+        for ir in range(self.size):
+            if (self.isRef[ir]):
+                self.k[ir] = 0.0
+
+    def _restoreKminim(self):
+        self.k = self.k_minim
+
     def setParameters (self, i, phi=None, k=None, m=None):
         if phi is not None:
             self.phi[i] = phi
@@ -298,9 +319,11 @@ class generalizedDihedralTerms (object):
         if m is not None:
             self.m[i] = m
 
-    def calcForConf (self, conf, forceConf, calcForce=True):
+    def calcForConf (self, conf, forceConf, calcForce=True, minim=False):
         if (self.size == 0):
             return 0.0
+        if (minim):
+            self._prepareKminim()
         phi = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
         argument = self.m * phi - np.radians(self.phi)
         energies = self.k * (1 + np.cos(argument))
@@ -327,6 +350,8 @@ class generalizedDihedralTerms (object):
                 forceConf[self.aj[ir],:] += (f_j).T[ir,:]
                 forceConf[self.ak[ir],:] += (f_k).T[ir,:]
                 forceConf[self.al[ir],:] += (f_l).T[ir,:]
+        if (minim):
+            self._restoreKminim()
         return energies
 
 class dihedralTerms (generalizedDihedralTerms):
@@ -416,6 +441,17 @@ class generalizedOptDihedralTerms(object):
         self.k      = np.zeros((6, self.size))
         self.phi    = np.zeros((6, self.size))
         self.m      = np.array([1,2,3,4,5,6], dtype=np.uint8)
+        self.isRef  = [False for i in range(size)]
+
+    def print(self, fp, minim=False):
+        if (minim):
+            self._prepareKminim()
+        fp.write("Opt. Dihedral terms:\n")
+        for i in range(self.size):
+            fp.write("ai={}, aj={}, ak={}, al={}, k={}, phi={}, m={}\n".format(
+                self.ai[i], self.aj[i], self.ak[i], self.al[i], self.k[:,i], self.phi[:,i], self.m))
+        if (minim):
+            self._restoreKminim()
 
     def verifyPhase (self):
         return True
@@ -423,11 +459,12 @@ class generalizedOptDihedralTerms(object):
     def getType(self):
         return "standard"
 
-    def setMember(self, i, ai, aj, ak, al):
-        self.ai[i] = ai - 1
-        self.aj[i] = aj - 1
-        self.ak[i] = ak - 1
-        self.al[i] = al - 1
+    def setMember(self, i, ai, aj, ak, al, isRef):
+        self.ai[i]    = ai - 1
+        self.aj[i]    = aj - 1
+        self.ak[i]    = ak - 1
+        self.al[i]    = al - 1
+        self.isRef[i] = isRef
 
     def setParameters (self, i, m, phi, k):
         if (m is not None):
@@ -439,9 +476,20 @@ class generalizedOptDihedralTerms(object):
             self.phi[m-1,i] = phi
         self.verifyPhase()
 
-    def calcForConf (self, conf, forceConf, calcForce=True):
+    def _prepareKminim(self):
+        self.k_minim = np.copy(self.k)
+        for ir in range(self.size):
+            if (self.isRef[ir]):
+                self.k[:,ir] = 0.0
+
+    def _restoreKminim(self):
+        self.k = self.k_minim
+        
+    def calcForConf (self, conf, forceConf, calcForce=True, minim=False):
         if (self.size == 0):
             return 0.0
+        if (minim):
+            self._prepareKminim()
         phi       = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
         argument = gp.einsum('i,j->ij', self.m, phi) - np.radians(self.phi)
         energies  = gp.einsum('ij,ij->j', self.k, (1 + np.cos(argument)))
@@ -480,6 +528,8 @@ class generalizedOptDihedralTerms(object):
                 forceConf[self.aj[idih],:] += f_j.T[idih,:]
                 forceConf[self.ak[idih],:] += f_k.T[idih,:]
                 forceConf[self.al[idih],:] += f_l.T[idih,:]
+        if (minim):
+            self._restoreKminim()
         return energies
 
 class optDihedralTerms(generalizedOptDihedralTerms):
@@ -531,33 +581,59 @@ class optDihedralTerms(generalizedOptDihedralTerms):
 class RyckaertBellemansDihedralTerms(object):
 
     def __init__(self, size):
-        self.size = size
-        self.ai = np.zeros(self.size, dtype=np.int32)
-        self.aj = np.zeros(self.size, dtype=np.int32)
-        self.ak = np.zeros(self.size, dtype=np.int32)
-        self.al = np.zeros(self.size, dtype=np.int32)
-        self.c0 = np.zeros(self.size)
-        self.c1 = np.zeros(self.size)
-        self.c2 = np.zeros(self.size)
-        self.c3 = np.zeros(self.size)
-        self.c4 = np.zeros(self.size)
-        self.c5 = np.zeros(self.size)
+        self.size  = size
+        self.ai    = np.zeros(self.size, dtype =np.int32)
+        self.aj    = np.zeros(self.size, dtype =np.int32)
+        self.ak    = np.zeros(self.size, dtype =np.int32)
+        self.al    = np.zeros(self.size, dtype =np.int32)
+        self.c0    = np.zeros(self.size)
+        self.c1    = np.zeros(self.size)
+        self.c2    = np.zeros(self.size)
+        self.c3    = np.zeros(self.size)
+        self.c4    = np.zeros(self.size)
+        self.c5    = np.zeros(self.size)
+        self.isRef = [False for i in range(size)]
 
     def getType(self):
         return "ryckaert"
 
-    def setMember(self, i, ai, aj, ak, al, c0, c1, c2, c3, c4, c5):
-        self.ai[i] = ai - 1
-        self.aj[i] = aj - 1
-        self.ak[i] = ak - 1
-        self.al[i] = al - 1
-        self.c0[i] = c0
-        self.c1[i] = c1
-        self.c2[i] = c2
-        self.c3[i] = c3
-        self.c4[i] = c4
-        self.c5[i] = c5
+    def setMember(self, i, ai, aj, ak, al, c0, c1, c2, c3, c4, c5, isRef):
+        self.ai[i]    = ai - 1
+        self.aj[i]    = aj - 1
+        self.ak[i]    = ak - 1
+        self.al[i]    = al - 1
+        self.c0[i]    = c0
+        self.c1[i]    = c1
+        self.c2[i]    = c2
+        self.c3[i]    = c3
+        self.c4[i]    = c4
+        self.c5[i]    = c5
+        self.isRef[i] = isRef
 
+    def _prepareCminim(self):
+        self._c0_backup = np.copy(self.c0)
+        self._c1_backup = np.copy(self.c1)
+        self._c2_backup = np.copy(self.c2)
+        self._c3_backup = np.copy(self.c3)
+        self._c4_backup = np.copy(self.c4)
+        self._c5_backup = np.copy(self.c5)
+        for ir in range(self.size):
+            if (self.isRef[ir]):
+                self.c0[ir] = 0
+                self.c1[ir] = 0
+                self.c2[ir] = 0
+                self.c3[ir] = 0
+                self.c4[ir] = 0
+                self.c5[ir] = 0
+
+    def _restoreCminim(self):
+        self.c0 = self._c0_backup
+        self.c1 = self._c1_backup
+        self.c2 = self._c2_backup
+        self.c3 = self._c3_backup
+        self.c4 = self._c4_backup
+        self.c5 = self._c5_backup
+        
     def setParameters (self, i, j, c):
         if (j < 0):
             raise Exception()
@@ -575,10 +651,11 @@ class RyckaertBellemansDihedralTerms(object):
             if j == 5:
                 self.c5[i] = c
 
-    def calcForConf(self, conf, forceConf, calcForce=True):
+    def calcForConf(self, conf, forceConf, calcForce=True, minim=False):
         if (self.size == 0):
             return 0
-        
+        if (minim):
+            self._prepareCminim()
         phi = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
         cos = np.cos(phi)
         sin = np.sin(phi)
@@ -608,17 +685,19 @@ class RyckaertBellemansDihedralTerms(object):
                 forceConf[self.aj[ir],:] += (f_j).T[ir,:]
                 forceConf[self.ak[ir],:] += (f_k).T[ir,:]
                 forceConf[self.al[ir],:] += (f_l).T[ir,:]
+        if (minim):
+            self._restoreCminim()
         return energies
 
 class FourierDihedralTerms(RyckaertBellemansDihedralTerms):
-    def setMember(self, i, ai, aj, ak, al, f1, f2, f3, f4):
+    def setMember(self, i, ai, aj, ak, al, f1, f2, f3, f4, isRef):
         c0 = f2 + 0.50 * (f1 + f3)
         c1 = 0.50 * (-f1 + 3*f3)
         c2 = -f2 + 4*f4
         c3 = -2*f3
         c4 = -4*f4
         c5 = 0
-        super().setMember(i, ai, aj, ak, al, c0, c1, c2, c3, c4, c5)
+        super().setMember(i, ai, aj, ak, al, c0, c1, c2, c3, c4, c5, isRef)
 
 class improperTerms (object):
 
@@ -709,10 +788,10 @@ class dihedralRestraintTerms (object):
         self.size += 1
         self.setMember(self.size - 1, ai, aj, ak, al, phi, k)
 
-    def print(self):
-        print("{} restraints:".format(self.size))
+    def print(self, fp):
+        fp.write("{} restraints:\n".format(self.size))
         for i in range(self.size):
-            print("ai = {}, aj = {}, ak = {}, al = {}, phi = {}, k = {}".format(
+            fp.write("ai = {}, aj = {}, ak = {}, al = {}, phi = {}, k = {}\n".format(
                 self.ai[i], self.aj[i], self.ak[i], self.al[i], self.phi[i], self.k[i]))
 
     def calcForConf (self, conf, forceConf, calcForce=True):
@@ -762,9 +841,9 @@ class LJTerms (object):
         self.c6[i] = c6
         self.c12[i] = c12
 
-    def print(self):
+    def print(self, fp):
         for i in range(self.size):
-            print("LJ interaction, type = %d, %d-%d, c6 = %e, c12 = %e" % 
+            fp.write("LJ interaction, type = %d, %d-%d, c6 = %e, c12 = %e\n" % 
                     (self.type[i], self.ai[i]+1, self.aj[i]+1, self.c6[i], self.c12[i]))
 
     def setParameters(self, i, c6=None, c12=None):
@@ -940,25 +1019,25 @@ class MMCalculator (object):
                 j = 0
                 for i in range(ndofs):
                     if i not in optdihedrals:
-                        self.dihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
-                                                     stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i])
+                        self.dihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3], stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], isRef=stpDict['refdihedral_bools'][i])
                         j += 1
                 # now Opt
                 for j,i in enumerate(optdihedrals):
-                    self.optDihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3])
-                    
+                    self.optDihedralTerms.setMember(j, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3], isRef=stpDict['refdihedral_bools'][i])
+                        
             elif (dihtype == 3):
                 # Ryckaert-Bellemanns
                 self.dihedralTerms = RyckaertBellemansDihedralTerms(ndofs)
                 for i in range(ndofs):
                     self.dihedralTerms.setMember(i, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
-                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i], stpDict[key][5][i], stpDict[key][6][i])
+                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i], stpDict[key][5][i], stpDict[key][6][i], isRef=stpDict['refdihedral_bools'][i])
+
             elif (dihtype == 5):
                 # Fourier
                 self.dihedralTerms = FourierDihedralTerms(ndofs)
                 for i in range(ndofs):
                     self.dihedralTerms.setMember(i, stpDict[key][0][i][0], stpDict[key][0][i][1], stpDict[key][0][i][2], stpDict[key][0][i][3],
-                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i])
+                                                 stpDict[key][1][i], stpDict[key][2][i], stpDict[key][3][i], stpDict[key][4][i], isRef=stpDict['refdihedral_bools'][i])
                 
         key   = 'impropers'
         ndofs = len(stpDict[key][0])
@@ -1060,13 +1139,18 @@ class MMCalculator (object):
     def duplicateDihedral (self, i):
         return self.dihedralTerms.duplicateDihedral(i)
 
-    def calcForConf (self, conf, removeRestraintsFromTotal=False, debug=False, calcForce=True):
+    def print(self, fp, minim=False):
+        self.dihedralTerms.print(fp, minim)
+        self.optDihedralTerms.print(fp, minim)
+        self.dihedralRestraintTerms.print(fp)
+
+    def calcForConf (self, conf, removeRestraintsFromTotal=False, debug=False, calcForce=True, minim=False):
         self.clearForces()
         outputDict = {}
         outputDict['total'] = 0.0
         outputDict['bonds'] = np.sum(self.bondTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
         outputDict['angles'] = np.sum(self.angleTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
-        outputDict['propers'] = np.sum(self.dihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce)) + np.sum(self.optDihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
+        outputDict['propers'] = np.sum(self.dihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce, minim=minim)) + np.sum(self.optDihedralTerms.calcForConf(conf, self.forceConf, calcForce=calcForce, minim=minim))
         outputDict['impropers'] = np.sum(self.improperTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))
         outputDict['lj'] = np.sum(self.LJTerms.calcForConf(conf, self.forceConf, debug=debug, calcForce=calcForce))
         outputDict['coulomb'] = np.sum(self.coulombTerms.calcForConf(conf, self.forceConf, calcForce=calcForce))

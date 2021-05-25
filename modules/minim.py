@@ -53,7 +53,7 @@ class steepestDescentsMinimizer (object):
         dx = self.dx0
         dele = self.dele + 10
         iteration = 0
-        (curr_ene, curr_f) = self.mmCalc.calcForConf(conf, calcForce=(self.maxSteps != 0))
+        (curr_ene, curr_f) = self.mmCalc.calcForConf(conf, calcForce=(self.maxSteps != 0), minim=True)
         self.appendEneConf(curr_ene, conf)
         while (True):
             if (iteration == self.maxSteps):
@@ -67,7 +67,7 @@ class steepestDescentsMinimizer (object):
             self.mmCalc.normalizeForces()
             self.mmCalc.applyForcesToConfWithFactor(conf, dx)
             # Get new forces and energies.
-            (curr_ene, curr_f)  = self.mmCalc.calcForConf(conf)
+            (curr_ene, curr_f)  = self.mmCalc.calcForConf(conf, minim=True)
             # Calculate DELE.
             dele = curr_ene['total'] - old_ene['total']
             # If energy has increased, reject new configuration and halve dx for the next step.
@@ -133,7 +133,7 @@ class conjugateGradientMinimizer (object):
 
     def run(self, conf):
         self.clear()
-        stepEnergy, stepForce = self.mmCalc.calcForConf(conf)
+        stepEnergy, stepForce = self.mmCalc.calcForConf(conf, minim=True)
         # Store.
         self.ensemble.appendConf(conf)
         self.energies.append(stepEnergy)
@@ -161,7 +161,7 @@ class conjugateGradientMinimizer (object):
                 self.mmCalc.applyForcesToConfWithFactor(conf, boundB - boundA, stepDir)
 
                 if bcalcB:
-                    energyB, forceB = self.mmCalc.calcForConf(conf)
+                    energyB, forceB = self.mmCalc.calcForConf(conf, minim=True)
                     energyB = energyB['total']
                     gB = np.sum(stepDir * forceB)
                 # Terminating conditions.
@@ -177,7 +177,7 @@ class conjugateGradientMinimizer (object):
 
                     # Energies and forces at sMin.
                     self.mmCalc.applyForcesToConfWithFactor(conf, sMin - boundB, stepDir)
-                    energySmin, forceSmin = self.mmCalc.calcForConf(conf)
+                    energySmin, forceSmin = self.mmCalc.calcForConf(conf, minim=True)
                     gMin = np.sum(forceSmin * stepDir)
 
                     if (energySmin['total'] <= energyA) and (energySmin['total'] <= energyB):
