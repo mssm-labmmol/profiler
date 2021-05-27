@@ -40,7 +40,7 @@ def checkStpExtension (fn):
 def createStreamAfterPreprocessing (fn):
     cpp_path = which('cpp')
     if cpp_path is None:
-        answer = 'n'
+        answer = 'y'
         while not (answer == 'y'):
             print("Error: The stpParser uses the C preprocessor (cpp) to translate")
             print("directives such as #include and #define. However, no path for cpp")
@@ -510,22 +510,26 @@ def parseStpFile (filename, prepareOpt=False):
         dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
         # For each dihedral in [ optdihedrals ], remove multiple instances from stp data.
         for dihtype_ in optDihIdxs:
-            idxInPropers = []
+            idxInPropers = {}
             for dihAtoms in dihtype_:
                 for i,dih in enumerate(dihparticles):
                     if (dihAtoms == dih):
-                        idxInPropers.append(i)
-        if len(idxInPropers) > 1:
-            for x in sorted(idxInPropers[1:], reverse=True):
-                del dihedralParticles[x]
-                del dihparticles[x]
-                dihedralPhi = np.delete(dihedralPhi, x)
-                dihedralK = np.delete(dihedralK, x)
-                dihedralM = np.delete(dihedralM, x)
-                dihedralC3 = np.delete(dihedralC3, x)
-                dihedralC4 = np.delete(dihedralC4, x)
-                dihedralC5 = np.delete(dihedralC5, x)
-    
+                        try:
+                            idxInPropers[i] += 1
+                        except KeyError:
+                            idxInPropers[i] = 0
+        idxsToRemove = [x for x in idxInPropers.keys() if idxInPropers[x] > 1]
+        for x in sorted(idxsToRemove, reverse=True):
+            del dihedralParticles[x]
+            del dihparticles[x]
+            dihedralPhi = np.delete(dihedralPhi, x)
+            dihedralK = np.delete(dihedralK, x)
+            dihedralM = np.delete(dihedralM, x)
+            dihedralC3 = np.delete(dihedralC3, x)
+            dihedralC4 = np.delete(dihedralC4, x)
+            dihedralC5 = np.delete(dihedralC5, x)
+        # Recover indices.
+        refDihIdx = dihparticles.index(refDihIdx)
         optDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in optDihIdxs]
 
         # Zero the contribution of optDihedrals -- they will be

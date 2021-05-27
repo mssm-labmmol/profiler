@@ -513,16 +513,30 @@ class generalizedOptDihedralTerms(object):
             rmj = fastCross(rij, rkj)
             rnk = fastCross(rkj, rkl)
             # norms
-            mod_rmj = np.linalg.norm(rmj, axis=1)
+            mod_rmj = np.linalg.norm(rmj, axis=1).reshape(-1,1)
             mod_rmj2 = mod_rmj * mod_rmj
-            mod_rnk = np.linalg.norm(rnk, axis=1)
+            mod_rnk = np.linalg.norm(rnk, axis=1).reshape(-1,1)
             mod_rnk2 = mod_rnk * mod_rnk
             m_in_columns = self.m.reshape(-1,1)
             # forces
-            f_i = gp.einsum('ij,kj->kj',  self.k * m_in_columns * np.sin(argument), ((rkj/(mod_rmj2)) * rmj).T)
-            f_l = gp.einsum('ij,kj->kj', -self.k * m_in_columns * np.sin(argument), ((rkj/(mod_rnk2)) * rnk).T)
-            f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
-            f_k = -(f_i + f_l + f_j)
+            try:
+                f_i = gp.einsum('ij,kj->kj',  self.k * m_in_columns * np.sin(argument), ((rkj/(mod_rmj2)) * rmj).T)
+                f_l = gp.einsum('ij,kj->kj', -self.k * m_in_columns * np.sin(argument), ((rkj/(mod_rnk2)) * rnk).T)
+                f_j = ( (dot_ij_kj/(mod_rkj2)) - 1 ) * f_i - (dot_kl_kj/(mod_rkj2)) * f_l
+                f_k = -(f_i + f_l + f_j)
+            except ValueError:
+                print("Debug start:")
+                print("self.k=", self.k)
+                print("m_in_columns=", m_in_columns)
+                print("sin(arg)=", np.sin(argument))
+                print("left_side=", self.k*m_in_columns*np.sin(argument))
+                print("rmj=", rmj)
+                print("rkj=", rkj)
+                print("mod_rmj2=", mod_rmj2)
+                print("sub_right_side=", rkj/mod_rmj2)
+                print("right_side=", ((rkj/(mod_rmj2)) * rmj).T)
+                print("Debug end.")
+                raise ValueError
             for idih in range(len(phi)):
                 forceConf[self.ai[idih],:] += f_i.T[idih,:]
                 forceConf[self.aj[idih],:] += f_j.T[idih,:]
