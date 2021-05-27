@@ -417,6 +417,7 @@ def parseStpFile (filename, prepareOpt=False):
     reflist = []
     optType = None
     optPairIdxs = []
+    refDihIdxs = []
     fp = createStreamAfterPreprocessing(filename)
     while True:
         bn = gotoNextBlock(fp)
@@ -495,16 +496,15 @@ def parseStpFile (filename, prepareOpt=False):
                 if dih not in dihparticles:
                     raise RuntimeError("Optimized dihedral not found in [ dihedrals ].")
         elif(bn == "refdihedral"):
+            raise RuntimeError(".stp files no longer support `refdihedral'; use `refdihedrals' instead")
+        elif (bn == "refdihedrals"):
             reflist = readDihedralBlock(fp)
-            # check if it belongs
+            refDihIdxs.append(reflist)
+            # check if they belong
             dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
-            if reflist[0] not in dihparticles:
-                raise RuntimeError("Reference dihedral not found in [ dihedrals ].")
-            if (len(reflist) == 0):
-                raise RuntimeError("You need to specify one reference dihedral per system!")
-            if (len(reflist) > 1):
-                raise RuntimeError("You can only list one reference dihedral per system!")
-            refDihIdx = reflist[0]
+            for ref in reflist:
+                if ref not in dihparticles:
+                    raise RuntimeError("Reference dihedral not found in [ dihedrals ].")
     fp.close()
     if (prepareOpt):
         dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
@@ -525,11 +525,11 @@ def parseStpFile (filename, prepareOpt=False):
                 dihedralC3 = np.delete(dihedralC3, x)
                 dihedralC4 = np.delete(dihedralC4, x)
                 dihedralC5 = np.delete(dihedralC5, x)
-        # Recover indices.
-        refDihIdx = dihparticles.index(refDihIdx)
+    
         optDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in optDihIdxs]
 
-        dihedralK[refDihIdx] = 0.0
+        # Zero the contribution of optDihedrals -- they will be
+        # replaced anyway.
         for i in optDihIdxs:
             dihedralK[i] = 0.0
         
@@ -537,9 +537,29 @@ def parseStpFile (filename, prepareOpt=False):
         optAtomsIdxs = []
         optPairIdxs = []
         optDihIdxs = []
-        refDihIdx = dihparticles.index(refDihIdx)
 
-        dihedralK[refDihIdx] = 0.0
+    # Recover indices for reference dihedral.
+    refDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in refDihIdxs]
+    
+    # Zero the contribution of reference dihedrals to `mimic' a
+    # constraint.
+    # for reflist in refDihIdxs:
+    #     for ref in reflist:
+    #         dihedralK[ref] = 0.0
+
+    # For each dihedral, store if it is a reference dihedral.
+    refdihedralBools = []
+    for d, dih in enumerate(dihparticles):
+        storedValue = False
+        for reflist in refDihIdxs:
+            for ref in reflist:
+                if (ref == d):
+                    storedValue = True
+                    break
+            if (storedValue):
+                break
+        refdihedralBools.append(storedValue)
+
     out = {
         'defaults': defaults,
         'atoms': atoms,
@@ -552,8 +572,8 @@ def parseStpFile (filename, prepareOpt=False):
         'optatoms': optAtomsIdxs,
         'optpairs': optPairIdxs,
         'optdihedrals': optDihIdxs,
-        'refdihedral': refDihIdx,
-        'refdihedral_bools': [(dihparticles[refDihIdx] == d) for d in dihparticles],
+t        'refdihedrals': refDihIdxs,
+        'refdihedral_bools': refdihedralBools,
         'opttype': optType
     }
     return out

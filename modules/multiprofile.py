@@ -29,6 +29,7 @@ from .opts import cmdlineOpts, optOpts, minimOpts, dihrestrOpts
 import  numpy                     as      np
 from abc import ABC
 from .readopts import MaskLooper, IndexListCreator
+import itertools
 
 class MaybeConditionedParameter:
     def __init__(self, value, cond_func=None):
@@ -183,29 +184,68 @@ class FullOptimizableParameters(IOptimizableParameters):
     def __init__(self, LJMasks=None, kMasks=None, phiMasks=None):
         self._data, self._types = MaskLooper(ParameterFactory, LJMasks, kMasks, phiMasks)
 
-# End of new content
-
 class profile (object):
     
-    def __init__ (self, stpData, trajFile, scanFirst, scanStep, scanLast, restrConst, emAlgo, emDX0, emDXM, emDele, emSteps, emmData=None):
-            self.enerProfile        = []
-            self.ensemble           = ensemble([])
-            self.emmData = emmData
-            self.mmCalc             = MMCalculator()
-            if stpData['defaults']['comb-rule'] == 2:
-                self.mixType = 'arithmetic'
-            else:
-                self.mixType = 'geometric'
-            self.resetMinim(emAlgo, emDX0, emDXM, emDele, emSteps)
-            self.refDih             = stpData['propers'][0][stpData['refdihedral']][:4] # (ai, aj, ak, al) quadruple
-            self.restrConst         = restrConst
-            self.refPhi             = [scanFirst + i*scanStep for i in range(int((scanLast-scanFirst)/scanStep)+1)]
-            self.optType            = stpData['opttype']
-            # initialize data
-            self.ensemble.readFromTrajectory(trajFile)
-            self.mmCalc.createFromStpDictionary(stpData)
-            # index list creator
-            self.indexList = IndexListCreator(self.optType, stpData['optatoms'], stpData['optpairs'], stpData['optdihedrals'])
+    def __init__ (self, stpData, trajFile, scanFirst, scanStep, scanLast, restrConst, emAlgo, emDX0, emDXM, emDele, emSteps):
+        """
+        Parameters:
+        -----------
+          stpData(dict)                                        : parsed .stp file dictionary 
+          trajFile(str)                                        : trajectory file for molecule
+          scanFirst(list)                                      : list of scan starting points for each dihedral-restraint type
+          scanStep(list)                                       : list of scan steps for each dihedral-restraint type
+          scanLast(list)                                       : list of scan last points for each dihedral-restraint type
+          restrConst(list)                                     : list of force constants for each dihedral-restraint type
+          emAlgo(int)                                          : energy-minimization algorithm choice
+          emDX0(float),emDXM(float),emDele(float),emSteps(int) : energy-minimization parameters
+
+        Attributes:
+        -----------
+          enerProfile(list)    : list of energies (float) for each configuration in the ensemble
+          ensemble(ensemble)   : ensemble configurations for this molecule
+          mmCalc(MMCalculator) : molecular-mechanics calculator for this molecule
+          mixType(str)         : 'arithmetic' or 'geometric'
+          optType(str)         : 'pair' or 'atom'
+          refDihs(list)        : list of quadruples of each reference dihedral
+          restrConst(list)     : list of dihedral-restraint force constants for each reference dihedral
+          refPhi(list of list) : list of dihedral-restraint angles (list of float) for each reference dihedral
+          indexList(IndexList) : IndexList object for properly retrieving optDihedrals/optAtoms/optPairs indexes
+        """
+        self.enerProfile        = []
+        self.ensemble           = ensemble([])
+        self.mmCalc             = MMCalculator()
+        if stpData['defaults']['comb-rule'] == 2:
+            self.mixType = 'arithmetic'
+        else:
+            self.mixType = 'geometric'
+        self.resetMinim(emAlgo, emDX0, emDXM, emDele, emSteps)
+        # refDihs is a list of quadruples
+        self.refDihs = [stpData['propers'][0][d][:4] for reflist in stpData['refdihedrals'] for d in reflist]
+        # self.restrConst is a list of dihedral-restraint force
+        # constants for each refDih, while restrConst is a list of
+        # force constants for each type!
+        self.restrConst = [restrConst[type_] for type_, reflist in enumerate(stpData['refdihedrals']) for d in reflist]
+        # refPhi is a list of phi values corresponding to each
+        # refDih--e.g., refPhi[i] = [0,10,20,...] ...
+        self.refPhi = []
+        for type_, reflist in enumerate(stpData['refdihedrals']):
+            for d in reflist:
+                scanValues = [scanFirst[type_] + i * scanStep[type_] for i in
+                              range(int((scanLast[type_] - scanFirst[type_])/scanStep[type_]) + 1)]
+                self.refPhi.append(scanValues)
+        #
+        self.optType = stpData['opttype']
+        # initialize data
+        self.ensemble.readFromTrajectory(trajFile)
+        self.mmCalc.createFromStpDictionary(stpData)
+        # index list creator
+        self.indexList = IndexListCreator(self.optType, stpData['optatoms'], stpData['optpairs'], stpData['optdihedrals'])
+
+    def replaceEnsemble(self, newEnsemble):
+        self.ensemble = newEnsemble
+
+    def calculateNumberOfConfigurations(self):
+        return np.prod([len(phis) for phis in self.refPhi])
 
     def resetMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps):
         if (emAlgo == 1): # SDEM
@@ -214,7 +254,6 @@ class profile (object):
             self.emAlgo = conjugateGradientMinimizer(dx0=emDX0, nsteps=emSteps, dxm=emDXM, prec=emDele, calc=self.mmCalc)
 
     def resetMMCalcForMinim(self, stpData):
-        self.emmData = None
         self.mmCalc = MMCalculator()
         self.mmCalc.createFromStpDictionary(stpData)
 
@@ -223,7 +262,9 @@ class profile (object):
         self.resetMinim(emAlgo, emDX0, emDXM, emDele, emSteps)
 
     def setDihedralParameters (self, whichOpt, m, phi=None, k=None):
-        # FIXME: This needs to be refactored.
+        # FIXME: This needs to be refactored in the future, using
+        # different logics for 'standard' and 'ryckaert' is a bit
+        # ugly.
         if (optOpts.dihType == 'standard'):
             for idx in range(len(self.indexList.get(whichOpt))): # Note the range(len(
                 if (self.mmCalc.dihedralTerms.getType() == 'standard'):
@@ -255,26 +296,26 @@ class profile (object):
         self.setLJParameters(type_, cs6=cs6, cs12=cs12)
         self.setDihedralParameters(type_, m, phi=phi, k=k)
 
-    def minimizeProfile (self, wei=None, veryLargeEnergy=1.0e+05):
+    def minimizeProfile (self, wei=None, veryLargeEnergy=1.0e+05, elements=None, enerPrefix=None, trajPrefix=None):
         self.enerProfile = []
-        for i,phi in enumerate(self.refPhi):
-            if (wei is None) or (wei[i] != 0):
-                if (self.emmData is None):
-                    # set restraints in a push-pop fashion
-                    self.mmCalc.pushDihedralRestraint (*self.refDih, phi_0=phi, k=self.restrConst)
-                    # minimize
-                    self.emAlgo.run(self.ensemble[i])
-                    self.mmCalc.popDihedralRestraint()
-                    self.enerProfile.append(
-                        self.mmCalc.calcForConf(self.ensemble[i], removeRestraintsFromTotal=True, calcForce=False, minim=False)[0]['total']
-                    )
-                else:
-                    raise Exception("In new code versions, this branch shouldn't be executed.")
-                    # self.mmCalc.setEmm(self.emmData[i])
-                    # self.emAlgo.run(self.ensemble[i])
-                    # self.enerProfile.append(self.mmCalc.calcForConf(self.ensemble[i], calcForce=False, minim=False))
+        
+        for k, phiValues in enumerate(itertools.product(*self.refPhi)):
+            # set all restraints
+            for i, phi in enumerate(phiValues):
+                self.mmCalc.pushDihedralRestraint(*self.refDihs[i], phi_0=phi, k=self.restrConst[i])
+            # minimize
+            if (enerPrefix is not None) and (trajPrefix is not None) and (elements is not None):
+                out_ener = "{}_{}.dat".format(enerPrefix, k)
+                out_traj = "{}_{}.xyz".format(trajPrefix, k)
+                self.emAlgo.runAndSave(self.ensemble[k], elements, out_ener, out_traj)
             else:
-                self.enerProfile.append(veryLargeEnergy)
+                self.emAlgo.run(self.ensemble[k])
+            # pop all restraints
+            for i, phi in enumerate(phiValues):
+                self.mmCalc.popDihedralRestraint()
+            # calculate and store energy
+            self.enerProfile.append(self.mmCalc.calcForConf(self.ensemble[k], removeRestraintsFromTotal=True, calcForce=False, minim=False)[0]['total'])
+            
         # shift to zero mean
         self.enerProfile = np.array(self.enerProfile) - np.mean(self.enerProfile)
         return True
@@ -299,29 +340,25 @@ class multiProfile (object):
 
     def __init__ (self):
         self.profiles = []
-        #self.m        = [[s + 1 for s in multSwitches] for multSwitches in optOpts.optTors]
         self.optPars  = None  # It will be initialized separately for each dihedral type.
 
         for i in range(optOpts.nSystems):
             trajFile = cmdlineOpts.trajFiles[i]
             stpData  = optOpts.stpData[i]
-            if optOpts.emmData is None:
-                emmData = None
-            else:
-                emmData = optOpts.emmData[i,:]
             if (optOpts.dihType == 'standard'):
                 self.profiles.append(profile(stpData, trajFile,
-                    dihrestrOpts.start, dihrestrOpts.step, dihrestrOpts.last, dihrestrOpts.k,
-                    minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps,
-                                             emmData=emmData))
-
+                                             dihrestrOpts.start, dihrestrOpts.step,
+                                             dihrestrOpts.last, dihrestrOpts.k,
+                                             minimOpts.minimType, minimOpts.dx0, minimOpts.dxm,
+                                             minimOpts.dele, minimOpts.maxSteps))
                 self.optPars = FullOptimizableParameters(LJMasks=optOpts.LJMask, kMasks=optOpts.kMask, phiMasks=optOpts.phiMask)
 
             if (optOpts.dihType == 'ryckaert'):
                 self.profiles.append(profile(stpData, trajFile,
-                    dihrestrOpts.start, dihrestrOpts.step, dihrestrOpts.last, dihrestrOpts.k,
-                                             minimOpts.minimType, minimOpts.dx0, minimOpts.dxm, minimOpts.dele, minimOpts.maxSteps,
-                                             emmData=emmData))
+                                             dihrestrOpts.start, dihrestrOpts.step,
+                                             dihrestrOpts.last, dihrestrOpts.k,
+                                             minimOpts.minimType, minimOpts.dx0, minimOpts.dxm,
+                                             minimOpts.dele, minimOpts.maxSteps))
 
                 # ignores mask for optimization of phases
                 self.optPars = FullOptimizableParameters(LJMasks=optOpts.LJMask, kMasks=optOpts.kMask)
@@ -385,10 +422,6 @@ class multiProfile (object):
     def minimizeProfiles (self, useWei=False):
         if (useWei):
             raise Exception("useWei is dangerous")
-            #for i,profile in enumerate(self.profiles):
-            #    if not (profile.minimizeProfile(wei=optOpts.weiData[i][:])):
-            #        return False
-            #return True
         else:
             for i,profile in enumerate(self.profiles):
                 if not (profile.minimizeProfile()):

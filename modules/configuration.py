@@ -185,6 +185,8 @@ class ensemble (object):
         self.confs.append( conf.copy() )
 
     def readFromTrajectory (self, trajFile):
+        if (trajFile is None):
+            return
         if (trajFile.endswith('.g96')) or (trajFile.endswith('.trc')):
             traj = parseG96traj(trajFile, [], [], [], [], [])[-1]
             elem = ['X'] * traj.shape[2]

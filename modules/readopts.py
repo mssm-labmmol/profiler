@@ -176,12 +176,16 @@ def read_MINIMIZATION (blockdict):
 def read_TORSIONALSCAN (blockdict):
     blockname = 'torsional_scan'
     blocklist = blockdict[blockname]
-    dihrestrOpts.start = float(blocklist.pop(0))
-    dihrestrOpts.step  = float(blocklist.pop(0))
-    dihrestrOpts.last  = float(blocklist.pop(0))
-    dihrestrOpts.k     = float(blocklist.pop(0))
-    dihrestrOpts.nPoints = int(int(dihrestrOpts.last - dihrestrOpts.start)/dihrestrOpts.step) + 1
-
+    dihrestrOpts.ntypes = int(blocklist.pop(0))
+    if dihrestrOpts.ntypes < 1:
+        raise RuntimeError("You need at least one dihedral-restraint type.")
+    for type_ in dihrestrOpts.ntypes:
+        dihrestrOpts.start.append(float(blocklist.pop(0)))
+        dihrestrOpts.step.append( float(blocklist.pop(0)))
+        dihrestrOpts.last.append(float(blocklist.pop(0)))
+        dihrestrOpts.k.append(float(blocklist.pop(0)))
+        dihrestrOpts.nPoints.apend(int(int(dihrestrOpts.last - dihrestrOpts.start)/dihrestrOpts.step) + 1)
+        
 def read_GEOMETRYCHECK (blockdict):
     blockname = 'geometry_check'
     blocklist = blockdict[blockname]

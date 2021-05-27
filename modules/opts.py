@@ -103,12 +103,13 @@ class lastMinimOpts (object):
 
 class dihrestrOpts (object):
 
-    start = 0 # Starting angle. 
-    step = 10 # Step. 
-    last = 360 # Last angles. 
-    nPoints = 37 # How many points in the grid.
+    ntypes = 0 # Number of dihedral-restraint types.
+    start = [] # Starting angles.
+    step = [] # Step angles.
+    last = [] # Last angles. 
+    nPoints = [] # How many points in each grid.
     #width = 0 # Width of the flat part of the potential. 
-    k = 5000 # Force constant. 
+    k = [] # Force constants
 
 class geomcheckOpts (object):
 
