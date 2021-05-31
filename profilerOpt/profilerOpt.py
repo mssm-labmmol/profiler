@@ -130,6 +130,8 @@ def main():
 
     parser.add_argument('--debug-mm', dest='emm', default=False, action='store_true', help=argparse.SUPPRESS)
 
+    parser.add_argument('-s', metavar=('DIHSPEC_1', 'DIHSPEC_2'), dest='dih_spec', nargs='+', required=False, type=str, help="Torsional-scan dihedral-angle files.")
+
     args = parser.parse_args(preprocess_args(argv[1:]))
 
     # map arguments to xxxOpts

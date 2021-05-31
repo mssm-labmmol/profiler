@@ -169,7 +169,10 @@ class ensemble (object):
         return ensemble(newConfs)
 
     def __getitem__ (self, i):
-        return self.confs[i]
+        try:
+            return self.confs[i]
+        except IndexError:
+            raise IndexError("Configuration", i, "out of bounds for ensemble of size", self.size())
 
     def __setitem__ (self, i, value):
         self.confs[i] = value

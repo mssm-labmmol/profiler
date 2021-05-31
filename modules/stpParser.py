@@ -529,7 +529,6 @@ def parseStpFile (filename, prepareOpt=False):
             dihedralC4 = np.delete(dihedralC4, x)
             dihedralC5 = np.delete(dihedralC5, x)
         # Recover indices.
-        refDihIdx = dihparticles.index(refDihIdx)
         optDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in optDihIdxs]
 
         # Zero the contribution of optDihedrals -- they will be
@@ -576,7 +575,7 @@ def parseStpFile (filename, prepareOpt=False):
         'optatoms': optAtomsIdxs,
         'optpairs': optPairIdxs,
         'optdihedrals': optDihIdxs,
-t        'refdihedrals': refDihIdxs,
+        'refdihedrals': refDihIdxs,
         'refdihedral_bools': refdihedralBools,
         'opttype': optType
     }

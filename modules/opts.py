@@ -103,6 +103,10 @@ class lastMinimOpts (object):
 
 class dihrestrOpts (object):
 
+    origin = 1 # Origin of reference dihedral-angle values:
+               # 1: Systematic
+               # 2: From values in trajectory
+               # 3: From values specified in external files
     ntypes = 0 # Number of dihedral-restraint types.
     start = [] # Starting angles.
     step = [] # Step angles.

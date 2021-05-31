@@ -33,6 +33,7 @@ from    modules.coordParser              import  calcDihedral,    wrapAngleDegre
 from    modules.energy_force_vectorized  import  MMCalculator
 from    modules.minim                    import  steepestDescentsMinimizer, conjugateGradientMinimizer
 from    modules.multiprofile             import  profile as Profile
+from    modules.readopts                 import  genRefDihedrals_Systematic, genRefDihedrals_Trajectory, genRefDihedrals_ExternalFile
 from    datetime                         import  datetime
 from    platform                         import  platform,        python_version
 from    os.path                          import  isfile
@@ -53,8 +54,9 @@ def minimize_conf (conf: configuration, elements: list, stpdict: dict,
     minimizer.runAndSave(conf_copy, elements, out_ener, out_traj)
     return conf_copy
 
-def minimize_conf_with_profile(ensemble, out_prefix, stpData, scanFirst, scanStep, scanLast, restrConst, emAlgo, emDX0, emDXM, emDele, emSteps):
-    profile = Profile(stpData, None, scanFirst, scanStep, scanLast, restrConst, emAlgo, emDX0, emDXM, emDele, emSteps)
+def minimize_conf_with_profile(ensemble, out_prefix, stpData, refPhi,
+                               restrConst, emAlgo, emDX0, emDXM, emDele, emSteps):
+    profile = Profile(stpData, None, refPhi, restrConst, emAlgo, emDX0, emDXM, emDele, emSteps)
     if ensemble.size() <= 1:
         nconfs = profile.calculateNumberOfConfigurations()
         for i in range(nconfs - 1):
@@ -100,10 +102,12 @@ def main():
             "Torsional-scan trajectory or single molecular conformation (.xyz/.gro/.g96).")
     parser.add_argument('-t', metavar='STP', dest='pars', required=True, type=str, help=
             "Special-topology file (.stp).")
-    parser.add_argument('-dr', action='append', dest='dih_restr', type=float, required=True, nargs='+', help=
+    parser.add_argument('-dr', action='append', dest='dih_restr', type=float, required=False, nargs='+', help=
             "Torsional-scan angles (deg): from RFRST to RLST with a RSTEP step.")
     parser.add_argument('-dk', metavar='RFCT', dest='dih_k', required=True, nargs='+', help=
             "Force constants for dihedral restraint (we suggest 5000 kJ/(mol.rad^2)) for each type.")
+    parser.add_argument('-s', metavar='SPEC', dest='dih_spec', type=str, required=False, help=
+            "Torsional-scan angles specification file.")
     parser.add_argument('-op', metavar='PREFIX', dest='out', required=True, type=str, help=
             "Prefix for output files.")
     parser.add_argument('-min', metavar='MALG', dest='min_alg', required=False, type=int, default=1, help=
@@ -124,32 +128,48 @@ def main():
     # check if files exist or raise IOError
     checkfiles ([args.coords, args.pars])
 
-    # check if lengths are compatible
-    if len(args.dih_restr) != len(args.dih_k):
+    if args.dih_restr is not None and (len(args.dih_restr) != len(args.dih_k)):
         raise RuntimeError("Different number of types for -dr and -dk options.")
 
-    scanFirst  = [t_[0] for t_ in args.dih_restr]
-    scanStep   = [t_[1] for t_ in args.dih_restr]
-    scanLast   = [t_[2] for t_ in args.dih_restr]
     restrConst = args.dih_k
     
-    # get reference dihedral values from stp file
+    # get reference dihedrals from stp file
     stpdict = parseStpFile(args.pars)
+
     ens = ensemble([])
     ens.readFromTrajectory(args.coords)
 
-    if (ens.size() > 1):
-        optMode = 'trajectory'
-        debug_msg("Optimizing from input trajectory.", stdout, True)
+    if args.dih_restr is None:
+        if args.dih_spec is None:
+            dihMode = 'trajectory'
+        else:
+            dihMode = 'external'
     else:
-        optMode = 'configuration'
-        debug_msg("Optimizing from single configuration.", stdout, True)
+        if args.dih_spec is None:
+            dihMode = 'systematic'
+        else:
+            raise Exception("Can't use -dr and -s at the same time.")
 
+    if dihMode == 'systematic':
+        scanFirst  = [t_[0] for t_ in args.dih_restr]
+        scanStep   = [t_[1] for t_ in args.dih_restr]
+        scanLast   = [t_[2] for t_ in args.dih_restr]
+        refPhi = genRefDihedrals_Systematic(stpdict, scanFirst, scanStep, scanLast)
+        if (ens.size() > 1):
+            debug_msg("Optimizing from input trajectory.", stdout, True)
+        else:
+            debug_msg("Optimizing from single configuration.", stdout, True)
+    elif dihMode == 'trajectory':
+        refPhi = genRefDihedrals_Trajectory(stpdict, args.coords)
+        debug_msg("Optimizing from input trajectory (fixing reference dihedrals).", stdout, True)
+    elif dihMode == 'external':
+        refPhi = genRefDihedrals_ExternalFile(args.dih_spec)
+        
     profile = minimize_conf_with_profile(ens, args.out, stpdict,
-                                     scanFirst, scanStep, scanLast,
-                                     restrConst, args.min_alg,
-                                     args.min_dx0, args.min_dxm,
-                                     args.min_dele, args.min_nsteps)
+                                         refPhi, restrConst,
+                                         args.min_alg, args.min_dx0,
+                                         args.min_dxm, args.min_dele,
+                                         args.min_nsteps)
 
 
     profile.ensemble.writeToFile(args.out + '.xyz', fmt='xyz')

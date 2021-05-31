@@ -25,8 +25,10 @@
 from .opts import optOpts, randOpts, minimOpts, lastMinimOpts, vbgaOpts, dihrestrOpts, geomcheckOpts, cmdlineOpts
 from .randomizer import RandomizerFactory, LimiterDecorator, SignReverserDecorator
 from sys import stderr
+from .configuration import ensemble
 import numpy as np
 from functools import partial
+import itertools
 
 def getline (stream, comm = ';'):
     buff = ''
@@ -176,15 +178,16 @@ def read_MINIMIZATION (blockdict):
 def read_TORSIONALSCAN (blockdict):
     blockname = 'torsional_scan'
     blocklist = blockdict[blockname]
+    dihrestrOpts.origin = int(blocklist.pop(0))
     dihrestrOpts.ntypes = int(blocklist.pop(0))
     if dihrestrOpts.ntypes < 1:
         raise RuntimeError("You need at least one dihedral-restraint type.")
-    for type_ in dihrestrOpts.ntypes:
+    for type_ in range(dihrestrOpts.ntypes):
         dihrestrOpts.start.append(float(blocklist.pop(0)))
         dihrestrOpts.step.append( float(blocklist.pop(0)))
         dihrestrOpts.last.append(float(blocklist.pop(0)))
         dihrestrOpts.k.append(float(blocklist.pop(0)))
-        dihrestrOpts.nPoints.apend(int(int(dihrestrOpts.last - dihrestrOpts.start)/dihrestrOpts.step) + 1)
+        dihrestrOpts.nPoints.append(int(int(dihrestrOpts.last[-1] - dihrestrOpts.start[-1])/dihrestrOpts.step[-1]) + 1)
         
 def read_GEOMETRYCHECK (blockdict):
     blockname = 'geometry_check'
@@ -265,6 +268,7 @@ def argparse2opts (args):
     cmdlineOpts.outPrefix = args.out
     cmdlineOpts.inputFile = args.input
     cmdlineOpts.debugEmm = args.emm
+    cmdlineOpts.dihspecFiles = args.dih_spec
     # consistency check
     nref = len(args.ref)
     ncoords = len(args.coords)
@@ -385,3 +389,55 @@ def InitRandomizers():
     rds = MaskLooper(_InitRandomizerCore, LJMasks, kMasks, phiMasks)[0]
     return rds
 
+
+# ================ Dihedral-Restraint Reference Values ===============
+
+def genRefDihedrals_Systematic(stpData, scanFirst, scanStep, scanLast):
+    _refPhi = []
+    for type_, reflist in enumerate(stpData['refdihedrals']):
+        for d in reflist:
+            scanValues = [scanFirst[type_] + i * scanStep[type_] for i in
+                          range(int((scanLast[type_] - scanFirst[type_])/scanStep[type_]) + 1)]
+            _refPhi.append(scanValues)
+    
+    out = np.array(list(itertools.product(*_refPhi))).T
+    if out.ndim == 1:
+        out = out.reshape(1, -1)
+    return out
+    
+
+def genRefDihedrals_Trajectory(stpData, trajFile):
+    ens = ensemble()
+    ens.readFromTrajectory(trajFile)
+    refPhi = []
+    for type_, reflist in enumerate(stpData['refdihedrals']):
+        for d in reflist:
+            zeroIndexed = [ax - 1 for ax in stpData['propers'][0][d][:4]]
+            phis = []
+            for conf in ens:
+                phis.append(conf.getDihedral(*zeroIndexed))
+            refPhi.append(phis)
+    refPhi = np.array(refPhi)
+    if refPhi.ndim == 1:
+        refPhi = refPhi.reshape(1, -1)
+    return refPhi
+
+def genRefDihedrals_ExternalFile(dihedralSpecFile):
+    out = (np.loadtxt(dihedralSpecFile)).T
+    if out.ndim == 1:
+        out = out.reshape(1, -1)
+    return out
+
+def genRefDihedrals(system):
+    if (dihrestrOpts.origin == 1):
+        return genRefDihedrals_Systematic(optOpts.stpData[system],
+                                          dihrestrOpts.start,
+                                          dihrestrOpts.step,
+                                          dihrestrOpts.last)
+    elif (dihrestrOpts.origin == 2):
+        return genRefDihedrals_Trajectory(optOpts.stpData[system],
+                                          cmdlineOpts.trajFiles[system])
+    elif (dihrestrOpts.origin == 3):
+        return genRefDihedrals_ExternalFile(cmdlineOpts.dihspecFiles[system])
+    else:
+        raise ValueError
