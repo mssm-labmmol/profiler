@@ -91,6 +91,21 @@ def crossWrapper (crosstype):
     else:
         raise RuntimeError ("Cross-over type {} not allowed.".format(crosstype))
 
+def check_STP_Input_Consistency():
+    for i, stp in enumerate(optOpts.stpData):
+        if optOpts.nTors != len(stp['optdihedrals']):
+            raise ValueError("Number of opt. dihedral types in file {} should be {}.".format(cmdlineOpts.stpFiles[i], optOpts.nTors))
+        if stp['opttype'] == 'pair':
+            comp_LJ = len(stp['optpairs'])
+        elif stp['opttype'] == 'atom':
+            comp_LJ = len(stp['optatoms'])
+        elif stp['opttype'] is None:
+            comp_LJ = 0
+        else:
+            raise ValueError("Unexpected branch.")
+        if optOpts.nLJ != comp_LJ:
+            raise ValueError("Number of opt. LJ types in file {} should be {}.".format(cmdlineOpts.stpFiles[i], optOpts.nLJ))
+
 def main():
 
     progdescr = """
@@ -176,6 +191,10 @@ def main():
         dummyIndividual = multiProfile()
         # Get nonOpt energies
         optOpts.emmData = dummyIndividual.getNonoptEnergy()
+
+    # check consistency between number of dihedral/LJ types in stp
+    # files and in the input file
+    check_STP_Input_Consistency()
         
     # initialize strategy
     GA = evolStratFactory(popSize=vbgaOpts.popSize)
