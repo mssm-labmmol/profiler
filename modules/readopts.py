@@ -92,13 +92,19 @@ def read_PARAMETEROPTIMIZATION (blockdict):
         optOpts.kMask.append(currKMask)
         optOpts.phiMask.append(currPhiMask)
         optOpts.optTors.append(optTorsMask)
-    optOpts.optTors = np.array(optOpts.optTors, dtype=np.uint8)
+        
+    if optOpts.nTors != len(optOpts.kMask):
+        raise ValueError("Input file: Number of dihedral types do not match specification.")
 
+    optOpts.optTors = np.array(optOpts.optTors, dtype=np.uint8)
 
     for j in range(optOpts.nLJ):
         cs6switch = int(blocklist.pop(0))
         cs12switch = int(blocklist.pop(0))
         optOpts.LJMask.append((cs6switch, cs12switch))
+
+    if optOpts.nLJ != len(optOpts.LJMask):
+        raise ValueError("Input file: Number of LJ types do not match specification.")
 
     if (len(optOpts.LJMask) == 0):
         optOpts.LJMask = None
@@ -340,7 +346,7 @@ class IndexListCreator:
         elif (self.optType == 'pair'):
             return len(self.optPairs)
         else:
-            raise ValueError
+            return 0
         
     def _getDih(self, i):
         return self.optDihs[i]

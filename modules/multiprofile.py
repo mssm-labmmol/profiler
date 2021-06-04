@@ -280,8 +280,6 @@ class profile (object):
         elif (self.optType == 'pair'):
             for idx in indexList:
                 self.mmCalc.setLJParametersForPair(idx, cs6, cs12)
-        else:
-            raise ValueError("setLJParameters for {} is not supported.".format(self.optType))
 
     def setParameters(self, type_, cs6=None, cs12=None, m=None, phi=None, k=None):
         self.setLJParameters(type_, cs6=cs6, cs12=cs12)
