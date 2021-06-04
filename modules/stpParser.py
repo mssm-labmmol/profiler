@@ -28,6 +28,16 @@ from   subprocess import check_output
 from   shutil import which
 from   io     import StringIO
 
+def indices(lst, element):
+    result = []
+    offset = -1
+    while True:
+        try:
+            offset = lst.index(element, offset+1)
+        except ValueError:
+            return result
+        result.append(offset)
+
 def raiseError (msg):
     print ("ERROR: " + msg)
     exit(0)
@@ -508,18 +518,20 @@ def parseStpFile (filename, prepareOpt=False):
     fp.close()
     if (prepareOpt):
         dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
-        # For each dihedral in [ optdihedrals ], remove multiple instances from stp data.
+
+        # remove multiple instances of optdihedrals from proper dihedrals
+        idxsToRemove = []
         for dihtype_ in optDihIdxs:
-            idxInPropers = {}
             for dihAtoms in dihtype_:
-                for i,dih in enumerate(dihparticles):
-                    if (dihAtoms == dih):
-                        try:
-                            idxInPropers[i] += 1
-                        except KeyError:
-                            idxInPropers[i] = 0
-        idxsToRemove = [x for x in idxInPropers.keys() if idxInPropers[x] > 1]
-        for x in sorted(idxsToRemove, reverse=True):
+                # fill with indices of optdihedrals, except for the first one that appears
+                idxsToRemove.extend(indices(dihparticles, dihAtoms)[1:])
+
+        # remove duplicates and sort by reverse order
+        idxsToRemove = list(set(idxsToRemove))
+        idxsToRemove.sort(reverse=True)
+
+        # delete dihedral data 
+        for x in idxsToRemove:
             del dihedralParticles[x]
             del dihparticles[x]
             dihedralPhi = np.delete(dihedralPhi, x)
@@ -528,13 +540,19 @@ def parseStpFile (filename, prepareOpt=False):
             dihedralC3 = np.delete(dihedralC3, x)
             dihedralC4 = np.delete(dihedralC4, x)
             dihedralC5 = np.delete(dihedralC5, x)
+
         # Recover indices.
         optDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in optDihIdxs]
 
         # Zero the contribution of optDihedrals -- they will be
         # replaced anyway.
         for i in optDihIdxs:
-            dihedralK[i] = 0.0
+            dihedralPhi[i]  = 0.0
+            dihedralK[i]    = 0.0
+            dihedralM[i]    = 0.0
+            dihedralC3[i]   = 0.0
+            dihedralC4[i]   = 0.0
+            dihedralC5[i]   = 0.0
         
     else:
         optAtomsIdxs = []
