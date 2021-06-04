@@ -110,10 +110,7 @@ def main():
 
     progdescr = """
     profilerOpt is a Python program for simultaneous optimization of
-    torsional and 1-4 Lennard-Jones parameters. It is based on simple
-    in-house Python libraries for parameter optimization (using a
-    genetic algorithm) and calculation of molecular mechanics energies
-    and forces.
+    torsional and 1-4 Lennard-Jones parameters.
     """
 
     parser = argparse.ArgumentParser(description=progdescr, formatter_class=argparse.RawTextHelpFormatter)
