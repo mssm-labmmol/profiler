@@ -21,8 +21,6 @@ While every effort has been made to cover the most common functional forms and f
 
 # Limitations
 
-* The script can only process absolute paths in `#include` directives.
-
 * The script can only process the GROMACS directives listed below. If your .itp file contains more than one molecule definition (e.g., it involves solute and solvent) or a feature that is not supported (e.g., position restraints), please modify it first.
     * `[ defaults ]`
     * `[ atomtypes ]`

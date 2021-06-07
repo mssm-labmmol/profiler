@@ -22,12 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-def input_loop(max=0, end='0', convert=lambda x: int(x)):
+class InterfaceError(Exception): pass
+
+def input_loop(max=0, end='0', finish='-1', convert=lambda x: int(x)):
     output = []
     while True:
         answer = input("")
         if answer == end:
-            return output
+            return output, 'end' # this means the selection of a type has ended
+        elif answer == finish:
+            return output, 'finish' # this means the entire selection has ended
         else:
             output.append(convert(answer))
             if (max != 0) and (len(output) >= max):
@@ -55,10 +59,13 @@ def print_dihedral_list(itp_data):
                 names['ai'], names['aj'], names['ak'], names['al']))
 
 def write_refdihedral_block(stream, itp_data):
-    print("Select the dihedral to use as reference for the scan from the list below.")
     print_dihedral_list(itp_data)
-    dihs = input_loop(max=1)
-    stream.write('[ refdihedral ]\n')
+    print("Select the dihedrals to use as reference for the scan from the list above.")
+    print("For each dihedral desired, type the corresponding number and then Enter.")
+    print("  0 starts a new [ refdihedrals ] block.")
+    print(" -1 ends the selection of reference dihedrals.")
+    dihs, flag = input_loop()
+    stream.write('[ refdihedrals ]\n')
     for dih in dihs:
         stream.write("{:<4d}{:<4d}{:<4d}{:<4d}\n".format(
             itp_data['dihedrals'][dih - 1]['ai'],
@@ -66,13 +73,23 @@ def write_refdihedral_block(stream, itp_data):
             itp_data['dihedrals'][dih - 1]['ak'],
             itp_data['dihedrals'][dih - 1]['al']))
     stream.write('\n')
+    if (flag == 'end'):
+        # start a new type
+        write_refdihedral_block(stream, itp_data)
+    elif (flag == 'finish'):
+        # finish this sub-interface
+        return
+    else:
+        # unexpected! I don't know what to do!
+        raise InterfaceError("Unexpected flag ", flag)
 
 def write_optdihedrals_block(stream, itp_data):
+    print_dihedral_list(itp_data)
     print("Select the dihedrals you want to optimize from the list below.")
     print("For each dihedral desired, type the corresponding number and then Enter.")
-    print("Typing 0 ends the selection.")
-    print_dihedral_list(itp_data)
-    dihs = input_loop()
+    print("  0 starts a new [ optdihedrals ] block.")
+    print(" -1 ends the selection of dihedrals.")
+    dihs, flag = input_loop()
     stream.write('[ optdihedrals ]\n')
     for dih in dihs:
         stream.write("{:<4d}{:<4d}{:<4d}{:<4d}\n".format(
@@ -81,51 +98,99 @@ def write_optdihedrals_block(stream, itp_data):
             itp_data['dihedrals'][dih - 1]['ak'],
             itp_data['dihedrals'][dih - 1]['al']))
     stream.write('\n')
+    if (flag == 'end'):
+        # start a new type
+        write_optdihedrals_block(stream, itp_data)
+    elif (flag == 'finish'):
+        # finish this sub-interface
+        return
+    else:
+        # unexpected! I don't know what to do!
+        raise InterfaceError("Unexpected flag ", flag)
 
 def write_optpairs_block(stream, itp_data):
-    print("Select the 1,4 pairs you want to optimize from the list below.")
+    for i, pair in enumerate(itp_data['pairs']):
+        print("\t{} - {}-{}, types: {}-{}, names: {}-{}".format(
+            i+1, pair['ai'], pair['aj'],
+            itp_data['atoms'][pair['ai'] - 1]['type'], itp_data['atoms'][pair['aj'] - 1]['type'],
+            itp_data['atoms'][pair['ai'] - 1]['name'], itp_data['atoms'][pair['aj'] - 1]['name']))
+    print("Select the 1,4 pairs you want to optimize from the list above.")
     print("For each pair desired, type the corresponding number and then Enter.")
-    print("Typing 0 ends the selection.")
-    for i, pair in enumerate(itp_data['nbpairs']):
-        if (pair['func'] == 2): # 1,4 pair
-            print("\t{} - {}-{}, types: {}-{}, names: {}-{}".format(
-                i+1, pair['ai'], pair['aj'],
-                itp_data['atoms'][pair['ai'] - 1]['type'], itp_data['atoms'][pair['aj'] - 1]['type'],
-                itp_data['atoms'][pair['ai'] - 1]['name'], itp_data['atoms'][pair['aj'] - 1]['name']))
-    pairs = input_loop()
+    print("  0 starts a new [ optpairs ] block.")
+    print(" -1 ends the selection of pairs.")
+    pairs, flag = input_loop()
     stream.write('[ optpairs ]\n')
     for pair in pairs:
         stream.write('{:<4d}{:<4d}\n'.format(
-            itp_data['nbpairs'][pair - 1]['ai'], itp_data['nbpairs'][pair - 1]['aj']))
+            itp_data['pairs'][pair - 1]['ai'], itp_data['pairs'][pair - 1]['aj']))
     stream.write('\n')
+    if (flag == 'end'):
+        # start a new type
+        write_optpairs_block(stream, itp_data)
+    elif (flag == 'finish'):
+        # finish this sub-interface
+        return
+    else:
+        # unexpected! I don't know what to do!
+        raise InterfaceError("Unexpected flag ", flag)
 
 def write_optatoms_block(stream, itp_data):
-    print("Select the atoms you want to optimize from the list below.")
-    print("For each each atom desired, type its number and then Enter.")
-    print("Typing 0 ends the selection.")
     for i, atom in enumerate(itp_data['atoms']):
         print("\t{} - type: {} name: {}".format(i+1, atom['type'], atom['name']))
-    atoms = input_loop()
+    print("Select the atoms you want to optimize from the list above.")
+    print("For each each atom desired, type its number and then Enter.")
+    print("  0 starts a new [ optatoms ] block.")
+    print(" -1 ends the selection of atoms.")
+    atoms, flag = input_loop()
     stream.write('[ optatoms ]\n')
     for at in atoms:
-        stream.write('{:<4d}'.format(at))
-    stream.write('\n')
+        stream.write('{:<4d}'.format(int(at)))
+    stream.write('\n\n')
+    if (flag == 'end'):
+        # start a new type
+        write_optatoms_block(stream, itp_data)
+    elif (flag == 'finish'):
+        # finish this sub-interface
+        return
+    else:
+        # unexpected! I don't know what to do!
+        raise InterfaceError("Unexpected flag ", flag)
 
 def choose_atoms_or_pairs(stream):
     while True:
-        answer = input("Do you want to optimize an atom type (1) or specific 1,4 pairs (2)?\nType 1 or 2, then Enter.\n")
+        answer = input("Do you want to optimize an atom type (1), specific 1,4 pairs (2), or none of them (0)?\nType 0, 1 or 2, then Enter.\n")
         if (int(answer) == 1):
             return "atoms"
         if (int(answer) == 2):
             return "pairs"
+        if (int(answer) == 0):
+            return ""
+
+def choose_refdihedrals(stream):
+    while True:
+        answer = input("Do you want to select reference dihedrals?\nType 0 (No), 1 (Yes), then Enter.\n")
+        if (int(answer) == 1):
+            return True
+        if (int(answer) == 0):
+            return False
+
+def choose_optdihedrals(stream):
+    while True:
+        answer = input("Do you want to select dihedrals to optimize?\nType 0 (No), 1 (Yes), then Enter.\n")
+        if (int(answer) == 1):
+            return True
+        if (int(answer) == 0):
+            return False
 
 def write_optblocks_via_interface(stream, itp_data):
-    write_refdihedral_block(stream, itp_data)
-    write_optdihedrals_block(stream, itp_data)
+    if (choose_refdihedrals(stream)):
+        write_refdihedral_block(stream, itp_data)
+
+    if (choose_optdihedrals(stream)):
+        write_optdihedrals_block(stream, itp_data)
+
     choice = choose_atoms_or_pairs(itp_data)
     if (choice == 'atoms'):
         write_optatoms_block(stream, itp_data)
     elif (choice == 'pairs'):
         write_optpairs_block(stream, itp_data)
-    else:
-        raise Exception("Unexpected choice: {}".format(choice))
