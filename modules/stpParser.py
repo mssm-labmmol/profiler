@@ -47,22 +47,27 @@ def checkStpExtension (fn):
         return True
     return False
 
-def createStreamAfterPreprocessing (fn):
-    cpp_path = which('cpp')
-    if cpp_path is None:
-        answer = 'y'
-        while not (answer == 'y'):
-            print("Error: The stpParser uses the C preprocessor (cpp) to translate")
-            print("directives such as #include and #define. However, no path for cpp")
-            print("was found. Please, preprocess the file %s manually. If you have already" % fn)
-            print("done this, or if your file does not need preprocessing, answer with")
-            print("'y'. If you want to quit, send the kill signal Ctrl+C.")
-            answer = input("")
-        fp = open(fn, 'r')
+def createStreamAfterPreprocessing (fn, preprocess=False):
+    if preprocess:
+        cpp_path = which('cpp')
+        if cpp_path is None:
+            answer = 'n'
+            while not (answer == 'y'):
+                print("Error: The stpParser uses the C preprocessor (cpp) to translate")
+                print("directives such as #include and #define, which are commonly used in")
+                print("Gromacs force-field files. However, no path for cpp was found.")
+                print("Please, make sure cpp is installed and in your $PATH. Otherwise,")
+                print("preprocess the file %s manually. If you have already" % fn)
+                print("done this, or if your file does not need preprocessing, answer with")
+                print("'y'. If you want to quit, press Ctrl+C.")
+                answer = input("")
+            fp = open(fn, 'r')
+        else:
+            processed_string = check_output([cpp_path, '-P', '-traditional', fn]).decode('utf-8')
+            fp = StringIO(processed_string)
+        return fp
     else:
-        processed_string = check_output([cpp_path, '-P', '-traditional', fn]).decode('utf-8')
-        fp = StringIO(processed_string)
-    return fp
+        return open(fn, 'r')
 
 # goto block '[ stringId ]'
 def gotoBlock (stream, stringId):

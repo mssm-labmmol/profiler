@@ -29,22 +29,29 @@ from shutil import which
 from io import StringIO
 from subprocess import check_output
 
-def createStreamAfterPreprocessing (fn):
-    cpp_path = which('cpp')
-    if cpp_path is None:
-        answer = 'n'
-        while not (answer == 'y'):
-            print("Error: The stpParser uses the C preprocessor (cpp) to translate")
-            print("directives such as #include and #define. However, no path for cpp")
-            print("was found. Please, preprocess the file %s manually. If you have already" % fn)
-            print("done this, or if your file does not need preprocessing, answer with")
-            print("'y'. If you want to quit, send the kill signal Ctrl+C.")
-            answer = input("")
-        fp = open(fn, 'r')
+
+def createStreamAfterPreprocessing (fn, preprocess=False):
+    if preprocess:
+        cpp_path = which('cpp')
+        if cpp_path is None:
+            answer = 'n'
+            while not (answer == 'y'):
+                print("Error: The stpParser uses the C preprocessor (cpp) to translate")
+                print("directives such as #include and #define, which are commonly used in")
+                print("Gromacs force-field files. However, no path for cpp was found.")
+                print("Please, make sure cpp is installed and in your $PATH. Otherwise,")
+                print("preprocess the file %s manually. If you have already" % fn)
+                print("done this, or if your file does not need preprocessing, answer with")
+                print("'y'. If you want to quit, press Ctrl+C.")
+                answer = input("")
+            fp = open(fn, 'r')
+        else:
+            processed_string = check_output([cpp_path, '-P', '-traditional', fn]).decode('utf-8')
+            fp = StringIO(processed_string)
+        return fp
     else:
-        processed_string = check_output([cpp_path, '-P', '-traditional', fn]).decode('utf-8')
-        fp = StringIO(processed_string)
-    return fp
+        return open(fn, 'r')
+
 
 def check_if_path_is_fullpath (path):
     if path.startswith('/'):
@@ -132,21 +139,13 @@ def substitute_defines_in_file (input_fn, output_fn, hash_of_defines):
     fp_output.close()
     fp.close()
 
-def pre_process_file (input_fn, output_fn, method='cpp'):
-    if (method == 'cpp'):
-        fpo = open(output_fn, 'w')
-        fpi = createStreamAfterPreprocessing(input_fn)
-        for line in fpi:
-            # add padding before blocks
-            if line[0] == '[':
-                fpo.write('\n')
-            fpo.write(line)
-        fpi.close()
-        fpo.close()
-    elif (method == 'in-house'):
-        # WARNING: This does not support #ifdef
-        middle_output = output_fn + "_tmp"
-        expand_includes_in_file (input_fn, middle_output)
-        hash_of_defines = extract_defines_in_file (middle_output)
-        substitute_defines_in_file (middle_output, output_fn, hash_of_defines)
-        os.remove(middle_output)
+def pre_process_file (input_fn, output_fn):
+    fpo = open(output_fn, 'w')
+    fpi = createStreamAfterPreprocessing(input_fn, preprocess=True)
+    for line in fpi:
+        # add padding before blocks
+        if line[0] == '[':
+            fpo.write('\n')
+        fpo.write(line)
+    fpi.close()
+    fpo.close()
