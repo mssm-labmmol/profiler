@@ -19,7 +19,8 @@ setup (
         'console_scripts': [
             'profilerOpt=profilerOpt.profilerOpt:main',
         ]
-    }
+    },
+    install_requires=['numpy', 'deap']
 )
 
 setup (
@@ -32,5 +33,6 @@ setup (
         'console_scripts': [
             'profilerGen=profilerGen.profilerGen:main',
         ]
-    }
+    },
+    install_requires=['numpy', 'deap']
 )

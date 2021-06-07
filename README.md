@@ -17,6 +17,11 @@ consult the [documentation](./doc/src/doc.pdf).
 
 # Installation
 
+`profilerTools` depends on `numpy` and on `DEAP`, which should be
+automatically installed.
+
+To install, run
+
 	python setup.py install
 
 After that, the two executables `profilerOpt` and `profilerGen` should
@@ -31,14 +36,15 @@ you may face compilation errors like
 
 	fatal errror: numpy/arrayobject.h: No such file or directory
 
-This can usually be remedied with
+For users of the APT package manager, this can usually be remedied with
 
 	sudo apt install python-numpy
 
 # Requirements
 
-* `python` (preferably >3.0)
+* `python` (preferably >3.4)
 * `numpy`
+* `DEAP`
 
 # Limitations
 
@@ -50,7 +56,7 @@ This can usually be remedied with
   very far from optimal in terms of speed (even without taking the
   previous item into account). For this reason, the duration of
   `profilerOpt` jobs increase very fastly with the number and size of
-  the systems and also with the size of the genetic-algorithm
+  the systems and also with the size of the evolutionary-algorithm
   population.
   
 * With parallelization, `profilerOpt` jobs with a given RNG seed are
