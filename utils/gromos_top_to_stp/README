@@ -45,13 +45,13 @@ You have to include them manually.
 # Example
 
 Assume that the files `pentane.top` and `hexane.top` are GROMOS topologies for the pentane (CH3-CH2-CH2-CH2-CH3) and hexane (CH3-CH2-CH2-CH2-CH2-CH3) molecules, respectively.
-Consider:
+Then:
 
 * 
 
 		gromos_top_to_stp -t pentane.top hexane.top
 		
-	The .stp output files will be written without any of the blocks `[ refdihedral ]`, `[ optdihedrals ]`, `[ optpairs ]` or `[ optatoms ]`. The interactive interface will not be invoked.
+	The .stp output files `pentane.stp` and `hexane.stp` will be written without any of the blocks `[ refdihedral ]`, `[ optdihedrals ]`, `[ optpairs ]` or `[ optatoms ]`.
 
 
 # Hard-coded Limits
