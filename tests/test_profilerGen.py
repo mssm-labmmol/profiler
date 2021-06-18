@@ -4,7 +4,7 @@ import os
 import glob
 import unittest
 from   numpy import loadtxt
-from ..profilerGen.profilerGen import ProfilerGenRunner
+from ..profilerTools.profilerGen.profilerGen import ProfilerGenRunner
 
 class TestProfilerGen(unittest.TestCase):
 

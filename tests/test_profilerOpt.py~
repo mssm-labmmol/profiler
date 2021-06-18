@@ -4,7 +4,7 @@ import os
 import glob
 import unittest
 from   numpy import loadtxt
-from ..profilerGen.profilerGen import ProfilerGenRunner
+from ..profilerOpt.profilerOpt import ProfilerOptRunner
 
 # =========== Patch all random functions (there are a lot). ==========
 
@@ -111,35 +111,29 @@ patch_random_shuffle = patch('random.shuffle', side_effect=lambda x:
 
 patch_random_shuffle.start()
 
-class TestProfilerGen(unittest.TestCase):
+class TestProfilerOpt(unittest.TestCase):
 
     def test_integrated(self):
         args = [
-            '-c', 'tests/data/profilerGen_pe.xyz',
-            '-t', 'tests/data/profilerGen_pe.stp',
-            '-dk', '5000', '5000',
-            '-op', 'tests/output_test_profilerGen',
-            '-dr', '-180', '90', '180',
-            '-dr', '-180', '120', '180',
-            '-min', '1',
-            '-dx0', '0.05',
-            '-dxm', '0.20',
-            '-dele', '1.0e-06',
-            '-nsteps', '10000',
+            '-c', 'tests/data/profilerOpt_bu.xyz', 'tests/data/profilerOpt_pe.xyz',
+            '-r', 'tests/data/profilerOpt_bu.dat', 'tests/data/profilerOpt_pe.dat',
+            '-t', 'tests/data/profilerOpt_bu.stp', 'tests/data/profilerOpt_pe.stp',
+            '-i', 'tests/data/profilerOpt_run.inp',
+            '-op', 'tests/output_test_profilerOpt',
         ]
-        refdata = list(loadtxt('tests/data/output_test_profilerGen.dat',
-                          usecols=(0,)))
-        
+
+        refdata = list(loadtxt('tests/data/output_test_profilerOpt.dat',
+                           usecols=(0,)))
 
         # run job
-        job = ProfilerGenRunner(args)
+        job = ProfilerOptRunner(args)
 
         # remove output files
-        for fn in glob.glob('tests/output_test_profilerGen*'):
+        for fn in glob.glob('tests/output_test_profilerOpt*'):
             os.remove(fn)
 
         # compare
-        for calc, ref in zip(job.get_energies(), refdata):
+        for calc, ref in zip(job.get_optimal_parameters(), refdata):
             self.assertAlmostEqual(calc, ref, places=4)
         
 if __name__ == '__main__':

@@ -5,7 +5,7 @@ import numpy
 extended_numpy = Extension(
     'geometrypy',
     sources = [
-        'geometrypy/geometrypy.c',
+        'profilerTools/geometrypy/geometrypy.c',
         ]
 )
 
@@ -17,7 +17,7 @@ setup (
     ],
     entry_points={
         'console_scripts': [
-            'profilerOpt=profilerOpt.profilerOpt:main',
+            'profilerOpt=profilerTools.profilerOpt.profilerOpt:main',
         ]
     },
     install_requires=['numpy', 'deap', 'scikit-learn']
@@ -31,7 +31,7 @@ setup (
     ],
     entry_points={
         'console_scripts': [
-            'profilerGen=profilerGen.profilerGen:main',
+            'profilerGen=profilerTools.profilerGen.profilerGen:main',
         ]
     },
     install_requires=['numpy', 'deap', 'scikit-learn']

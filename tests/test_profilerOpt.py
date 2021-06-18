@@ -4,7 +4,7 @@ import os
 import glob
 import unittest
 from   numpy import loadtxt
-from ..profilerOpt.profilerOpt import ProfilerOptRunner
+from ..profilerTools.profilerOpt.profilerOpt import ProfilerOptRunner
 
 # =========== Patch all random functions (there are a lot). ==========
 
