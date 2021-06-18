@@ -24,68 +24,80 @@
 
 import numpy as np
 import re
-from   subprocess import check_output
-from   shutil import which
-from   io     import StringIO
+from subprocess import check_output
+from shutil import which
+from io import StringIO
+
 
 def indices(lst, element):
     result = []
     offset = -1
     while True:
         try:
-            offset = lst.index(element, offset+1)
+            offset = lst.index(element, offset + 1)
         except ValueError:
             return result
         result.append(offset)
 
-def raiseError (msg):
-    print ("ERROR: " + msg)
+
+def raiseError(msg):
+    print("ERROR: " + msg)
     exit(0)
 
-def checkStpExtension (fn):
+
+def checkStpExtension(fn):
     if (fn.endswith('.stp')):
         return True
     return False
 
-def createStreamAfterPreprocessing (fn, preprocess=False):
+
+def createStreamAfterPreprocessing(fn, preprocess=False):
     if preprocess:
         cpp_path = which('cpp')
         if cpp_path is None:
             answer = 'n'
             while not (answer == 'y'):
-                print("Error: The stpParser uses the C preprocessor (cpp) to translate")
-                print("directives such as #include and #define, which are commonly used in")
-                print("Gromacs force-field files. However, no path for cpp was found.")
-                print("Please, make sure cpp is installed and in your $PATH. Otherwise,")
-                print("preprocess the file %s manually. If you have already" % fn)
-                print("done this, or if your file does not need preprocessing, answer with")
-                print("'y'. If you want to quit, press Ctrl+C.")
+                print(
+                    f"Error: The stpParser uses the C preprocessor"
+                     " (cpp) to translate" "directives such as #include"
+                     " and #define, which are commonly used in" "Gromacs"
+                     " force-field files. However, no path for cpp was"
+                     " found."  "Please, make sure cpp is installed and"
+                     " in your $PATH. Otherwise," "preprocess the file {fn}"
+                     " manually. If you have already" "done this, or if"
+                     " your file does not need preprocessing, answer"
+                     " with" "'y'. If you want to quit, press Ctrl+C."
+                )    
                 answer = input("")
             fp = open(fn, 'r')
         else:
-            processed_string = check_output([cpp_path, '-P', '-traditional', fn]).decode('utf-8')
+            processed_string = check_output(
+                [cpp_path, '-P', '-traditional', fn]).decode('utf-8')
             fp = StringIO(processed_string)
         return fp
     else:
         return open(fn, 'r')
 
+
 # goto block '[ stringId ]'
-def gotoBlock (stream, stringId):
+def gotoBlock(stream, stringId):
     for line in stream:
         if re.match(r"^\[ " + re.escape(stringId) + r" ]", line):
             return
 
+
 # goto next block and return block name
-def gotoNextBlock (stream):
+def gotoNextBlock(stream):
     for line in stream:
         m = re.match("\[ (\w+) \]", line)
         if m:
             return m.group(1)
     return -1
 
+
 # assumes that stream is currently at a '[ bonds ]' block
-def readBondsFromStream (stream):
-    outputParticles  = []
+def readBondsFromStream(stream):
+    outputParticles = []
     outputParameters = []
     for line in stream:
         if (re.match(r"^;", line)):
@@ -94,16 +106,17 @@ def readBondsFromStream (stream):
             break
         flds = line.split()
         # check for type
-        if (int(flds[2])) not in [1,2]:
-            raiseError ("all bonds must be type 1 or 2 and given explicitly")
-        outputParticles.append( (int(flds[0]), int(flds[1]), int(flds[2])) ) 
-        outputParameters.append( [float(flds[3]), float(flds[4])] )
+        if (int(flds[2])) not in [1, 2]:
+            raiseError("all bonds must be type 1 or 2 and given explicitly")
+        outputParticles.append((int(flds[0]), int(flds[1]), int(flds[2])))
+        outputParameters.append([float(flds[3]), float(flds[4])])
     outputParameters = np.array(outputParameters)
     return (outputParticles, outputParameters)
+
 
 # assumes that stream is currently at an '[ angles ]' block
-def readAnglesFromStream (stream):
-    outputParticles  = []
+def readAnglesFromStream(stream):
+    outputParticles = []
     outputParameters = []
     for line in stream:
         if (re.match(r"^;", line)):
@@ -112,24 +125,34 @@ def readAnglesFromStream (stream):
             break
         flds = line.split()
         # check for type
-        if (int(flds[3])) in [1,2]:
-            outputParticles.append( (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3])) ) 
-            outputParameters.append( [float(flds[4]), float(flds[5]), 0.0, 0.0] )
+        if (int(flds[3])) in [1, 2]:
+            outputParticles.append(
+                (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3])))
+            outputParameters.append([float(flds[4]), float(flds[5]), 0.0, 0.0])
         elif int(flds[3]) == 5:
-            outputParticles.append( (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3])) ) 
-            outputParameters.append( [float(flds[4]), float(flds[5]), float(flds[6]), float(flds[7])] )
+            outputParticles.append(
+                (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3])))
+            outputParameters.append([
+                float(flds[4]),
+                float(flds[5]),
+                float(flds[6]),
+                float(flds[7])
+            ])
         else:
-            raiseError ("all angles must be type 1, 2 or 5 and given explicitly")
+            raiseError(
+                "all angles must be type 1, 2 or 5 and given explicitly")
     outputParameters = np.array(outputParameters)
     return (outputParticles, outputParameters)
 
-# Assumes that stream is currently at a '[ dihedrals ]' block.
-# This function is a bit trickier because the block may contain proper or improper dihedrals.
-# To accomodate these two possibilities, the output tuple distinguishes the proper and improper cases.
-def readDihedralsFromStream (stream):
-    outputParticles  = []
+
+# Assumes that stream is currently at a '[ dihedrals ]' block.  This
+# function is a bit trickier because the block may contain proper or
+# improper dihedrals.  To accomodate these two possibilities, the
+# output tuple distinguishes the proper and improper cases.
+def readDihedralsFromStream(stream):
+    outputParticles = []
     outputParameters = []
-    outputImproperParticles  = []
+    outputImproperParticles = []
     outputImproperParameters = []
     outputRestraintParticles = []
     outputRestraintParameters = []
@@ -143,34 +166,68 @@ def readDihedralsFromStream (stream):
         # check for type
         if (int(flds[4]) == 1) or (int(flds[4]) == 9):
             # proper dihedral
-            outputParticles.append((int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]), 1)) # hard-coded 1 to avoid Exception for different dihedral types
-            outputParameters.append([float(flds[5]), float(flds[6]), int(flds[7]), 0.0, 0.0, 0.0])
+            outputParticles.append(
+                (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]), 1)
+            )  # hard-coded 1 to avoid Exception for different dihedral types
+            outputParameters.append(
+                [float(flds[5]),
+                 float(flds[6]),
+                 int(flds[7]), 0.0, 0.0, 0.0])
         elif (int(flds[4]) == 3):
             # Ryckaert-Bellemanns
-            outputParticles.append((int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]), int(flds[4]))) 
-            outputParameters.append([float(flds[5]), float(flds[6]), float(flds[7]), float(flds[8]), float(flds[9]), float(flds[10])])
+            outputParticles.append((int(flds[0]), int(flds[1]), int(flds[2]),
+                                    int(flds[3]), int(flds[4])))
+            outputParameters.append([
+                float(flds[5]),
+                float(flds[6]),
+                float(flds[7]),
+                float(flds[8]),
+                float(flds[9]),
+                float(flds[10])
+            ])
         elif (int(flds[4]) == 5):
             # Fourier
-            outputParticles.append((int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]), int(flds[4]))) 
-            outputParameters.append([float(flds[5]), float(flds[6]), float(flds[7]), float(flds[8]), 0.0, 0.0])
+            outputParticles.append((int(flds[0]), int(flds[1]), int(flds[2]),
+                                    int(flds[3]), int(flds[4])))
+            outputParameters.append([
+                float(flds[5]),
+                float(flds[6]),
+                float(flds[7]),
+                float(flds[8]), 0.0, 0.0
+            ])
         elif (int(flds[4]) == 2):
             # improper
-            outputImproperParticles.append( (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]), int(flds[4])) ) 
-            outputImproperParameters.append( [float(flds[5]), float(flds[6])] )
+            outputImproperParticles.append(
+                (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]),
+                 int(flds[4])))
+            outputImproperParameters.append([float(flds[5]), float(flds[6])])
         elif (int(flds[4]) == 4):
             # improper
-            outputImproperParticles.append( (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]), int(flds[4])) ) 
-            outputImproperParameters.append( [float(flds[5]), float(flds[6]), int(flds[7])] )
+            outputImproperParticles.append(
+                (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3]),
+                 int(flds[4])))
+            outputImproperParameters.append(
+                [float(flds[5]), float(flds[6]),
+                 int(flds[7])])
         elif (int(flds[4]) == -1):
             # dihedral restraint
-            outputRestraintParticles.append( (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3])) ) 
-            outputRestraintParameters.append( [float(flds[5]), float(flds[6])] )
+            outputRestraintParticles.append(
+                (int(flds[0]), int(flds[1]), int(flds[2]), int(flds[3])))
+            outputRestraintParameters.append([float(flds[5]), float(flds[6])])
         else:
-            raiseError ("dihedral must be type 1 (proper), 2 (improper), 3, (Ryckert-Bellemanns), 4 (periodic improper), 5 (Fourier), 9 (multiple propers) or -1 (dihedral restraint)  and given explicitly")
+            raiseError(
+                "dihedral must be type 1 (proper), 2 (improper), "
+                "3, (Ryckert-Bellemanns), 4 (periodic improper), "
+                "5 (Fourier), 9 (multiple propers) or"
+                " -1 (dihedral restraint)  and given explicitly"
+            )
     outputParameters = np.array(outputParameters)
     outputImproperParameters = np.array(outputImproperParameters)
     outputRestraintParameters = np.array(outputRestraintParameters)
-    return ((outputParticles, outputParameters), (outputImproperParticles, outputImproperParameters), (outputRestraintParticles, outputRestraintParameters))
+    return ((outputParticles, outputParameters), (outputImproperParticles,
+                                                  outputImproperParameters),
+            (outputRestraintParticles, outputRestraintParameters))
+
 
 # Assumes that stream is currently at a [ defaults ] block.
 # Syntax is nbfunc comb-rule gen-pairs fudgeLJ fudgeQQ.
@@ -179,7 +236,8 @@ def readDefaultsFromStream(stream):
     allowedDict = {
         'nbfunc': [1],
         'comb-rule': [1, 2, 3],
-        'gen-pairs': ['fudge', 'atomic', 'no']}
+        'gen-pairs': ['fudge', 'atomic', 'no']
+    }
     for line in stream:
         if (re.match(r"^;", line)):
             continue
@@ -196,11 +254,13 @@ def readDefaultsFromStream(stream):
     # check allowed values
     for flag in ['nbfunc', 'comb-rule', 'gen-pairs']:
         if (outputDict[flag] not in allowedDict[flag]):
-            raise Exception("Value {} not allowed for {}.".format(outputDict[flag], flag))
+            raise Exception("Value {} not allowed for {}.".format(
+                outputDict[flag], flag))
     return outputDict
 
+
 # Assumes that stream is currently at a [ atoms ] block.
-def readAtomsFromStream (stream, comb_rule=1, gen_pairs='atomic'):
+def readAtomsFromStream(stream, comb_rule=1, gen_pairs='atomic'):
     outputParameters = []
     for line in stream:
         if (re.match(r"^;", line)):
@@ -213,51 +273,68 @@ def readAtomsFromStream (stream, comb_rule=1, gen_pairs='atomic'):
             break
         if (nflds == 6):
             if (comb_rule == 1):
-                outputParameters.append ({'type': flds[0], 
-                                          'c6': float(flds[1]), 
-                                          'c12': float(flds[2]), 
-                                          'cs6': float(flds[3]), 
-                                          'cs12': float(flds[4]), 
-                                          'q': float(flds[5])})
+                outputParameters.append({
+                    'type': flds[0],
+                    'c6': float(flds[1]),
+                    'c12': float(flds[2]),
+                    'cs6': float(flds[3]),
+                    'cs12': float(flds[4]),
+                    'q': float(flds[5])
+                })
             elif ((comb_rule == 2) or (comb_rule == 3)):
                 # convert sigma-epsilon to c6-c12
                 sigma = float(flds[1])
                 epsilon = float(flds[2])
                 ssigma = float(flds[3])
                 sepsilon = float(flds[4])
-                outputParameters.append ({'type': flds[0], 
-                                          'c6': 4 * epsilon * (sigma**6),
-                                          'c12': 4 * epsilon * (sigma ** 12),
-                                          'cs6': 4 * sepsilon * (ssigma ** 6),
-                                          'cs12': 4 * sepsilon * (ssigma ** 12),
-                                          'q': float(flds[5])})
+                outputParameters.append({
+                    'type': flds[0],
+                    'c6': 4 * epsilon * (sigma**6),
+                    'c12': 4 * epsilon * (sigma**12),
+                    'cs6': 4 * sepsilon * (ssigma**6),
+                    'cs12': 4 * sepsilon * (ssigma**12),
+                    'q': float(flds[5])
+                })
         elif (nflds == 4):
             if (gen_pairs == 'atomic'):
-                raise Exception("Can't generate 1-4 pair parameters if 1-4 atomic parameters are not given.")
+                raise Exception(
+                    "Can't generate 1-4 pair parameters if 1-4"
+                    " atomic parameters are not given."
+                )
             else:
                 if (comb_rule == 1):
-                    outputParameters.append ({'type': flds[0], 
-                                              'c6': float(flds[1]), 
-                                              'c12': float(flds[2]), 
-                                              'cs6': 0.0,
-                                              'cs12': 0.0,
-                                              'q': float(flds[3])})
+                    outputParameters.append({
+                        'type': flds[0],
+                        'c6': float(flds[1]),
+                        'c12': float(flds[2]),
+                        'cs6': 0.0,
+                        'cs12': 0.0,
+                        'q': float(flds[3])
+                    })
                 elif ((comb_rule == 2) or (comb_rule == 3)):
                     # convert sigma-epsilon to c6-c12
                     sigma = float(flds[1])
                     epsilon = float(flds[2])
-                    outputParameters.append ({'type': flds[0], 
-                                              'c6': 4 * epsilon * (sigma**6),
-                                              'c12': 4 * epsilon * (sigma ** 12),
-                                              'cs6': 0,
-                                              'cs12': 0,
-                                              'q': float(flds[3])})
+                    outputParameters.append({
+                        'type': flds[0],
+                        'c6': 4 * epsilon * (sigma**6),
+                        'c12': 4 * epsilon * (sigma**12),
+                        'cs6': 0,
+                        'cs12': 0,
+                        'q': float(flds[3])
+                    })
     outputParameters = np.array(outputParameters)
     return outputParameters
 
+
 # Assumes that stream is currently at a special '[ nbpairs ]' block.
-def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='atomic', fudgeLJ=1.0, fudgeQQ=1.0):
-    outputParticles  = []
+def readNonbondedFromStream(stream,
+                            atomicParameters,
+                            comb_rule=1,
+                            gen_pairs='atomic',
+                            fudgeLJ=1.0,
+                            fudgeQQ=1.0):
+    outputParticles = []
     outputParameters = []
     for line in stream:
         if (re.match(r"^;", line)):
@@ -267,21 +344,23 @@ def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='a
         nflds = len(flds)
         if (nflds < 2):
             break
-        outputParticles.append( (int(flds[0]), int(flds[1]), int(flds[2])) ) 
+        outputParticles.append((int(flds[0]), int(flds[1]), int(flds[2])))
         # outputParameters must be calculated from the atomicParameters
-        nb_type = int(flds[2]);
-        ai_idx  = int(flds[0]) - 1;
-        aj_idx  = int(flds[1]) - 1;
-        c6      = 0.0
-        c12     = 0.0
-        qiqj    = 0.0
+        nb_type = int(flds[2])
+        ai_idx = int(flds[0]) - 1
+        aj_idx = int(flds[1]) - 1
+        c6 = 0.0
+        c12 = 0.0
+        qiqj = 0.0
         qiqj = atomicParameters[ai_idx]['q'] * atomicParameters[aj_idx]['q']
         if (nb_type == 1):
             # this is a standard type, get c6 and c12 from line or atoms
             if (nflds == 3):
                 # from atoms
-                c6 = np.sqrt(atomicParameters[ai_idx]['c6'] * atomicParameters[aj_idx]['c6'])
-                c12 = np.sqrt(atomicParameters[ai_idx]['c12'] * atomicParameters[aj_idx]['c12'])
+                c6 = np.sqrt(atomicParameters[ai_idx]['c6'] *
+                             atomicParameters[aj_idx]['c6'])
+                c12 = np.sqrt(atomicParameters[ai_idx]['c12'] *
+                              atomicParameters[aj_idx]['c12'])
             else:
                 # from line
                 if (comb_rule == 1):
@@ -289,11 +368,11 @@ def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='a
                     c6 = float(flds[3])
                     c12 = float(flds[4])
                 elif ((comb_rule == 2) or (comb_rule == 3)):
-                    # line contains sigma, epsilon 
+                    # line contains sigma, epsilon
                     sigma = float(flds[3])
                     epsilon = float(flds[4])
-                    c6 = 4 * epsilon * (sigma ** 6)
-                    c12 = 4 * epsilon * (sigma ** 12)
+                    c6 = 4 * epsilon * (sigma**6)
+                    c12 = 4 * epsilon * (sigma**12)
         elif (nb_type == 2):
             # this is a 1-4 pair
             # charges are fudged
@@ -304,40 +383,46 @@ def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='a
                 if (gen_pairs == 'atomic'):
                     # mix atomic parameters
                     if (comb_rule == 1) or (comb_rule == 3):
-                        c6 = np.sqrt(atomicParameters[ai_idx]['cs6'] * atomicParameters[aj_idx]['cs6'])
-                        c12 = np.sqrt(atomicParameters[ai_idx]['cs12'] * atomicParameters[aj_idx]['cs12'])
+                        c6 = np.sqrt(atomicParameters[ai_idx]['cs6'] *
+                                     atomicParameters[aj_idx]['cs6'])
+                        c12 = np.sqrt(atomicParameters[ai_idx]['cs12'] *
+                                      atomicParameters[aj_idx]['cs12'])
                     elif (comb_rule == 2):
                         c6i = atomicParameters[ai_idx]['cs6']
                         c12i = atomicParameters[ai_idx]['cs12']
                         c6j = atomicParameters[aj_idx]['cs6']
                         c12j = atomicParameters[aj_idx]['cs12']
-                        sigmai = (c12i/c6i)**(1.0/6.0)
+                        sigmai = (c12i / c6i)**(1.0 / 6.0)
                         epsiloni = 0.25 * (c6i**2) / c12i
-                        sigmaj = (c12j/c6j)**(1.0/6.0)
+                        sigmaj = (c12j / c6j)**(1.0 / 6.0)
                         epsilonj = 0.25 * (c6j**2) / c12j
                         sigma = 0.5 * (sigmai + sigmaj)
                         epsilon = np.sqrt(epsiloni * epsilonj)
-                        c6 = 4 * epsilon * (sigma ** 6)
-                        c12 = 4 * epsilon * (sigma ** 12)
+                        c6 = 4 * epsilon * (sigma**6)
+                        c12 = 4 * epsilon * (sigma**12)
                 elif (gen_pairs == 'fudge'):
                     if (comb_rule == 1) or (comb_rule == 3):
-                        c6 = fudgeLJ * np.sqrt(atomicParameters[ai_idx]['c6'] * atomicParameters[aj_idx]['c6'])
-                        c12 = fudgeLJ * np.sqrt(atomicParameters[ai_idx]['c12'] * atomicParameters[aj_idx]['c12'])
+                        c6 = fudgeLJ * np.sqrt(atomicParameters[ai_idx]['c6'] *
+                                               atomicParameters[aj_idx]['c6'])
+                        c12 = fudgeLJ * np.sqrt(
+                            atomicParameters[ai_idx]['c12'] *
+                            atomicParameters[aj_idx]['c12'])
                     elif (comb_rule == 2):
                         c6i = atomicParameters[ai_idx]['c6']
                         c12i = atomicParameters[ai_idx]['c12']
                         c6j = atomicParameters[aj_idx]['c6']
                         c12j = atomicParameters[aj_idx]['c12']
-                        sigmai = (c12i/c6i)**(1.0/6.0)
+                        sigmai = (c12i / c6i)**(1.0 / 6.0)
                         epsiloni = 0.25 * (c6i**2) / c12i
-                        sigmaj = (c12j/c6j)**(1.0/6.0)
+                        sigmaj = (c12j / c6j)**(1.0 / 6.0)
                         epsilonj = 0.25 * (c6j**2) / c12j
                         sigma = 0.5 * (sigmai + sigmaj)
                         epsilon = np.sqrt(epsiloni * epsilonj)
-                        c6 = fudgeLJ * 4 * epsilon * (sigma ** 6)
-                        c12 = fudgeLJ * 4 * epsilon * (sigma ** 12)                        
+                        c6 = fudgeLJ * 4 * epsilon * (sigma**6)
+                        c12 = fudgeLJ * 4 * epsilon * (sigma**12)
                 elif (gen_pairs == 'no'):
-                    raise Exception("Must specify pair parameters if gen-pairs = no.")
+                    raise Exception(
+                        "Must specify pair parameters if gen-pairs = no.")
             else:
                 # from line
                 if (comb_rule == 1):
@@ -345,27 +430,29 @@ def readNonbondedFromStream (stream, atomicParameters, comb_rule=1, gen_pairs='a
                     c6 = float(flds[3])
                     c12 = float(flds[4])
                 elif ((comb_rule == 2) or (comb_rule == 3)):
-                    # line contains sigma, epsilon 
+                    # line contains sigma, epsilon
                     sigma = float(flds[3])
                     epsilon = float(flds[4])
-                    c6 = 4 * epsilon * (sigma ** 6)
-                    c12 = 4 * epsilon * (sigma ** 12)
+                    c6 = 4 * epsilon * (sigma**6)
+                    c12 = 4 * epsilon * (sigma**12)
         else:
             # Stop!
-            raiseError ("non-bonded pair type must be 1 or 2, not %d" % nb_type)
-        outputParameters.append( [c6, c12, qiqj] )
+            raiseError("non-bonded pair type must be 1 or 2, not %d" % nb_type)
+        outputParameters.append([c6, c12, qiqj])
     outputParameters = np.array(outputParameters)
     return (outputParticles, outputParameters)
 
-def readListFromStreamAndSubtractOne (stream):
+
+def readListFromStreamAndSubtractOne(stream):
     out = []
     for line in stream:
         if (re.match(r"^;", line)):
             continue
         if (len(line.split()) < 1):
             break
-        out += [int(x)-1 for x in line.split()]
+        out += [int(x) - 1 for x in line.split()]
     return out
+
 
 def readDihedralBlock(stream):
     out = []
@@ -380,6 +467,7 @@ def readDihedralBlock(stream):
             raise Exception("Wrong specification of dihedral.")
         out.append([int(x) for x in line.split()])
     return out
+
 
 def readOptpairBlock(stream, nbparticles):
     out = []
@@ -396,9 +484,10 @@ def readOptpairBlock(stream, nbparticles):
             out.append(nbparticles.index((int(flds[0]), int(flds[1]), 2)))
         except ValueError:
             raise ValueError("optpair not found.")
-    return out    
+    return out
 
-def parseStpFile (filename, prepareOpt=False):
+
+def parseStpFile(filename, prepareOpt=False):
     defaults = None
     atoms = []
     bondParticles = []
@@ -421,7 +510,7 @@ def parseStpFile (filename, prepareOpt=False):
     dihedralC5 = []
     improperK = []
     improperPhi = []
-    improperM   = [] # for periodic
+    improperM = []  # for periodic
     restraintsK = []
     restraintsPhi = []
     nbC6 = []
@@ -442,84 +531,98 @@ def parseStpFile (filename, prepareOpt=False):
             defaults = readDefaultsFromStream(fp)
         if (bn == 'atoms'):
             if (defaults is None):
-                raise Exception("[ defaults ] block must come before [ atoms ]")
-            atoms = readAtomsFromStream (fp, defaults['comb-rule'], defaults['gen-pairs'])
+                raise Exception(
+                    "[ defaults ] block must come before [ atoms ]")
+            atoms = readAtomsFromStream(fp, defaults['comb-rule'],
+                                        defaults['gen-pairs'])
         elif (bn == "bonds"):
-            (particles, pars) = readBondsFromStream (fp)
+            (particles, pars) = readBondsFromStream(fp)
             bondParticles += particles
             if (pars.shape[0] > 0):
-                bondK = np.append(bondK,pars[:,1])
-                bondL = np.append(bondL,pars[:,0])
-        elif(bn == "angles"):
-            (particles,pars) = readAnglesFromStream (fp)
+                bondK = np.append(bondK, pars[:, 1])
+                bondL = np.append(bondL, pars[:, 0])
+        elif (bn == "angles"):
+            (particles, pars) = readAnglesFromStream(fp)
             angleParticles += particles
             if (pars.shape[0] > 0):
-                angleK = np.append(angleK,pars[:,1])
-                angleT = np.append(angleT,pars[:,0])
-                angleKub = np.append(angleKub, pars[:,3])
-                angleR13 = np.append(angleR13, pars[:,2])
-        elif(bn == "dihedrals"):
-            ((particles,pars), (particlesI,parsI), (particlesR, parsR)) = readDihedralsFromStream(fp)
+                angleK = np.append(angleK, pars[:, 1])
+                angleT = np.append(angleT, pars[:, 0])
+                angleKub = np.append(angleKub, pars[:, 3])
+                angleR13 = np.append(angleR13, pars[:, 2])
+        elif (bn == "dihedrals"):
+            ((particles, pars), (particlesI, parsI),
+             (particlesR, parsR)) = readDihedralsFromStream(fp)
             dihedralParticles += particles
             improperParticles += particlesI
             restraintsParticles += particlesR
             if (pars.shape[0] > 0):
-                dihedralPhi       = np.append(dihedralPhi,pars[:,0])
-                dihedralK         = np.append(dihedralK,pars[:,1])
-                dihedralM         = np.append(dihedralM,pars[:,2])
-                dihedralC3         = np.append(dihedralC3,pars[:,3])
-                dihedralC4         = np.append(dihedralC4,pars[:,4])
-                dihedralC5         = np.append(dihedralC5,pars[:,5])
+                dihedralPhi = np.append(dihedralPhi, pars[:, 0])
+                dihedralK = np.append(dihedralK, pars[:, 1])
+                dihedralM = np.append(dihedralM, pars[:, 2])
+                dihedralC3 = np.append(dihedralC3, pars[:, 3])
+                dihedralC4 = np.append(dihedralC4, pars[:, 4])
+                dihedralC5 = np.append(dihedralC5, pars[:, 5])
             if (parsI.shape[0] > 0):
-                improperK         = np.append(improperK,parsI[:,1])
-                improperPhi       = np.append(improperPhi,parsI[:,0])
+                improperK = np.append(improperK, parsI[:, 1])
+                improperPhi = np.append(improperPhi, parsI[:, 0])
                 if parsI.shape[1] > 2:
-                    improperM = np.append(improperM,parsI[:,2])
+                    improperM = np.append(improperM, parsI[:, 2])
                 else:
-                    improperM = np.append(improperM, [0.0 for i in range(parsI.shape[0])])
+                    improperM = np.append(improperM,
+                                          [0.0 for i in range(parsI.shape[0])])
             if (parsR.shape[0] > 0):
-                restraintsK         = np.append(restraintsK,parsR[:,1])
-                restraintsPhi       = np.append(restraintsPhi,parsR[:,0])
-        elif(bn == "nbpairs"):
-            (particles,pars)  = readNonbondedFromStream (fp, atoms, defaults['comb-rule'], defaults['gen-pairs'], defaults['fudgeLJ'], defaults['fudgeQQ'])
+                restraintsK = np.append(restraintsK, parsR[:, 1])
+                restraintsPhi = np.append(restraintsPhi, parsR[:, 0])
+        elif (bn == "nbpairs"):
+            (particles, pars) = readNonbondedFromStream(
+                fp, atoms, defaults['comb-rule'], defaults['gen-pairs'],
+                defaults['fudgeLJ'], defaults['fudgeQQ'])
             nbParticles += particles
             if (pars.shape[0] > 0):
-                nbC6 = np.append(nbC6,pars[:,0])
-                nbC12= np.append(nbC12,pars[:,1])
-                nbQIJ = np.append(nbQIJ,pars[:,2])
-        elif(bn == "optatoms"):
+                nbC6 = np.append(nbC6, pars[:, 0])
+                nbC12 = np.append(nbC12, pars[:, 1])
+                nbQIJ = np.append(nbQIJ, pars[:, 2])
+        elif (bn == "optatoms"):
             if not (optType == 'pair'):
-                optAtomsIdxs.append( readListFromStreamAndSubtractOne (fp) )
+                optAtomsIdxs.append(readListFromStreamAndSubtractOne(fp))
                 optType = 'atom'
                 if (defaults['gen-pairs'] == 'no') and (prepareOpt):
-                    err_str = "Cannot perform optimization of atomic 1,4 parameters with gen-pairs = no.\n"
+                    err_str = "Cannot perform optimization of atomic" \
+                    " 1,4 parameters with gen-pairs = no.\n"
                     raise ValueError(err_str)
             else:
                 raise ValueError("Can only set one optType.")
-        elif(bn == 'optpairs'):
+        elif (bn == 'optpairs'):
             if not (optType == 'atom'):
-                optPairIdxs.append( readOptpairBlock(fp, nbParticles) )
+                optPairIdxs.append(readOptpairBlock(fp, nbParticles))
                 optType = 'pair'
             else:
                 raise ValueError("Can only set one optType.")
-        elif(bn == "optdihedrals"):
-            optDihIdxs.append(readDihedralBlock (fp))
+        elif (bn == "optdihedrals"):
+            optDihIdxs.append(readDihedralBlock(fp))
             # check if they belong
-            dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
+            dihparticles = [[x[0], x[1], x[2], x[3]]
+                            for x in dihedralParticles]
             lastType = optDihIdxs[-1]
             for dih in lastType:
                 if dih not in dihparticles:
-                    raise RuntimeError("Optimized dihedral not found in [ dihedrals ].")
-        elif(bn == "refdihedral"):
-            raise RuntimeError(".stp files no longer support `refdihedral'; use `refdihedrals' instead")
+                    raise RuntimeError(
+                        "Optimized dihedral not found in [ dihedrals ].")
+        elif (bn == "refdihedral"):
+            raise RuntimeError(
+                ".stp files no longer support `refdihedral'; "
+                "use `refdihedrals' instead"
+            )
         elif (bn == "refdihedrals"):
             reflist = readDihedralBlock(fp)
             refDihIdxs.append(reflist)
             # check if they belong
-            dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
+            dihparticles = [[x[0], x[1], x[2], x[3]]
+                            for x in dihedralParticles]
             for ref in reflist:
                 if ref not in dihparticles:
-                    raise RuntimeError("Reference dihedral not found in [ dihedrals ].")
+                    raise RuntimeError(
+                        "Reference dihedral not found in [ dihedrals ].")
     fp.close()
     if (prepareOpt):
         dihparticles = [[x[0], x[1], x[2], x[3]] for x in dihedralParticles]
@@ -528,14 +631,15 @@ def parseStpFile (filename, prepareOpt=False):
         idxsToRemove = []
         for dihtype_ in optDihIdxs:
             for dihAtoms in dihtype_:
-                # fill with indices of optdihedrals, except for the first one that appears
+                # fill with indices of optdihedrals, except for the
+                # first one that appears
                 idxsToRemove.extend(indices(dihparticles, dihAtoms)[1:])
 
         # remove duplicates and sort by reverse order
         idxsToRemove = list(set(idxsToRemove))
         idxsToRemove.sort(reverse=True)
 
-        # delete dihedral data 
+        # delete dihedral data
         for x in idxsToRemove:
             del dihedralParticles[x]
             del dihparticles[x]
@@ -547,26 +651,28 @@ def parseStpFile (filename, prepareOpt=False):
             dihedralC5 = np.delete(dihedralC5, x)
 
         # Recover indices.
-        optDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in optDihIdxs]
+        optDihIdxs = [[dihparticles.index(d) for d in dihtype_]
+                      for dihtype_ in optDihIdxs]
 
         # Zero the contribution of optDihedrals -- they will be
         # replaced anyway.
         for i in optDihIdxs:
-            dihedralPhi[i]  = 0.0
-            dihedralK[i]    = 0.0
-            dihedralM[i]    = 0.0
-            dihedralC3[i]   = 0.0
-            dihedralC4[i]   = 0.0
-            dihedralC5[i]   = 0.0
-        
+            dihedralPhi[i] = 0.0
+            dihedralK[i] = 0.0
+            dihedralM[i] = 0.0
+            dihedralC3[i] = 0.0
+            dihedralC4[i] = 0.0
+            dihedralC5[i] = 0.0
+
     else:
         optAtomsIdxs = []
         optPairIdxs = []
         optDihIdxs = []
 
     # Recover indices for reference dihedral.
-    refDihIdxs = [[dihparticles.index(d) for d in dihtype_] for dihtype_ in refDihIdxs]
-    
+    refDihIdxs = [[dihparticles.index(d) for d in dihtype_]
+                  for dihtype_ in refDihIdxs]
+
     # Zero the contribution of reference dihedrals to `mimic' a
     # constraint.
     # for reflist in refDihIdxs:
@@ -587,19 +693,28 @@ def parseStpFile (filename, prepareOpt=False):
         refdihedralBools.append(storedValue)
 
     out = {
-        'defaults': defaults,
-        'atoms': atoms,
+        'defaults':
+        defaults,
+        'atoms':
+        atoms,
         'bonds': (bondParticles, bondK, bondL),
         'angles': (angleParticles, angleK, angleT, angleKub, angleR13),
-        'propers': (dihedralParticles, dihedralPhi, dihedralK, dihedralM, dihedralC3, dihedralC4, dihedralC5), 
+        'propers': (dihedralParticles, dihedralPhi, dihedralK, dihedralM,
+                    dihedralC3, dihedralC4, dihedralC5),
         'impropers': (improperParticles, improperK, improperPhi, improperM),
         'restraints': (restraintsParticles, restraintsK, restraintsPhi),
         'nb': (nbParticles, nbC6, nbC12, nbQIJ),
-        'optatoms': optAtomsIdxs,
-        'optpairs': optPairIdxs,
-        'optdihedrals': optDihIdxs,
-        'refdihedrals': refDihIdxs,
-        'refdihedral_bools': refdihedralBools,
-        'opttype': optType
+        'optatoms':
+        optAtomsIdxs,
+        'optpairs':
+        optPairIdxs,
+        'optdihedrals':
+        optDihIdxs,
+        'refdihedrals':
+        refDihIdxs,
+        'refdihedral_bools':
+        refdihedralBools,
+        'opttype':
+        optType
     }
     return out

@@ -22,26 +22,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import numpy as np 
+import numpy as np
 
-def parseGROtraj (fn):
+
+def parseGROtraj(fn):
     fp = open(fn, 'r')
     traj = []
     # file loop
     while (True):
-        line = fp.readline() # title - ignored
+        line = fp.readline()  # title - ignored
         if (line == ''):
             break
-        line = fp.readline() # number of atoms
+        line = fp.readline()  # number of atoms
         fields = line.split()
         natoms = int(fields[0])
-        xs  = []
-        ys  = []
-        zs  = []
+        xs = []
+        ys = []
+        zs = []
         els = []
         for i in range(natoms):
             line = fp.readline()
-            # gro is fixed-format 
+            # gro is fixed-format
             ele = line[10:15].strip()[0]
             x = float(line[20:28])
             y = float(line[28:36])
@@ -50,7 +51,7 @@ def parseGROtraj (fn):
             xs.append(x)
             ys.append(y)
             zs.append(z)
-        line = fp.readline() # box 
-        traj.append(np.array([xs,ys,zs]))
+        line = fp.readline()  # box
+        traj.append(np.array([xs, ys, zs]))
     fp.close()
     return (traj, els)

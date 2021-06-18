@@ -93,7 +93,8 @@ PyArrayObject *PyArray_Einsum_ij_ij_i (PyArrayObject *a1, PyArrayObject *a2) {
   }
   return output;
  badargument:
-  PyErr_SetString(PyExc_ValueError, "Einsum ij,ij->i expects two 2-D PyArrays with the same shape.");
+  PyErr_SetString(PyExc_ValueError,
+     "Einsum ij,ij->i expects two 2-D PyArrays with the same shape.");
   return NULL;
 }
 
@@ -127,7 +128,8 @@ PyArrayObject *PyArray_Einsum_ij_ij_j (PyArrayObject *a1, PyArrayObject *a2) {
   }
   return output;
  badargument:
-  PyErr_SetString(PyExc_ValueError, "Einsum ij,ij->j expects two 2-D PyArrays with the same shape.");
+  PyErr_SetString(PyExc_ValueError,
+    "Einsum ij,ij->j expects two 2-D PyArrays with the same shape.");
   return NULL;
 }
 
@@ -154,20 +156,25 @@ PyArrayObject *PyArray_Einsum_ij_kj_kj (PyArrayObject *a1, PyArrayObject *a2) {
     for (int j = 0; j < dims_out[1]; j++) {
       output_c[dims_out[1]*k + j] = 0.0;
       for (int i = 0; i < dims[0]; i++) {
-	output_c[dims_out[1]*k + j] += a1_c[dims[1]*i + j] * a2_c[dims_out[1]*k + j];
+	output_c[dims_out[1]*k + j] +=
+	    a1_c[dims[1]*i + j] * a2_c[dims_out[1]*k + j];
 	NanTracker("Einsum_ij_kj_kj", 1, output_c[dims_out[1]*k + j]);
       }
     }
   }
   return output;
  badargument:
-  PyErr_SetString(PyExc_ValueError, "Einsum ij,kj->kj expects two 2-D PyArrays with the same number of columns.");
+  PyErr_SetString(PyExc_ValueError,
+    "Einsum ij,kj->kj expects two 2-D PyArrays with the same number of columns.");
   return NULL;
 }
 
 typedef struct t_einsum {
   const char *key; /* einsum string */
-  PyArrayObject (*(*einsum_func) (PyArrayObject*, PyArrayObject*)); /* pointer to einsum function */
+  PyArrayObject (*(*einsum_func) (PyArrayObject*, PyArrayObject*)); /* pointer
+								     * to
+								     * einsum
+								     * function */
 } t_einsum;
 
 static t_einsum einsum_lookup_table[] = {
@@ -304,7 +311,9 @@ crossProduct(PyObject *dummy, PyObject *args)
   output = PyArray_EMPTY (2, dims, NPY_DOUBLE, 0);
   output_c = (npy_double*) PyArray_DATA(output);
   for (npy_intp i = 0; i < dims[0]; ++i)
-    MyCArray_CrossProduct_InPlace(v1_c + GPY_DIMENSIONS*i, v2_c + GPY_DIMENSIONS*i, output_c + GPY_DIMENSIONS*i);
+    MyCArray_CrossProduct_InPlace(v1_c + GPY_DIMENSIONS*i,
+				  v2_c + GPY_DIMENSIONS*i,
+				  output_c + GPY_DIMENSIONS*i);
 
   /* DECREF's */
   Py_XDECREF(v1);
@@ -368,7 +377,9 @@ calculateDisplacements(PyObject *dummy, PyObject *args)
     {
         for (npy_intp j = 0; j < GPY_DIMENSIONS; ++j)
 	{
-	  outputc[GPY_DIMENSIONS*i + j] = (npy_double) confc[GPY_DIMENSIONS*iic[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j];
+	  outputc[GPY_DIMENSIONS*i + j] =
+	      (npy_double) confc[GPY_DIMENSIONS*iic[i]+j]
+	        - confc[GPY_DIMENSIONS*ijc[i]+j];
 	  NanTracker("calculateDisplacements", 1, outputc[GPY_DIMENSIONS*i + j]);
 	}
     }
@@ -436,7 +447,8 @@ calculateDistances(PyObject *dummy, PyObject *args)
         outputc[i] = (npy_double) 0.00;
         for (int j = 0; j < GPY_DIMENSIONS; ++j)
 	{
-            outputc[i] += (npy_double) pow(confc[GPY_DIMENSIONS*iic[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j], 2);
+            outputc[i] += (npy_double) pow(confc[GPY_DIMENSIONS*iic[i]+j]
+					   - confc[GPY_DIMENSIONS*ijc[i]+j], 2);
 	    NanTracker("calculateDistances", 1, outputc[i]);
 	}
 
@@ -506,7 +518,8 @@ calculateDistances2(PyObject *dummy, PyObject *args)
         outputc[i] = (npy_double) 0.00;
         for (int j = 0; j < GPY_DIMENSIONS; ++j)
 	{
-            outputc[i] += (npy_double) pow(confc[GPY_DIMENSIONS*iic[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j], 2);
+            outputc[i] += (npy_double) pow(confc[GPY_DIMENSIONS*iic[i]+j]
+					   - confc[GPY_DIMENSIONS*ijc[i]+j], 2);
 	    NanTracker("calculateDistances2", 1, outputc[i]);
 	}
     }
@@ -581,8 +594,10 @@ calculateCosines(PyObject *dummy, PyObject *args)
       outputc[i] = (npy_double) 0.00;
       /* dot product */
       for (int j = 0; j < GPY_DIMENSIONS; ++j) {
-	npy_double v1 = confc[GPY_DIMENSIONS*iic[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j];
-	npy_double v2 = confc[GPY_DIMENSIONS*ikc[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j];
+	npy_double v1 = confc[GPY_DIMENSIONS*iic[i]+j]
+	    - confc[GPY_DIMENSIONS*ijc[i]+j];
+	npy_double v2 = confc[GPY_DIMENSIONS*ikc[i]+j]
+	    - confc[GPY_DIMENSIONS*ijc[i]+j];
 	v1_norm += v1 * v1;
 	v2_norm += v2 * v2;
 	outputc[i] += v1 * v2;
@@ -666,8 +681,10 @@ calculateSines(PyObject *dummy, PyObject *args)
       outputc[i] = (npy_double) 0.00;
       /* dot product */
       for (int j = 0; j < GPY_DIMENSIONS; ++j) {
-	npy_double v1 = confc[GPY_DIMENSIONS*iic[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j];
-	npy_double v2 = confc[GPY_DIMENSIONS*ikc[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j];
+	npy_double v1 = confc[GPY_DIMENSIONS*iic[i]+j]
+	    - confc[GPY_DIMENSIONS*ijc[i]+j];
+	npy_double v2 = confc[GPY_DIMENSIONS*ikc[i]+j]
+	    - confc[GPY_DIMENSIONS*ijc[i]+j];
 	v1_norm += v1 * v1;
 	v2_norm += v2 * v2;
 	outputc[i] += v1 * v2;
@@ -752,8 +769,10 @@ calculateAngles(PyObject *dummy, PyObject *args)
       outputc[i] = (npy_double) 0.00;
       /* dot product */
       for (int j = 0; j < GPY_DIMENSIONS; ++j) {
-	npy_double v1 = confc[GPY_DIMENSIONS*iic[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j];
-	npy_double v2 = confc[GPY_DIMENSIONS*ikc[i]+j] - confc[GPY_DIMENSIONS*ijc[i]+j];
+	npy_double v1 = confc[GPY_DIMENSIONS*iic[i]+j]
+	    - confc[GPY_DIMENSIONS*ijc[i]+j];
+	npy_double v2 = confc[GPY_DIMENSIONS*ikc[i]+j]
+	    - confc[GPY_DIMENSIONS*ijc[i]+j];
 	v1_norm += v1 * v1;
 	v2_norm += v2 * v2;
 	outputc[i] += v1 * v2;
@@ -913,34 +932,34 @@ badargument:
 }
 
 static PyMethodDef mymethods[] = {
-				  { "einsum", einsumWrapper,
-				    METH_VARARGS | METH_KEYWORDS,
-				    ""},
-				  { "crossProduct", crossProduct,
-				    METH_VARARGS | METH_KEYWORDS,
-				    ""},
-				  { "calculateDisplacements", calculateDisplacements,
-				    METH_VARARGS | METH_KEYWORDS,
-				    ""},
-				  { "calculateDistances", calculateDistances,
-				    METH_VARARGS | METH_KEYWORDS, 
-				    ""},
-				  { "calculateDistances2", calculateDistances2,
-				    METH_VARARGS | METH_KEYWORDS, 
-				    ""},
-				  { "calculateCosines", calculateCosines,
-				    METH_VARARGS | METH_KEYWORDS, 
-				    ""},
-				  { "calculateSines", calculateSines,
-				    METH_VARARGS | METH_KEYWORDS, 
-				    ""},
-				  { "calculateAngles", calculateAngles,
-				    METH_VARARGS | METH_KEYWORDS, 
-				    ""},
-				  { "calculateDihedrals", calculateDihedrals,
-				    METH_VARARGS | METH_KEYWORDS, 
-				    ""},
-				  {NULL, NULL, 0, NULL} /* Sentinel */
+			  { "einsum", einsumWrapper,
+			    METH_VARARGS | METH_KEYWORDS,
+			    ""},
+			  { "crossProduct", crossProduct,
+			    METH_VARARGS | METH_KEYWORDS,
+			    ""},
+			  { "calculateDisplacements", calculateDisplacements,
+			    METH_VARARGS | METH_KEYWORDS,
+			    ""},
+			  { "calculateDistances", calculateDistances,
+			    METH_VARARGS | METH_KEYWORDS, 
+			    ""},
+			  { "calculateDistances2", calculateDistances2,
+			    METH_VARARGS | METH_KEYWORDS, 
+			    ""},
+			  { "calculateCosines", calculateCosines,
+			    METH_VARARGS | METH_KEYWORDS, 
+			    ""},
+			  { "calculateSines", calculateSines,
+			    METH_VARARGS | METH_KEYWORDS, 
+			    ""},
+			  { "calculateAngles", calculateAngles,
+			    METH_VARARGS | METH_KEYWORDS, 
+			    ""},
+			  { "calculateDihedrals", calculateDihedrals,
+			    METH_VARARGS | METH_KEYWORDS, 
+			    ""},
+			  {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
 static struct PyModuleDef geometrypymodule = {

@@ -30,98 +30,120 @@ from io import StringIO
 from subprocess import check_output
 
 
-def createStreamAfterPreprocessing (fn, preprocess=False):
+def createStreamAfterPreprocessing(fn, preprocess=False):
     if preprocess:
         cpp_path = which('cpp')
         if cpp_path is None:
             answer = 'n'
             while not (answer == 'y'):
-                print("Error: The stpParser uses the C preprocessor (cpp) to translate")
-                print("directives such as #include and #define, which are commonly used in")
-                print("Gromacs force-field files. However, no path for cpp was found.")
-                print("Please, make sure cpp is installed and in your $PATH. Otherwise,")
-                print("preprocess the file %s manually. If you have already" % fn)
-                print("done this, or if your file does not need preprocessing, answer with")
+                print(
+                    "Error: The stpParser uses the C preprocessor (cpp) to translate"
+                )
+                print(
+                    "directives such as #include and #define, which are commonly used in"
+                )
+                print(
+                    "Gromacs force-field files. However, no path for cpp was found."
+                )
+                print(
+                    "Please, make sure cpp is installed and in your $PATH. Otherwise,"
+                )
+                print("preprocess the file %s manually. If you have already" %
+                      fn)
+                print(
+                    "done this, or if your file does not need preprocessing, answer with"
+                )
                 print("'y'. If you want to quit, press Ctrl+C.")
                 answer = input("")
             fp = open(fn, 'r')
         else:
-            processed_string = check_output([cpp_path, '-P', '-traditional', fn]).decode('utf-8')
+            processed_string = check_output(
+                [cpp_path, '-P', '-traditional', fn]).decode('utf-8')
             fp = StringIO(processed_string)
         return fp
     else:
         return open(fn, 'r')
 
 
-def check_if_path_is_fullpath (path):
+def check_if_path_is_fullpath(path):
     if path.startswith('/'):
         return True
     else:
         return False
 
-def extract_filename_from_include_considering_path (string, parent_fn):
+
+def extract_filename_from_include_considering_path(string, parent_fn):
     if not (check_if_path_is_fullpath(parent_fn)):
-        raise Exception("error in function: %s must be an absolute path" % parent_fn)
+        raise Exception("error in function: %s must be an absolute path" %
+                        parent_fn)
     m = re.match(r'^#include\s+"(.*)"', string)
     if m:
-        if (check_if_path_is_fullpath (m.group(1))):
+        if (check_if_path_is_fullpath(m.group(1))):
             return m.group(1)
         else:
-            return os.path.abspath(os.path.dirname(parent_fn) + '/' + m.group(1))
+            return os.path.abspath(
+                os.path.dirname(parent_fn) + '/' + m.group(1))
     else:
         return ""
 
-def put_includes_into_stream (filename, stream):
-    fp = open (filename, "r")
+
+def put_includes_into_stream(filename, stream):
+    fp = open(filename, "r")
     for line in fp:
         # extra space for blocks
         if (line.rstrip().startswith('[')):
             stream.write("\n")
-        nested_include = extract_filename_from_include_considering_path (line, filename)
+        nested_include = extract_filename_from_include_considering_path(
+            line, filename)
         if (nested_include == ""):
             stream.write(line)
         else:
-            put_includes_into_stream (nested_include, stream)
+            put_includes_into_stream(nested_include, stream)
     fp.close()
 
-def extract_define_directive (string):
+
+def extract_define_directive(string):
     m = re.match(r'^#define\s+(\S+)\s+(.*)', string)
     if m:
         return (m.group(1), m.group(2))
     else:
         return ""
 
-def expand_includes_in_file (input_fn, output_fn):
+
+def expand_includes_in_file(input_fn, output_fn):
     input_fn = os.path.abspath(input_fn)
     output_fn = os.path.abspath(output_fn)
-    fp = open (input_fn, "r")
+    fp = open(input_fn, "r")
     fp_output = open(output_fn, "w")
     for line in fp:
         # extra space for blocks
         if (line.rstrip().startswith('[')):
             fp_output.write("\n")
-        nested_include = extract_filename_from_include_considering_path (line, input_fn)
+        nested_include = extract_filename_from_include_considering_path(
+            line, input_fn)
         if (nested_include == ""):
             fp_output.write(line)
         else:
-            put_includes_into_stream (nested_include, fp_output)
+            put_includes_into_stream(nested_include, fp_output)
     fp_output.close()
     fp.close()
 
-def extract_defines_in_file (input_fn):
+
+def extract_defines_in_file(input_fn):
     hash_of_defines = {}
     fp = open(input_fn, "r")
     for line in fp:
-        this_define = extract_define_directive (line)
+        this_define = extract_define_directive(line)
         if not (this_define == ""):
             hash_of_defines[this_define[0]] = this_define[1]
     return hash_of_defines
 
-def substitute_defines_in_file (input_fn, output_fn, hash_of_defines):
+
+def substitute_defines_in_file(input_fn, output_fn, hash_of_defines):
     fp = open(input_fn, "r")
     fp_output = open(output_fn, "w")
     for line in fp:
-        this_define = extract_define_directive (line)
+        this_define = extract_define_directive(line)
         comment = ""
         if (this_define == ""):
             for d in hash_of_defines:
@@ -139,7 +161,8 @@ def substitute_defines_in_file (input_fn, output_fn, hash_of_defines):
     fp_output.close()
     fp.close()
 
-def pre_process_file (input_fn, output_fn):
+
+def pre_process_file(input_fn, output_fn):
     fpo = open(output_fn, 'w')
     fpi = createStreamAfterPreprocessing(input_fn, preprocess=True)
     for line in fpi:

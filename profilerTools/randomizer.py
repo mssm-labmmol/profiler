@@ -22,54 +22,66 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from    random  import  uniform, gauss, lognormvariate, choice
-from    abc     import  ABC
-import  numpy   as      np
+from random import uniform, gauss, lognormvariate, choice
+from abc import ABC
+import numpy as np
+
 
 class RandomizerInterface(ABC):
-    def random(self): pass
+    def random(self):
+        pass
+
 
 class LogNormalRandomizer(RandomizerInterface):
     def __init__(self, mean, stdev):
         self.mean = mean
         self.stdev = stdev
+
     def random(self):
-        phi = (self.stdev ** 2 + self.mean ** 2) ** 0.5
-        mu = np.log(self.mean ** 2 / phi)
-        sigma = (np.log(phi ** 2 / self.mean ** 2)) ** 0.5
+        phi = (self.stdev**2 + self.mean**2)**0.5
+        mu = np.log(self.mean**2 / phi)
+        sigma = (np.log(phi**2 / self.mean**2))**0.5
         samples = lognormvariate(mu, sigma)
         return samples
+
 
 class GaussianRandomizer(RandomizerInterface):
     def __init__(self, mean, stdev):
         self.mean = mean
         self.stdev = stdev
+
     def random(self):
         samples = gauss(self.mean, self.stdev)
         return samples
 
+
 class UniformRandomizer(RandomizerInterface):
     def __init__(self, low, up):
         self.low = low
-        self.up  = up
+        self.up = up
+
     def random(self):
         samples = uniform(self.low, self.up)
         return samples
 
+
 class UniformDimDist(RandomizerInterface):
     def __init__(self, low, up):
         self.low = low
-        self.up  = up
+        self.up = up
+
     def random(self):
         low_exp = np.log10(self.low)
-        up_exp  = np.log10(self.up)
+        up_exp = np.log10(self.up)
         exp = uniform(low_exp, up_exp)
-        return 10 ** exp
+        return 10**exp
+
 
 class SignReverserDecorator(RandomizerInterface):
     def __init__(self, randomizer, pinv):
         self._randomizer = randomizer
         self.pinv = pinv
+
     def random(self):
         x = choice(range(1, 101))
         r = self._randomizer.random()
@@ -78,16 +90,19 @@ class SignReverserDecorator(RandomizerInterface):
         else:
             return -1.0 * r
 
+
 class LimiterDecorator(RandomizerInterface):
     def __init__(self, randomizer, min_, max_):
         self._randomizer = randomizer
         self.min_ = min_
         self.max_ = max_
+
     def random(self):
         rand = self._randomizer.random()
         while (rand < self.min_) and (rand > self.max_):
             rand = self._randomizer.random()
         return rand
+
 
 def RandomizerFactory(typestr, **kwargs):
     if (typestr == 'uniform'):

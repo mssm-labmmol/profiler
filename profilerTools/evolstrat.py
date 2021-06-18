@@ -21,6 +21,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
+# ------------------------------------------------------------------------------
+#
+# This code uses the DEAP library for all evolutionary-algorithm computations.
+# The official repository of DEAP can be found on https://github.com/DEAP/deap.
+# It is licensed under the GNU Lesser General Public License v3.0.
+#
+#
 
 from deap import base
 from deap import creator
@@ -39,49 +47,57 @@ from .multiprofile import multiProfile
 
 # ======================= Module-wide variables ======================
 
-randomizers = None # Will be initialized withing each strategy
+randomizers = None  # Will be initialized within each strategy
 
 # ======================== Functions for DEAP ========================
+
 
 def defaultInitializer():
     return [r.random() for r in randomizers]
 
+
 def defaultEvaluate(individual, scaler=None):
     if (scaler is not None):
-        pars = scaler.inverse_transform([list(individual),])[0]
+        pars = scaler.inverse_transform([
+            list(individual),
+        ])[0]
     else:
         pars = individual
     mp = multiProfile()
     mp.setOptimizableParameters(slice(0, len(pars), 1), list(pars))
     if mp.areThereUnphysicalParameters():
-        out = 1.0e+03 # large RMSD
+        out = 1.0e+03  # large RMSD
     else:
         mp.minimizeProfiles()
         out = mp.rmsdToData()
-    return 1.0/out,
+    return 1.0 / out,
+
 
 def defaultMut(individual, indpb=0.26, stdperc=0.1):
     """
     Each individual attribute suffers a Gaussian mutation with probability
     `indpb'. The standard deviations are `stdperc' times the corresponding mean.
-    """ 
+    """
     mu = [0 for i in range(len(individual))]
     sigma = [stdperc * x for x in individual]
     # TODO: Only return if parameters are Physical!!!!
     return tools.mutGaussian(individual, mu, sigma, indpb)
 
+
 def defaultCx(mother, father):
     return tools.cxOnePoint(mother, father)
 
+
 def defaultSel(population, howMany):
     return tools.selRoulette(individuals=population,
-                               k=howMany, 
-                               fit_attr='fitness')
+                             k=howMany,
+                             fit_attr='fitness')
+
 
 # ======================== DEAP child classes ========================
 
-class DEAP_GA:
 
+class DEAP_GA:
     def __init__(self,
                  popSize=200,
                  initFunc=defaultInitializer,
@@ -104,8 +120,8 @@ class DEAP_GA:
 
         hof = tools.HallOfFame(hofn)
         self.hof = hof
-        
-        stats = tools.Statistics(key=lambda ind: 1.0/ind.fitness.values[0])
+
+        stats = tools.Statistics(key=lambda ind: 1.0 / ind.fitness.values[0])
         stats.register("avg", np.mean)
         stats.register("std", np.std)
         stats.register("min", np.min)
@@ -114,11 +130,13 @@ class DEAP_GA:
 
         # Our fitness already takes into account all the molecules simultaneously.
         # Therefore, there is no need for a multi-objective optimization.
-        creator.create("FitnessMin", base.Fitness, weights=(1.0,))
+        creator.create("FitnessMin", base.Fitness, weights=(1.0, ))
         creator.create("Individual", list, fitness=creator.FitnessMin)
         toolbox.register("randomize", initFunc)
-        toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.randomize)
-        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+        toolbox.register("individual", tools.initIterate, creator.Individual,
+                         toolbox.randomize)
+        toolbox.register("population", tools.initRepeat, list,
+                         toolbox.individual)
 
         toolbox.register("mate", cxFunc)
         toolbox.register("mutate", mutFunc)
@@ -134,8 +152,14 @@ class DEAP_GA:
             self.toolbox.register("map", pool.map)
         # Run the GA and store the Logbook
         self.population = self.toolbox.population(self.popSize)
-        self.output = algorithms.eaSimple(self.population, self.toolbox, self.cxpb,
-                self.mutpb, nGens, stats=self.stats, halloffame=self.hof, verbose=True)
+        self.output = algorithms.eaSimple(self.population,
+                                          self.toolbox,
+                                          self.cxpb,
+                                          self.mutpb,
+                                          nGens,
+                                          stats=self.stats,
+                                          halloffame=self.hof,
+                                          verbose=True)
 
     def getBest(self):
         # Return best multiprofile
@@ -145,14 +169,15 @@ class DEAP_GA:
         mp.minimizeProfiles()
         return mp
 
-class DEAP_CMAES:
 
-    def __init__(self,
-                 centroid=None,
-                 sigma=None,
-                 popSize=200, # lambda_ in the algorithm
-                 evalFunc=defaultEvaluate,
-                 hofn=5):
+class DEAP_CMAES:
+    def __init__(
+            self,
+            centroid=None,
+            sigma=None,
+            popSize=200,  # lambda_ in the algorithm
+            evalFunc=defaultEvaluate,
+            hofn=5):
 
         global randomizers
         randomizers = InitRandomizers()
@@ -163,10 +188,14 @@ class DEAP_CMAES:
             sigma = 0.20
 
         self.scaler = MaxAbsScaler()
-        self.scaler.fit([centroid,])
+        self.scaler.fit([
+            centroid,
+        ])
 
         # Reset centroid
-        centroid = self.scaler.transform([centroid,])[0]
+        centroid = self.scaler.transform([
+            centroid,
+        ])[0]
 
         hof = tools.HallOfFame(hofn)
         self.hof = hof
@@ -174,8 +203,8 @@ class DEAP_CMAES:
         self.popSize = popSize
 
         toolbox = base.Toolbox()
-        
-        stats = tools.Statistics(key=lambda ind: 1.0/ind.fitness.values[0])
+
+        stats = tools.Statistics(key=lambda ind: 1.0 / ind.fitness.values[0])
         stats.register("avg", np.mean)
         stats.register("std", np.std)
         stats.register("min", np.min)
@@ -184,11 +213,13 @@ class DEAP_CMAES:
 
         # Our fitness already takes into account all the molecules simultaneously.
         # Therefore, there is no need for a multi-objective optimization.
-        creator.create("FitnessMin", base.Fitness, weights=(1.0,))
+        creator.create("FitnessMin", base.Fitness, weights=(1.0, ))
         creator.create("Individual", list, fitness=creator.FitnessMin)
         toolbox.register("evaluate", evalFunc, scaler=self.scaler)
 
-        strategy = cma.Strategy(centroid=centroid, sigma=sigma, lambda_=popSize)
+        strategy = cma.Strategy(centroid=centroid,
+                                sigma=sigma,
+                                lambda_=popSize)
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
 
@@ -202,12 +233,17 @@ class DEAP_CMAES:
 
         # Run CMA-ES and store final things
         self.output = algorithms.eaGenerateUpdate(self.toolbox,
-                                    ngen=nGens, stats=self.stats,
-                                    halloffame=self.hof, verbose=True)
+                                                  ngen=nGens,
+                                                  stats=self.stats,
+                                                  halloffame=self.hof,
+                                                  verbose=True)
+
     def getBest(self):
         # Return best multiprofile
         best = self.hof[0]
-        best = self.scaler.inverse_transform([best,])[0]
+        best = self.scaler.inverse_transform([
+            best,
+        ])[0]
         mp = multiProfile()
         mp.setOptimizableParameters(slice(0, len(best), 1), list(best))
         mp.minimizeProfiles()

@@ -22,38 +22,41 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .configuration import * 
-from .energy_force_vectorized import * 
-from .stpParser import * 
+from .configuration import *
+from .energy_force_vectorized import *
+from .stpParser import *
 from math import sqrt
 
-class steepestDescentsMinimizer (object):
 
-    def __init__ (self, dx0, dxm, maxSteps, dele, mmCalc):
+class steepestDescentsMinimizer(object):
+    def __init__(self, dx0, dxm, maxSteps, dele, mmCalc):
         self.dx0 = dx0
         self.dxm = dxm
         self.maxSteps = maxSteps
         self.dele = dele
-        self.mmCalc  = mmCalc
+        self.mmCalc = mmCalc
 
         self.energies = []
-        self.ens      = ensemble([])
+        self.ens = ensemble([])
 
-    def clear (self):
+    def clear(self):
         self.energies = []
-        self.ens      = ensemble([])
+        self.ens = ensemble([])
         self.mmCalc.clearForces()
 
-    def appendEneConf (self, ene, conf):
+    def appendEneConf(self, ene, conf):
         self.energies.append(ene)
         self.ens.appendConf(conf)
 
-    def run (self, conf, debug=False):
+    def run(self, conf, debug=False):
         self.clear()
         dx = self.dx0
         dele = self.dele + 10
         iteration = 0
-        (curr_ene, curr_f) = self.mmCalc.calcForConf(conf, calcForce=(self.maxSteps != 0), minim=True)
+        (curr_ene,
+         curr_f) = self.mmCalc.calcForConf(conf,
+                                           calcForce=(self.maxSteps != 0),
+                                           minim=True)
         self.appendEneConf(curr_ene, conf)
         while (True):
             if (iteration == self.maxSteps):
@@ -67,10 +70,11 @@ class steepestDescentsMinimizer (object):
             self.mmCalc.normalizeForces()
             self.mmCalc.applyForcesToConfWithFactor(conf, dx)
             # Get new forces and energies.
-            (curr_ene, curr_f)  = self.mmCalc.calcForConf(conf, minim=True)
+            (curr_ene, curr_f) = self.mmCalc.calcForConf(conf, minim=True)
             # Calculate DELE.
             dele = curr_ene['total'] - old_ene['total']
-            # If energy has increased, reject new configuration and halve dx for the next step.
+            # If energy has increased, reject new configuration and
+            # halve dx for the next step.
             if (dele > 0):
                 # This effectively restores the old configuration.
                 self.mmCalc.setForces(old_f)
@@ -80,7 +84,9 @@ class steepestDescentsMinimizer (object):
                 # This resets the new energies and forces to their old values.
                 curr_ene = old_ene
                 curr_f = old_f
-                dele = self.dele + 10 # This is to avoid considering the previous DELE in convergence check.
+                dele = self.dele + 10  # This is to avoid considering
+                                       # the previous DELE in
+                                       # convergence check.
             else:
                 # Store new energies and configurations.
                 self.appendEneConf(curr_ene, conf)
@@ -90,45 +96,58 @@ class steepestDescentsMinimizer (object):
                     dx = self.dxm
             iteration += 1
 
-    def getUnrestrainedEnergy (self):
+    def getUnrestrainedEnergy(self):
         return self.energies[-1]['total'] - self.energies[-1]['restraints']
 
-    def getRestraintEnergy (self):
+    def getRestraintEnergy(self):
         return self.energies[-1]['restraints']
 
-    def getFin (self):
+    def getFin(self):
         return self.ens[-1]
 
-    def writeEnergiesToFile (self, fn, removeRestraints=False):
+    def writeEnergiesToFile(self, fn, removeRestraints=False):
         if removeRestraints:
-            np.savetxt(fn, [x['total'] - x['restraints'] for x in self.energies])
+            np.savetxt(fn,
+                       [x['total'] - x['restraints'] for x in self.energies])
         else:
             np.savetxt(fn, [x['total'] for x in self.energies])
 
-    def writeEnsembleToTraj (self, fn):
+    def writeEnsembleToTraj(self, fn):
         self.ens.writeToFile(fn)
 
-    def runAndSave (self, conf, elements, fn_ener, fn_traj, removeRestraints=False, debug=False):
+    def runAndSave(self,
+                   conf,
+                   elements,
+                   fn_ener,
+                   fn_traj,
+                   removeRestraints=False,
+                   debug=False):
         self.run(conf, debug)
         self.writeEnergiesToFile(fn_ener, removeRestraints)
         self.ens.elements = elements
         self.writeEnsembleToTraj(fn_traj)
 
-class conjugateGradientMinimizer (object):
 
-    def __init__ (self, calc, dx0=0.01, dxm=0.10, nsteps=100, bfac=2.0, prec=1.0e-08):
-        self.dx0  = dx0
-        self.dxm  = dxm
+class conjugateGradientMinimizer(object):
+    def __init__(self,
+                 calc,
+                 dx0=0.01,
+                 dxm=0.10,
+                 nsteps=100,
+                 bfac=2.0,
+                 prec=1.0e-08):
+        self.dx0 = dx0
+        self.dxm = dxm
         self.nsteps = nsteps
         self.bfac = bfac
         self.prec = prec
         self.energies = []
-        self.ensemble = ensemble ([])
-        self.mmCalc = calc       
+        self.ensemble = ensemble([])
+        self.mmCalc = calc
 
-    def clear (self):
+    def clear(self):
         self.energies = []
-        self.ensemble = ensemble ([])
+        self.ensemble = ensemble([])
         self.mmCalc.clearForces()
 
     def run(self, conf):
@@ -144,21 +163,20 @@ class conjugateGradientMinimizer (object):
         for step in range(self.nsteps):
 
             # Restore some quantities.
-            dx   = self.dx0
+            dx = self.dx0
             ncyc = 0
-            energyA  = stepEnergy
-            forceA   = stepForce
-            boundA   = 0
-            gA       = np.sum(stepDir * forceA)
-            boundB   = dx / sqrt(np.sum(stepDir * stepDir))
+            energyA = stepEnergy
+            forceA = stepForce
+            boundA = 0
+            gA = np.sum(stepDir * forceA)
+            boundB = dx / sqrt(np.sum(stepDir * stepDir))
             # Inner cycle - setting bounds a, b, including check on sMin.
 
             bcalcB = True
             while True:
 
-
-
-                self.mmCalc.applyForcesToConfWithFactor(conf, boundB - boundA, stepDir)
+                self.mmCalc.applyForcesToConfWithFactor(
+                    conf, boundB - boundA, stepDir)
 
                 if bcalcB:
                     energyB, forceB = self.mmCalc.calcForConf(conf, minim=True)
@@ -169,56 +187,64 @@ class conjugateGradientMinimizer (object):
                     # try interpolation
                     # Compute sMin.
                     try:
-                        Z    = 3 * (energyA - energyB) / (boundB - boundA) - gA - gB
-                        W    = sqrt(Z * Z - gA * gB)
-                        sMin = boundB - (boundB - boundA) * (W - Z - gB)/(gA - gB + 2 * W)
+                        Z = 3 * (energyA - energyB) / (boundB -
+                                                       boundA) - gA - gB
+                        W = sqrt(Z * Z - gA * gB)
+                        sMin = boundB - (boundB - boundA) * (W - Z - gB) / (
+                            gA - gB + 2 * W)
                     except ValueError:
-                        raise ValueError("Unexpected values were found during conjugate-gradients minimization. Please, try again with a smaller DX0.")
+                        raise ValueError(
+                            "Unexpected values were found during"
+                            " conjugate-gradients minimization. Please, "
+                            "try again with a smaller DX0."
+                        )
 
                     # Energies and forces at sMin.
-                    self.mmCalc.applyForcesToConfWithFactor(conf, sMin - boundB, stepDir)
-                    energySmin, forceSmin = self.mmCalc.calcForConf(conf, minim=True)
+                    self.mmCalc.applyForcesToConfWithFactor(
+                        conf, sMin - boundB, stepDir)
+                    energySmin, forceSmin = self.mmCalc.calcForConf(conf,
+                                                                    minim=True)
                     gMin = np.sum(forceSmin * stepDir)
 
-                    if (energySmin['total'] <= energyA) and (energySmin['total'] <= energyB):
+                    if (energySmin['total'] <=
+                            energyA) and (energySmin['total'] <= energyB):
                         break
                     else:
                         if gMin < 0:
                             # repeat for (a, sMin)
                             # move configuration to A
-                            self.mmCalc.applyForcesToConfWithFactor(conf, boundA - sMin, stepDir)
+                            self.mmCalc.applyForcesToConfWithFactor(
+                                conf, boundA - sMin, stepDir)
                             energyB = energySmin['total']
-                            forceB  = forceSmin.copy()
-                            gB      = gMin
-                            boundB  = sMin
-                            ncyc   += 1
+                            forceB = forceSmin.copy()
+                            gB = gMin
+                            boundB = sMin
+                            ncyc += 1
                             # no need to calculate B
                             bcalcB = False
                         else:
                             # repeat for (sMin, b)
                             energyA = energySmin['total']
-                            forceA  = forceSmin.copy()
-                            gA      = gMin
-                            boundA  = sMin
-                            ncyc   += 1
+                            forceA = forceSmin.copy()
+                            gA = gMin
+                            boundA = sMin
+                            ncyc += 1
                             # no need to calculate B
                             bcalcB = False
                 else:
-                    dx     *= self.bfac
+                    dx *= self.bfac
                     if (dx >= self.dxm):
-                        raise Exception("DXM reached in conjugate-gradients method.")
+                        raise Exception(
+                            "DXM reached in conjugate-gradients method.")
                     # Save for next step.
                     energyA = energyB
-                    forceA  = forceB.copy()
-                    gA      = gB
-                    boundA  = boundB
+                    forceA = forceB.copy()
+                    gA = gB
+                    boundA = boundB
                     boundB *= self.bfac
-                    bcalcB  = True
-                    ncyc   += 1
-                
+                    bcalcB = True
+                    ncyc += 1
 
-
-                
             # Store.
             self.ensemble.appendConf(conf)
             self.energies.append(energySmin)
@@ -226,36 +252,41 @@ class conjugateGradientMinimizer (object):
 
             if (np.abs(energySmin - stepEnergy) <= self.prec):
                 return
-                                                        
-            # Save for next step.
-            stepDir    = forceSmin + stepDir * (np.sum(forceSmin * forceSmin) / np.sum(stepForce * stepForce))
-            stepEnergy = energySmin
-            stepForce  = forceSmin.copy()
-            prevEnergy = stepEnergy
-            prevForce  = stepForce.copy()
 
-    def getUnrestrainedEnergy (self):
+            # Save for next step.
+            stepDir = forceSmin + stepDir * (np.sum(forceSmin * forceSmin) /
+                                             np.sum(stepForce * stepForce))
+            stepEnergy = energySmin
+            stepForce = forceSmin.copy()
+            prevEnergy = stepEnergy
+            prevForce = stepForce.copy()
+
+    def getUnrestrainedEnergy(self):
         return self.energies[-1]['total'] - self.energies[-1]['restraints']
 
-    def getRestraintEnergy (self):
+    def getRestraintEnergy(self):
         return self.energies[-1]['restraints']
 
-    def getFin (self):
+    def getFin(self):
         return self.ensemble[-1]
-        
-    def writeEnergiesToFile (self, fn, removeRestraints=False):
+
+    def writeEnergiesToFile(self, fn, removeRestraints=False):
         if removeRestraints:
-            np.savetxt(fn, [x['total'] - x['restraints'] for x in self.energies])
+            np.savetxt(fn,
+                       [x['total'] - x['restraints'] for x in self.energies])
         else:
             np.savetxt(fn, [x['total'] for x in self.energies])
 
-    def writeEnsembleToTraj (self, fn):
+    def writeEnsembleToTraj(self, fn):
         self.ensemble.writeToFile(fn)
 
-    def runAndSave (self, conf, elements, fn_ener, fn_traj, removeRestraints=False):
+    def runAndSave(self,
+                   conf,
+                   elements,
+                   fn_ener,
+                   fn_traj,
+                   removeRestraints=False):
         self.run(conf)
         self.ensemble.elements = elements
         self.writeEnergiesToFile(fn_ener, removeRestraints)
         self.writeEnsembleToTraj(fn_traj)
-
-

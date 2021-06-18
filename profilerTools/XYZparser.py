@@ -22,9 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import numpy as np 
+import numpy as np
 
-def parseXYZtraj (fn):
+
+def parseXYZtraj(fn):
     fp = open(fn, 'r')
     traj = []
     # file loop
@@ -34,33 +35,34 @@ def parseXYZtraj (fn):
             break
         fields = line.split()
         natoms = int(fields[0])
-        line = fp.readline() # title - ignored
-        xs  = []
-        ys  = []
-        zs  = []
+        line = fp.readline()  # title - ignored
+        xs = []
+        ys = []
+        zs = []
         els = []
         for i in range(natoms):
             line = fp.readline()
             fields = line.split()
             try:
                 ele = int(fields[0])
-                ele = z2name (ele)
+                ele = z2name(ele)
             except ValueError:
                 ele = fields[0]
                 pass
             els.append(ele)
             x = float(fields[1]) / 10.0
             y = float(fields[2]) / 10.0
-            z = float(fields[3]) / 10.0 
+            z = float(fields[3]) / 10.0
             xs.append(x)
             ys.append(y)
             zs.append(z)
-        traj.append(np.array([xs,ys,zs]))
-        
+        traj.append(np.array([xs, ys, zs]))
+
     fp.close()
     return (traj, els)
 
-def z2name (ele):
+
+def z2name(ele):
     if ele == 1:
         return 'H'
     if ele == 2:
