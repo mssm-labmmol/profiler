@@ -214,7 +214,10 @@ def input2dict (fn):
     block_cont = []
     while (True):
         read_code = getblock(fp, block_cont)
-        out_dict[block_cont[0]] = block_cont[1:]
+        try:
+            out_dict[block_cont[0]] = block_cont[1:]
+        except IndexError:
+            pass
         if not (read_code):
             break
     fp.close()

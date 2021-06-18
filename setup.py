@@ -20,7 +20,7 @@ setup (
             'profilerOpt=profilerOpt.profilerOpt:main',
         ]
     },
-    install_requires=['numpy', 'deap']
+    install_requires=['numpy', 'deap', 'scikit-learn']
 )
 
 setup (
@@ -34,5 +34,5 @@ setup (
             'profilerGen=profilerGen.profilerGen:main',
         ]
     },
-    install_requires=['numpy', 'deap']
+    install_requires=['numpy', 'deap', 'scikit-learn']
 )

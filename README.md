@@ -17,8 +17,9 @@ consult the [documentation](./doc/src/doc.pdf).
 
 # Installation
 
-`profilerTools` depends on `numpy` and on `DEAP`, which should be
-automatically installed.
+`profilerTools` depends on `numpy`, `DEAP` and `scikit-learn`, which
+should be automatically installed by following the instructions
+below.
 
 To install, run
 
@@ -45,6 +46,7 @@ For users of the APT package manager, this can usually be remedied with
 * `python` (preferably >3.4)
 * `numpy`
 * `DEAP`
+* `scikit-learn`
 
 # Limitations
 
@@ -59,9 +61,6 @@ For users of the APT package manager, this can usually be remedied with
   the systems and also with the size of the evolutionary-algorithm
   population.
   
-* With parallelization, `profilerOpt` jobs with a given RNG seed are
-  *not* reproducible (without parallelization, they are).
-
 # Utilities
 
 To facilitate the use of `profilerTools`, we provide additional

@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import warnings
 import  geometrypy      as      gp
 import  numpy           as      np
 from    .coordParser import wrapAngles
@@ -70,8 +71,8 @@ class atomTerms (object):
                 try:
                     return (sqrt(self.cs6[i]*self.cs6[j]), sqrt(self.cs12[i]*self.cs12[j]))
                 except ValueError:
-                    raise ValueError("cs6_i = {}, cs6_j = {}, cs12_i = {}, cs12_j = {}".format(
-                        self.cs6[i], self.cs6[j], self.cs12[i], self.cs12[j]))
+                    warnings.warn("Tried to perform a calculation with negative LJ parameters; Replacing them with 0.\n")
+                    return (0.0, 0.0)
         if (mixtype == 'arithmetic'):
             if (type == 1):
                 sigma_i, epsilon_i = c6c12_to_sigmaepsilon(self.c6[i], self.c12[i])
@@ -1220,3 +1221,4 @@ class MMCalculator (object):
                         fp.write("%18.7e" % data[key][i])
                 fp.write("\n")
             fp.close()
+        return data['total']

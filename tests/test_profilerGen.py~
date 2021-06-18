@@ -1,0 +1,14 @@
+from mock import patch
+import unittest
+
+from modules.energy_force_vectorized import *
+from modules.configuration import *
+
+class Profiler(unittest.TestCase):
+
+    def test_upper(self):
+        self.assertEqual('foo'.upper(), 'FOO')
+
+
+if __name__ == '__main__':
+    unittest.main()

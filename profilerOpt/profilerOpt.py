@@ -41,6 +41,10 @@ from os.path import isfile
 from random import seed
 import numpy as np
 from modules.deap_ga import *
+from textwrap import fill
+
+def my_fill(text):
+    return fill(text, width=55)
 
 def evolStratFactory(*args, **kargs):
     evolutionaryStrategy = vbgaOpts.strategy
@@ -106,120 +110,156 @@ def check_STP_Input_Consistency():
         if optOpts.nLJ != comp_LJ:
             raise ValueError("Number of opt. LJ types in file {} should be {}.".format(cmdlineOpts.stpFiles[i], optOpts.nLJ))
 
-def main():
+class ProfilerOptRunner:
 
-    progdescr = """
-    profilerOpt is a Python program for simultaneous optimization of
-    torsional and 1-4 Lennard-Jones parameters.
-    """
-
-    parser = argparse.ArgumentParser(description=progdescr, formatter_class=argparse.RawTextHelpFormatter)
-
-    # hack to avoid printing "optional arguments:" in help message
-    parser._optionals.title = "options"
-
-    parser.add_argument('-np', dest='nProcs', required=False, type=int, default=1, help=
-            "Number of subprocesses spawned in parallelization.")
-
-    parser.add_argument('-r', metavar=('REF_1','REF_2'), dest='ref', nargs='+', required=True, type=str, help=
-            "Reference data files.")
-
-    parser.add_argument('-c', metavar=('COORDS_1','COORDS_2'),
-                        dest='coords', nargs='+', required=True, type=str, help=
-                "Torsional-scan trajectory files (.g96/.xyz/.gro).")
-
-    parser.add_argument('-t', metavar=('STP_1', 'STP_2'), dest='pars', nargs='+', required=True, type=str, help=
-                "Special-topology files (.stp).")
-
-    parser.add_argument('-i', metavar='INP', dest='input', required=True, type=str, help=
-                "Input file containing profilerOpt parameters (.inp).")
-
-    parser.add_argument('-w', metavar=('WEI_1','WEI_2'), dest='wei', nargs='+', required=False, type=str, help=
-            "Weight files (default = derive weights from INP file).")
-
-    parser.add_argument('-op', metavar='PREFIX', dest='out', required=True, type=str, help=
-                "Prefix for output files.")
-
-    parser.add_argument('--debug-mm', dest='emm', default=False, action='store_true', help=argparse.SUPPRESS)
-
-    parser.add_argument('-s', metavar=('DIHSPEC_1', 'DIHSPEC_2'), dest='dih_spec', nargs='+', required=False, type=str, help="Torsional-scan dihedral-angle files.")
-
-    args = parser.parse_args(preprocess_args(argv[1:]))
-
-    # map arguments to xxxOpts
-    argparse2opts (args)
-
-    # starting program
-    printheader(stdout)
-
-    # read parameters from input and put them in the xxxOpts classes
-    readinput (cmdlineOpts.inputFile)
-
-    # set seed
-    if randOpts.seed == -1:
-        seed()
-    else:
-        seed(randOpts.seed)
-        np.random.seed(randOpts.seed)
-
-    # check if files exist or raise IOError
-    checkfiles (cmdlineOpts.stpFiles + cmdlineOpts.refFiles + cmdlineOpts.trajFiles + cmdlineOpts.weiFiles)
-    
-    # read ref and wei data
-    optOpts.refData = [np.loadtxt(r) for r in cmdlineOpts.refFiles]
-    if (len(cmdlineOpts.weiFiles) > 0):
-        optOpts.weiData = [np.loadtxt(w) for w in cmdlineOpts.weiFiles]
-    else:
-        # fill wei data with appropriate weights
-        weiCalcObj = initializeWeightCalculator(optOpts.wTemp)
-        weiCalcObj.setEnergiesFromFiles(cmdlineOpts.refFiles)
-        optOpts.weiData = weiCalcObj.computeWeights()
-    # put ref data at zero average
-    optOpts.refData = [r - np.mean(r) for r in optOpts.refData]
-
-    # read stp data into xxxOpts class
-    optOpts.stpData = [parseStpFile(s, prepareOpt=True) for s in cmdlineOpts.stpFiles]
-
-    # if no minimization is requested during the GA execution,
-    # calculate the MM energies of nonoptimized terms and store them
-    # globally
-    if (minimOpts.maxSteps == 0):
-        # Create a dummy individual.
-        dummyIndividual = multiProfile()
-        # Get nonOpt energies
-        optOpts.emmData = dummyIndividual.getNonoptEnergy()
-
-    # check consistency between number of dihedral/LJ types in stp
-    # files and in the input file
-    check_STP_Input_Consistency()
+    def __init__(self, args):
+        progdescr = """
+        profilerOpt is a Python program for simultaneous optimization of
+        torsional and 1-4 Lennard-Jones parameters taking into account
+        several systems simultaneously.
         
-    # initialize strategy
-    GA = evolStratFactory(popSize=vbgaOpts.popSize)
-
-    # run
-    GA.run(vbgaOpts.nGens, nprocs=cmdlineOpts.nProcs)
-
-    # This is for debugging purposes - also write E_MM energies.
-    if (cmdlineOpts.debugEmm):
-        for i, ind in enumerate(GA.population):
-            nonOpt = ind.getNonoptEnergy()
-            for j in range(nonOpt.shape[0]):
-                np.savetxt(cmdlineOpts.outPrefix + '_' + str(i+1) + '_' + str(j+1) + '_mm.dat', nonOpt[j,:])
-
-    # write best ind
-    optind = GA.getBest()
-    optind.saveTraj(cmdlineOpts.outPrefix, 'xyz')
-    optind.saveProfile(cmdlineOpts.outPrefix)
-    optind.saveParameters(cmdlineOpts.outPrefix + '.ifp')
+        For each system, the NDIHS reference dihedrals of its torsional
+        scan are defined in its input STP file. These reference dihedral
+        angles are distributed into NGROUPS reference-dihedral groups,
+        each specified by an individual [ refdihedrals ] block. The
+        dihedral angles in the same group share the same value of
+        restraint force constant, defined in the INP file (option -i). The
+        number of reference dihedrals NDIHS may may not be the same for
+        all systems, but the number of reference-dihedral groups NGROUPS
+        must be the same.
     
-    # now, update minim, do final optimization and save
-    print("\nPerforming final optimization... ", file=stdout, end='')
-    optind.prepareMinim(lastMinimOpts.minimType, lastMinimOpts.dx0, lastMinimOpts.dxm, lastMinimOpts.dele, lastMinimOpts.maxSteps)
-    optind.minimizeProfiles(useWei=False)
-    optind.saveTraj(cmdlineOpts.outPrefix + '_minim', 'xyz')
-    optind.saveProfile(cmdlineOpts.outPrefix + '_minim')
-    print("Done.", file=stdout)
-    printfooter(stdout)
+        There are three ways to specify the values of the torsional-scan
+        angles for each system: (i) explicitly, via NSCAN x NDIHS matrixes
+        supplied for each system in the -s option (NSCAN is the length of
+        the torsional scan for the system); (ii) keeping the
+        reference-dihedral-angle values of the input trajectories; (iii)
+        performing a (multidimensional) systematic scan for each system.
+        Choosing any of these approaches involves a particular setting of
+        option values in the INP file, which might have to be chosen in
+        accordance with the contents of the STP file of each molecule. We
+        recommend reading Chapter 4 of the documentation to set these
+        options appropriately.
+    
+      """
+    
+        parser = argparse.ArgumentParser(description=progdescr, formatter_class=argparse.RawTextHelpFormatter)
+    
+        # hack to avoid printing "optional arguments:" in help message
+        parser._optionals.title = "options"
+    
+        parser.add_argument('-np', dest='nProcs', required=False, type=int, default=1, help=
+                my_fill("Number of subprocesses spawned in parallelization."))
+    
+        parser.add_argument('-r', metavar=('REF_1','REF_2'), dest='ref', nargs='+', required=True, type=str, help=
+                my_fill("Reference data files."))
+    
+        parser.add_argument('-c', metavar=('COORDS_1','COORDS_2'),
+                            dest='coords', nargs='+', required=True, type=str, help=
+                    my_fill("Torsional-scan trajectory files (.g96/.xyz/.gro)."))
+    
+        parser.add_argument('-t', metavar=('STP_1', 'STP_2'), dest='pars', nargs='+', required=True, type=str, help=
+                    my_fill("Special topology files (.stp)."))
+    
+        parser.add_argument('-i', metavar='INP', dest='input', required=True, type=str, help=
+                    my_fill("Input file containing profilerOpt parameters (.inp)."))
+    
+        parser.add_argument('-w', metavar=('WEI_1','WEI_2'), dest='wei', nargs='+', required=False, type=str, help=
+                my_fill("Weight files (default = derive weights from INP file)."))
+    
+        parser.add_argument('-op', metavar='PREFIX', dest='out', required=True, type=str, help=
+                    my_fill("Prefix for output files."))
+    
+        parser.add_argument('--debug-mm', dest='emm', default=False, action='store_true', help=argparse.SUPPRESS)
+    
+        parser.add_argument('-s', metavar=('SPEC_1', 'SPEC_2'), dest='dih_spec', nargs='+', required=False, type=str, help=
+                            my_fill("Torsional-scan dihedral-angle files."))
+    
+        args = parser.parse_args(preprocess_args(args))
+    
+        # map arguments to xxxOpts
+        argparse2opts (args)
+    
+        # starting program
+        printheader(stdout)
+    
+        # read parameters from input and put them in the xxxOpts classes
+        readinput (cmdlineOpts.inputFile)
+    
+        # set seed
+        if randOpts.seed == -1:
+            seed()
+        else:
+            seed(randOpts.seed)
+            np.random.seed(randOpts.seed)
+    
+        # check if files exist or raise IOError
+        checkfiles (cmdlineOpts.stpFiles + cmdlineOpts.refFiles + cmdlineOpts.trajFiles + cmdlineOpts.weiFiles)
+        
+        # read ref and wei data
+        optOpts.refData = [np.loadtxt(r) for r in cmdlineOpts.refFiles]
+        if (len(cmdlineOpts.weiFiles) > 0):
+            optOpts.weiData = [np.loadtxt(w) for w in cmdlineOpts.weiFiles]
+        else:
+            # fill wei data with appropriate weights
+            weiCalcObj = initializeWeightCalculator(optOpts.wTemp)
+            weiCalcObj.setEnergiesFromFiles(cmdlineOpts.refFiles)
+            optOpts.weiData = weiCalcObj.computeWeights()
+        # put ref data at zero average
+        optOpts.refData = [r - np.mean(r) for r in optOpts.refData]
+    
+        # read stp data into xxxOpts class
+        optOpts.stpData = [parseStpFile(s, prepareOpt=True) for s in cmdlineOpts.stpFiles]
+    
+        # if no minimization is requested during the GA execution,
+        # calculate the MM energies of nonoptimized terms and store them
+        # globally
+        if (minimOpts.maxSteps == 0):
+            # Create a dummy individual.
+            dummyIndividual = multiProfile()
+            # Get nonOpt energies
+            optOpts.emmData = dummyIndividual.getNonoptEnergy()
+    
+        # check consistency between number of dihedral/LJ types in stp
+        # files and in the input file
+        check_STP_Input_Consistency()
+            
+        # initialize strategy
+        GA = evolStratFactory(popSize=vbgaOpts.popSize)
+    
+        # run
+        GA.run(vbgaOpts.nGens, nprocs=cmdlineOpts.nProcs)
+    
+        # This is for debugging purposes - also write E_MM energies.
+        if (cmdlineOpts.debugEmm):
+            for i, ind in enumerate(GA.population):
+                nonOpt = ind.getNonoptEnergy()
+                for j in range(nonOpt.shape[0]):
+                    np.savetxt(cmdlineOpts.outPrefix + '_' + str(i+1) + '_' + str(j+1) + '_mm.dat', nonOpt[j,:])
+    
+        # write best ind
+        optind = GA.getBest()
+        optind.saveTraj(cmdlineOpts.outPrefix, 'xyz')
+        optind.saveProfile(cmdlineOpts.outPrefix)
+        optind.saveParameters(cmdlineOpts.outPrefix + '.ifp')
+        
+        # now, update minim, do final optimization and save
+        print("\nPerforming final optimization... ", file=stdout, end='')
+        optind.prepareMinim(lastMinimOpts.minimType, lastMinimOpts.dx0, lastMinimOpts.dxm, lastMinimOpts.dele, lastMinimOpts.maxSteps)
+        optind.minimizeProfiles(useWei=False)
+        optind.saveTraj(cmdlineOpts.outPrefix + '_minim', 'xyz')
+        optind.saveProfile(cmdlineOpts.outPrefix + '_minim')
+        print("Done.", file=stdout)
+        printfooter(stdout)
 
+        # store best
+        self.optind = optind
+
+    def get_optimal_parameters(self):
+        return self.optind.getOptimizableParameters()
+
+def main():
+    job = ProfilerOptRunner(argv[1:])
+    return job
+    
 if __name__ == '__main__':
     main()
