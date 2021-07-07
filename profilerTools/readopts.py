@@ -23,7 +23,8 @@
 # SOFTWARE.
 
 from .opts import (optOpts, randOpts, minimOpts, lastMinimOpts,
-                   vbgaOpts, dihrestrOpts, geomcheckOpts, cmdlineOpts)
+                   vbgaOpts, llsOpts, dihrestrOpts, geomcheckOpts,
+                   cmdlineOpts)
 from .randomizer import (RandomizerFactory, LimiterDecorator,
                          SignReverserDecorator)
 from sys import stderr
@@ -80,7 +81,11 @@ def read_PARAMETEROPTIMIZATION(blockdict):
     optOpts.nLJ = int(blocklist.pop(0))
     optOpts.dihType = {1: 'standard', 2: 'ryckaert'}[int(blocklist.pop(0))]
     randOpts.mslots = True
+    optOpts.kMask = []
+    optOpts.phiMask = []
     optOpts.optTors = []
+    optOpts.LJMask  = []
+    npars = 0
     for j in range(optOpts.nTors):
         currKMask = [0, 0, 0, 0, 0, 0]
         currPhiMask = [0, 0, 0, 0, 0, 0]
@@ -92,10 +97,12 @@ def read_PARAMETEROPTIMIZATION(blockdict):
             elif (nt == 1):
                 currKMask[i] = 1
                 optTorsMask[i] = 1
+                npars =+ 1
             elif (nt == 2):
                 currKMask[i] = 1
                 currPhiMask[i] = 1
                 optTorsMask[i] = 1
+                npars += 2
             else:
                 raise Exception()
         optOpts.kMask.append(currKMask)
@@ -104,13 +111,17 @@ def read_PARAMETEROPTIMIZATION(blockdict):
 
     if optOpts.nTors != len(optOpts.kMask):
         raise ValueError(
-            "Input file: Number of dihedral types do not match specification.")
+            f"Input file: Number of dihedral types {len(optOpts.kMask)} do not match specification {optOpts.nTors}.")
 
     optOpts.optTors = np.array(optOpts.optTors, dtype=np.uint8)
 
     for j in range(optOpts.nLJ):
         cs6switch = int(blocklist.pop(0))
         cs12switch = int(blocklist.pop(0))
+        if cs6switch == 1:
+            npars += 1
+        if cs12switch == 1:
+            npars += 1
         optOpts.LJMask.append((cs6switch, cs12switch))
 
     if optOpts.nLJ != len(optOpts.LJMask):
@@ -125,6 +136,8 @@ def read_PARAMETEROPTIMIZATION(blockdict):
         optOpts.phiMask = None
 
     optOpts.wTemp = float(blocklist.pop(0))
+
+    return npars
 
 
 def read_PARAMETERRANDOMIZATION(blockdict):
@@ -162,19 +175,34 @@ def read_SEED(blockdict):
 
 def read_EVOLUTIONARYSTRAT(blockdict):
     blockname = 'evolutionary_strat'
-    blocklist = blockdict[blockname]
-    strategy_switch = int(blocklist.pop(0))
-    if strategy_switch == 1:
-        vbgaOpts.strategy = 'CMA-ES'
-    elif strategy_switch == 2:
-        vbgaOpts.strategy = 'GA'
-    else:
-        raise ValueError
-    vbgaOpts.popSize = int(blocklist.pop(0))
-    if (vbgaOpts.popSize <= 0):
-        raise Exception("Population size must be a positive number.")
-    vbgaOpts.nGens = int(blocklist.pop(0))
+    if blockname in blockdict.keys():
+        blocklist = blockdict[blockname]
+        strategy_switch = int(blocklist.pop(0))
+        if strategy_switch == 1:
+            vbgaOpts.strategy = 'CMA-ES'
+        elif strategy_switch == 2:
+            vbgaOpts.strategy = 'GA'
+        else:
+            raise ValueError
+        vbgaOpts.popSize = int(blocklist.pop(0))
+        if (vbgaOpts.popSize <= 0):
+            raise Exception("Population size must be a positive number.")
+        vbgaOpts.nGens = int(blocklist.pop(0))
+    
 
+def read_LLSSC(blockdict, number_of_pars):
+    blockname = 'lls_sc'
+    if blockname in blockdict.keys():
+        blocklist = blockdict[blockname]
+        llsOpts.max_cycles = int(blocklist.pop(0))
+        llsOpts.max_dpar = float(blocklist.pop(0))
+        llsOpts.reg_switch = int(blocklist.pop(0))
+        if (llsOpts.reg_switch != 0):
+            llsOpts.reg_center = []
+            for i in range(number_of_pars):
+                llsOpts.reg_center.append(float(blocklist.pop(0)))
+            llsOpts.reg_center = np.array(llsOpts.reg_center)
+                
 
 def read_MINIMIZATION(blockdict):
     blockname = 'minimization'
@@ -253,9 +281,10 @@ def input2dict(fn):
 
 def readinput(fn):
     outdict = input2dict(fn)
-    read_PARAMETEROPTIMIZATION(outdict)
+    npars = read_PARAMETEROPTIMIZATION(outdict)
     read_PARAMETERRANDOMIZATION(outdict)
     read_EVOLUTIONARYSTRAT(outdict)
+    read_LLSSC(outdict, npars)
     read_MINIMIZATION(outdict)
     read_TORSIONALSCAN(outdict)
     read_SEED(outdict)
@@ -396,13 +425,148 @@ class IndexListCreator:
     def _getDih(self, i):
         return self.optDihs[i]
 
+
     def get(self, idx):
+        """Returns the indexes of the DOFs for the optimized parameter(s) of
+        global type `idx`.
+
+        For optimized dihedrals, the output indexes /do not/ take into account
+        the different ordering in the MM calculator. Use
+        :method:`~profilerTools.energy_force_vectorized.MMCalculator.idx_to_OptIdx`
+        to convert to the internal index used in the MMCalculator.
+        """
         if idx >= self.lenLJ:
             return self._getDih(idx - self.lenLJ)
         else:
             return self._getAtomOrPair(idx)
 
 
+class Global_Type_IndexConverter:
+    """This class is responsible for the conversion between global parameter
+    indexes and type indexes. Global index distinguishes between parameters
+    within the same type, e.g. cs6 and cs12. The parameters are ordered with the
+    following priorities:
+    
+    (1) If p_i is Lennard-Jones and p_j is torsional, p_i < p_j.
+    (2) If type_index(p_i) < type_index(p_j), p_i < p_j.
+    (3) If p_i is cs6 and p_j is cs12, p_i < p_j.
+    (4) If p_i is force constant and p_j is phase, p_i < p_j.
+    (5) If p_i and p_j are both force constant or phase and m(p_i) < m(p_j),
+        then p_i < p_j.
+    
+    Type indexes do not distinguish between parameters of the same type, and
+    start at zero for each type of parameter (i.e., type indexes for torsional
+    parameters start at 0, as well as those for LJ parameters).
+    """
+
+    def __init__(self, nTors=None, nLJ=None,
+                 kMask=None, phiMask=None, LJMask=None):
+
+        if (nTors is None):
+            nTors = optOpts.nTors
+
+        if (nLJ is None):
+            nLJ = optOpts.nLJ
+
+        if (kMask is None):
+            kMask = optOpts.kMask
+
+        if (phiMask is None):
+            phiMask = optOpts.phiMask
+
+        if (LJMask is None):
+            LJMask = optOpts.LJMask
+
+        self._global2type_tors = dict()
+        self._global2type_lj   = dict()
+        self._global2string    = dict()
+
+        p = 0
+        for t in range(nLJ):
+            for i, pt in enumerate(LJMask[t]):
+                if pt != 0:
+                    self._global2type_lj[p] = t
+                    if (i == 0):
+                        self._global2string[p] = "cs6"
+                    elif (i == 1):
+                        self._global2string[p] = "cs12"
+                    p += 1
+
+        for t in range(nTors):
+            for i, pt in enumerate(kMask[t]):
+                if pt != 0:
+                    self._global2type_tors[p] = nLJ + t
+                    self._global2string[p] = f"k_{i+1}"
+                    p += 1
+            for i, pt in enumerate(phiMask[t]):
+                if pt != 0:
+                    self._global2type_tors[p] = nLJ + t
+                    self._global2string[p] = f"phi_{i+1}"
+                    p += 1
+
+
+
+    def global_to_type(self, idx):
+        """Converts global `idx` to type `idx`. Returns a tuple with the
+        converted index and the type of parameter (e.g., 'k_3',
+        'phi_2', 'cs6').
+        """
+        if idx in self._global2type_tors.keys():
+            return self._global2type_tors[idx], self._global2string[idx]
+        else:
+            return self._global2type_lj[idx], self._global2string[idx]
+
+
+    def global_is_torsional(self, idx):
+        """Returns `True` if the parameter with global index `idx` is
+        torsional and `False` otherwise.
+        """
+        if idx in self._global2type_tors.keys():
+            return True
+        else:
+            return False
+
+    def type_is_torsional(self, idx):
+        """Returns `True` if the parameter with type index `idx` is
+        torsional and `False` otherwise.
+        """
+        if idx in self._global2type_tors.values():
+            return True
+        else:
+            return False
+
+        
+    def type_to_global(self, idx):
+        """Converts type index to a list of global indexes."""
+        out = list()
+
+        if self.type_is_torsional(idx):
+            search_dict = self._global2type_tors
+        else:
+            search_dict = self._global2type_lj
+
+        for k, v in search_dict.items():
+            if (v == idx):
+                out.append(k)
+        
+        return out
+        
+
+    def get_k_phi_pairs(self):
+        """Returns a list of tuples with the indexes of all corresponding 'k',
+        'phi' pairs."""
+        out = []
+        for p_i, t_i in self._global2type_tors.items():
+            name_i = self._global2string[p_i]
+            for p_j, t_j in self._global2type_tors.items():
+                if p_j > p_i:
+                    name_j = self._global2string[p_j]
+                    if (t_i == t_j) and (name_i.replace('k', 'phi') == name_j):
+                        out.append((p_i, p_j))
+        return out
+
+
+    
 def RandomizerSwitch2Type(sw):
     switch2type = {
         1: 'uniform',

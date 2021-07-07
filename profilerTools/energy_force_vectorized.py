@@ -31,6 +31,7 @@ from sys import stderr
 from copy import deepcopy
 from .configuration import *
 from .fastmath import fastCross
+from .opts import optOpts
 
 
 def c6c12_to_sigmaepsilon(c6, c12):
@@ -1040,6 +1041,27 @@ class MMCalculator(object):
         self.LJTerms = LJTerms(0)
         self.coulombTerms = coulombTerms(0)
         self.forceConf = None
+        self._idx_to_OptIdx = {}
+
+
+    def idx_to_OptIdx(self, idx):
+        """Converts a global index `idx` of a dihedral into the index within the
+        `optDihedralTerms` terms. If the type of optimized dihedrals is
+        Ryckaert-Bellemanns, this method raises a ValueError. If the dihedral of
+        index `idx` is not an optimized dihedral, this method returns None.
+        
+        :param idx: (int) Global index of a dihedral.
+
+        :returns: (int) Index of the dihedral within `self.optDihedralTerms`.
+        """
+        if (optOpts.dihType == 'ryckaert'):
+            raise ValueError("Can't request OptIdx of Ryckaert-Bellemans "
+                             "dihedral.")
+
+        try:
+            return self._idx_to_OptIdx[idx]
+        except KeyError:
+            return None
 
     def createFromStpDictionary(self, stpDict):
         key = 'atoms'
@@ -1149,6 +1171,7 @@ class MMCalculator(object):
                         j += 1
                 # now Opt
                 for j, i in enumerate(optdihedrals):
+                    self._idx_to_OptIdx[i] = j
                     self.optDihedralTerms.setMember(
                         j,
                         stpDict[key][0][i][0],

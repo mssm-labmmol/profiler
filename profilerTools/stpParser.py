@@ -487,7 +487,7 @@ def readOptpairBlock(stream, nbparticles):
     return out
 
 
-def parseStpFile(filename, prepareOpt=False):
+def parseStpFile(filename, prepareOpt=False, zeroDihedrals=True):
     defaults = None
     atoms = []
     bondParticles = []
@@ -656,13 +656,14 @@ def parseStpFile(filename, prepareOpt=False):
 
         # Zero the contribution of optDihedrals -- they will be
         # replaced anyway.
-        for i in optDihIdxs:
-            dihedralPhi[i] = 0.0
-            dihedralK[i] = 0.0
-            dihedralM[i] = 0.0
-            dihedralC3[i] = 0.0
-            dihedralC4[i] = 0.0
-            dihedralC5[i] = 0.0
+        if (zeroDihedrals):
+            for i in optDihIdxs:
+                dihedralPhi[i] = 0.0
+                dihedralK[i] = 0.0
+                dihedralM[i] = 0.0
+                dihedralC3[i] = 0.0
+                dihedralC4[i] = 0.0
+                dihedralC5[i] = 0.0
 
     else:
         optAtomsIdxs = []

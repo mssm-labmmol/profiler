@@ -313,7 +313,6 @@ class ProfilerGenRunner:
 
 def main():
     job = ProfilerGenRunner(argv[1:])
-    return job
 
 
 if __name__ == '__main__':

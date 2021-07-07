@@ -28,7 +28,8 @@ from .configuration import ensemble
 from .opts import cmdlineOpts, optOpts, minimOpts, dihrestrOpts
 import numpy as np
 from abc import ABC
-from .readopts import MaskLooper, IndexListCreator, genRefDihedrals
+from .readopts import (MaskLooper, IndexListCreator, genRefDihedrals,
+                       Global_Type_IndexConverter)
 import itertools
 
 
@@ -223,10 +224,14 @@ class profile(object):
                                  retrieving
                                  optDihedrals/optAtoms/optPairs
                                  indexes
+        
+          stpData : self-explanatory
+        
         """
         self.enerProfile = []
         self.ensemble = ensemble([])
         self.mmCalc = MMCalculator()
+        self.stpData = stpData
         if stpData['defaults']['comb-rule'] == 2:
             self.mixType = 'arithmetic'
         else:
@@ -255,6 +260,31 @@ class profile(object):
         self.indexList = IndexListCreator(self.optType, stpData['optatoms'],
                                           stpData['optpairs'],
                                           stpData['optdihedrals'])
+
+
+    def getAtomIdxsForOptParameter(self, pt, isTorsional):
+        """Returns a list with the indexes of the atoms (pairs or
+        quadruples) that are modelled by the parameter with type index `p`.
+
+        :param pt: Parameter-type index.
+        :param isTorsional: Boolean, indicates if parameter is torsional.
+
+        :returns: A list of pairs or quadruples.
+        """
+        dof_idxs = self.indexList.get(pt)
+
+        if isTorsional:
+            # Using stp allows a uniform treatment of Ryckaert/standard
+            # Subtract '1' due to different index origins
+            dof_atom_idxs = [[x - 1 for x in self.stpData['propers'][0][ix][0:4]]
+                                for ix in dof_idxs]
+        else:
+            dof_atom_idxs = [[self.mmCalc.LJTerms.ai[ix],
+                                self.mmCalc.LJTerms.aj[ix]]
+            for ix in dof_idxs]
+
+        return np.array(dof_atom_idxs, dtype=np.int32)
+        
 
     def replaceEnsemble(self, newEnsemble):
         self.ensemble = newEnsemble
@@ -289,15 +319,17 @@ class profile(object):
         # different logics for 'standard' and 'ryckaert' is a bit
         # ugly.
         if (optOpts.dihType == 'standard'):
-            for idx in range(len(
-                    self.indexList.get(whichOpt))):  # Note the range(len(
-                if (self.mmCalc.dihedralTerms.getType() == 'standard'):
-                    self.mmCalc.setOptDihedralParameters(idx, m, phi, k)
-                else:
-                    raise Exception(
-                        ".inp requests standard dihedrals, but"
-                        " .stp specifies another type"
-                    )
+            idxs = map(self.mmCalc.idx_to_OptIdx,
+                       self.indexList.get(whichOpt))
+            for idx in idxs:
+                if (idx is not None):
+                    if (self.mmCalc.dihedralTerms.getType() == 'standard'):
+                        self.mmCalc.setOptDihedralParameters(idx, m, phi, k)
+                    else:
+                        raise Exception(
+                            ".inp requests standard dihedrals, but"
+                            " .stp specifies another type"
+                        )
         elif (optOpts.dihType == 'ryckaert'):
             for idx in self.indexList.get(
                     whichOpt):  # Note the absence of range(len(
@@ -386,13 +418,35 @@ class profile(object):
     def saveTraj(self, fn):
         self.ensemble.writeToFile(fn)
 
+    def recalculateEnergies(self):
+        """Returns a list with the energy profile calculated with the current
+        MMCalc object, without modifying the state of `self`."""
+        energies = []
+        for k in range(self.calculateNumberOfConfigurations()):
+            energies.append(
+                self.mmCalc.calcForConf(self.ensemble[k],
+                                        removeRestraintsFromTotal=True,
+                                        calcForce=False,
+                                        minim=False)[0]['total'])
 
-class multiProfile(object):
+        # shift to zero mean
+        avg = np.mean(energies)
+        return [e - avg for e in energies]
+
+    def getEnsemble(self):
+        return self.ensemble
+
+    def getIndexList(self):
+        return self.indexList
+        
+class multiProfile:
     def __init__(self):
         self.profiles = []
         self.optPars = None  # It will be initialized separately for
                              # each dihedral type.
+        self.dihType = optOpts.dihType
 
+        self.idxConverter = Global_Type_IndexConverter()
         for i in range(optOpts.nSystems):
             trajFile = cmdlineOpts.trajFiles[i]
             stpData = optOpts.stpData[i]
@@ -420,6 +474,40 @@ class multiProfile(object):
     def __getitem__(self, i):
         return self.profiles[i]
 
+    def getIndexConverter(self):
+        return self.idxConverter
+
+    def getConfigurations(self):
+        """Returns the concatenated configurations for all profiles."""
+        confs = list()
+        for profile in self.profiles:
+            for conf in profile.getEnsemble():
+                confs.append(conf)
+        return confs
+
+
+    def getConfigurationsAndProfiles(self):
+        """Returns the concatenated configurations for all profiles, as well
+        as the profiles to which they correspond.
+
+        :returns: A list where each member is a tuple (conf, profile).
+        """
+        out = list()
+        for profile in self.profiles:
+            for conf in profile.getEnsemble():
+                out.append((conf, profile))
+        return out
+        
+        
+
+    def calculateNumberOfConfigurations(self):
+        """Returns a list containing the number of configurations for each
+        system."""
+        confs = []
+        for profile in self.profiles:
+            confs.append(profile.calculateNumberOfConfigurations())
+        return confs
+
     def getOptimizableParameters(self):
         return self.optPars.to_list()
 
@@ -443,6 +531,15 @@ class multiProfile(object):
         else:
             self.setSingleOptimizableParameter(ks, vals)
 
+    def zeroOptimizableParameters(self):
+        """Zero the values of all optimizable parameters. Returns their
+        previous values."""
+        template = self.getOptimizableParameters()
+        self.setOptimizableParameters(slice(len(template)),
+                                      [0 for t in template])
+        return template
+        
+
     def prepareMinim(self, emAlgo, emDX0, emDXM, emDele, emSteps):
         for i, profile in enumerate(self.profiles):
             profile.prepareMinim(emAlgo, emDX0, emDXM, emDele, emSteps,
@@ -461,7 +558,31 @@ class multiProfile(object):
                     profile.setParameters(i, m=obj.m, **p)
 
     def getNonoptEnergy(self):
-        raise NotImplementedError()
+        """Returns the energies due to all other force-field terms except for
+        those in optimization.
+        
+        :returns ener: A :class:`np.ndarray` with shape (M, 1), where M is the
+                       total number of configurations for all systems. The
+                       energies in this vector are listed following the order of
+                       the systems and the order of configurations for each
+                       system.
+
+        """
+        ener = []
+
+        # Zero the energetic contribution of all the parameters in optimization.
+        old_parameters = self.zeroOptimizableParameters()
+
+        for profile in self.profiles:
+            ener += profile.recalculateEnergies()
+
+        ener = np.reshape(ener, (-1, 1))
+
+        # Restore the values of the parameters in optimization.
+        self.setOptimizableParameters(slice(len(old_parameters)), old_parameters)
+
+        return ener
+        
 
     def minimizeProfiles(self, useWei=False):
         if (useWei):
@@ -499,3 +620,6 @@ class multiProfile(object):
         with open(fn, 'w') as fp:
             self.optPars.writeToStream(fp)
             fp.write("rmsd = {}\n".format(self.rmsdToData()))
+
+    def getNumberOfSystems(self):
+        return len(self.profiles)

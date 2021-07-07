@@ -9,6 +9,16 @@ extended_numpy = Extension(
         ]
 )
 
+ext_gsl_ridge = Extension(
+    'gslpyridge',
+    sources = [
+        'profilerTools/gslpy_ridge/gslpy_ridge.c',
+    ],
+    libraries = [
+        'gsl',
+    ],
+)
+
 setup (
     name='profilerOpt',
     packages=find_packages(),
@@ -28,6 +38,7 @@ setup (
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
+        ext_gsl_ridge,
     ],
     entry_points={
         'console_scripts': [

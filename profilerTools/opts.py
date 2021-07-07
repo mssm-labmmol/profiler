@@ -86,9 +86,26 @@ class randOpts(object):
 
 class vbgaOpts(object):
 
-    strategy = "CMA-ES"  # Method
+    strategy = None  # Method
     popSize = -1  # Population size.
     nGens = 50  # Number of generations.
+
+
+class llsOpts(object):
+
+    max_cycles = 100 # Maximum number of self-consistent cycles.
+    
+    max_dpar   = 1.0e-03 # Tolerance on relative change of parameter
+                         # values.
+
+    reg_switch = 0 # Controls the use of regularization: 0, don't use
+                   # regularization; 1, use of regularization.
+                         
+    reg_center = None # Reference parameter values for
+                      # regularization. `None` means no
+                      # regularization. Otherwise it is a `np.ndarray`
+                      # of shape (N,), where N is the number of
+                      # optimized parameters.
 
 
 class writetrajOpts(object):

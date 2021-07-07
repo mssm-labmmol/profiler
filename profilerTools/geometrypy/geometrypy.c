@@ -54,7 +54,7 @@ PyArrayObject *PyArray_Einsum_i_j_ij (PyArrayObject *a1, PyArrayObject *a2) {
   for (int i = 0; i < dims_out[0]; i++) {
     for (int j = 0; j < dims_out[1]; j++) {
       output_c[dims_out[1]*i + j] = a1_c[i] * a2_c[j];
-      NanTracker("Einsum_i_j_ij", 1, output_c[dims_out[1]*i + j]);
+      //NanTracker("Einsum_i_j_ij", 1, output_c[dims_out[1]*i + j]);
     }
   }
   return output;
@@ -88,7 +88,7 @@ PyArrayObject *PyArray_Einsum_ij_ij_i (PyArrayObject *a1, PyArrayObject *a2) {
     output_c[i] = 0.0;
     for (int j = 0; j < dims[1]; j++) {
       output_c[i] += a1_c[dims[1]*i + j] * a2_c[dims[1]*i + j];
-      NanTracker("Einsum_ij_ij_i", 1, output_c[i]);
+      //NanTracker("Einsum_ij_ij_i", 1, output_c[i]);
     }
   }
   return output;
@@ -123,7 +123,7 @@ PyArrayObject *PyArray_Einsum_ij_ij_j (PyArrayObject *a1, PyArrayObject *a2) {
     output_c[i] = 0.0;
     for (int j = 0; j < dims[0]; j++) {
       output_c[i] += a1_c[dims[1]*j + i] * a2_c[dims[1]*j + i];
-      NanTracker("Einsum_ij_ij_j", 1, output_c[i]);
+      //NanTracker("Einsum_ij_ij_j", 1, output_c[i]);
     }
   }
   return output;
@@ -158,7 +158,7 @@ PyArrayObject *PyArray_Einsum_ij_kj_kj (PyArrayObject *a1, PyArrayObject *a2) {
       for (int i = 0; i < dims[0]; i++) {
 	output_c[dims_out[1]*k + j] +=
 	    a1_c[dims[1]*i + j] * a2_c[dims_out[1]*k + j];
-	NanTracker("Einsum_ij_kj_kj", 1, output_c[dims_out[1]*k + j]);
+	//NanTracker("Einsum_ij_kj_kj", 1, output_c[dims_out[1]*k + j]);
       }
     }
   }
@@ -188,12 +188,12 @@ static t_einsum einsum_lookup_table[] = {
 int MyCArray_CrossProduct_InPlace(npy_double *v1, npy_double *v2, npy_double *out) {
   if (GPY_DIMENSIONS != 3) {
     PyErr_BadArgument();
-    return 0;
+    return NULL;
   }
   out[0] = v1[1]*v2[2] - v1[2]*v2[1];
   out[1] = v1[2]*v2[0] - v1[0]*v2[2];
   out[2] = v1[0]*v2[1] - v1[1]*v2[0];
-  NanTracker("CrossProduct_InPlace", 3, out[0], out[1], out[2]);
+  //NanTracker("CrossProduct_InPlace", 3, out[0], out[1], out[2]);
   return 1;
 }
 
@@ -221,17 +221,17 @@ npy_double* MyCArray_Subtract(npy_double *v1, npy_double* v2) {
   out[0] = v1[0] - v2[0];
   out[1] = v1[1] - v2[1];
   out[2] = v1[2] - v2[2];
-  NanTracker("MyCArray_Subtract", 3, out[0], out[1], out[2]);
+  //NanTracker("MyCArray_Subtract", 3, out[0], out[1], out[2]);
   return out;
 }
 
 int MyCArray_DotProduct(npy_double *v1, npy_double *v2, npy_double *dot) {
   if (GPY_DIMENSIONS != 3) {
     PyErr_BadArgument();
-    return 0;
+    return NULL;
   }
   *dot = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
-  NanTracker("DotProduct", 1, *dot);
+  //NanTracker("DotProduct", 1, *dot);
   return 1;
 }
 
@@ -380,7 +380,7 @@ calculateDisplacements(PyObject *dummy, PyObject *args)
 	  outputc[GPY_DIMENSIONS*i + j] =
 	      (npy_double) confc[GPY_DIMENSIONS*iic[i]+j]
 	        - confc[GPY_DIMENSIONS*ijc[i]+j];
-	  NanTracker("calculateDisplacements", 1, outputc[GPY_DIMENSIONS*i + j]);
+	  //NanTracker("calculateDisplacements", 1, outputc[GPY_DIMENSIONS*i + j]);
 	}
     }
 
@@ -449,7 +449,7 @@ calculateDistances(PyObject *dummy, PyObject *args)
 	{
             outputc[i] += (npy_double) pow(confc[GPY_DIMENSIONS*iic[i]+j]
 					   - confc[GPY_DIMENSIONS*ijc[i]+j], 2);
-	    NanTracker("calculateDistances", 1, outputc[i]);
+	    //NanTracker("calculateDistances", 1, outputc[i]);
 	}
 
         outputc[i] = (npy_double) sqrt(outputc[i]);
@@ -520,7 +520,7 @@ calculateDistances2(PyObject *dummy, PyObject *args)
 	{
             outputc[i] += (npy_double) pow(confc[GPY_DIMENSIONS*iic[i]+j]
 					   - confc[GPY_DIMENSIONS*ijc[i]+j], 2);
-	    NanTracker("calculateDistances2", 1, outputc[i]);
+	    //NanTracker("calculateDistances2", 1, outputc[i]);
 	}
     }
 
@@ -601,7 +601,7 @@ calculateCosines(PyObject *dummy, PyObject *args)
 	v1_norm += v1 * v1;
 	v2_norm += v2 * v2;
 	outputc[i] += v1 * v2;
-	NanTracker("calculateCosines", 5, v1, v2, v1_norm, v2_norm, outputc[i]);
+	//NanTracker("calculateCosines", 5, v1, v2, v1_norm, v2_norm, outputc[i]);
       }
       v1_norm = sqrt(v1_norm);
       v2_norm = sqrt(v2_norm);
@@ -688,7 +688,7 @@ calculateSines(PyObject *dummy, PyObject *args)
 	v1_norm += v1 * v1;
 	v2_norm += v2 * v2;
 	outputc[i] += v1 * v2;
-	NanTracker("calculateSines", 5, v1, v2, v1_norm, v2_norm, outputc[i]);
+	//NanTracker("calculateSines", 5, v1, v2, v1_norm, v2_norm, outputc[i]);
       }
       v1_norm = sqrt(v1_norm);
       v2_norm = sqrt(v2_norm);
@@ -776,13 +776,13 @@ calculateAngles(PyObject *dummy, PyObject *args)
 	v1_norm += v1 * v1;
 	v2_norm += v2 * v2;
 	outputc[i] += v1 * v2;
-	NanTracker("calculateAngles", 5, v1, v2, v1_norm, v2_norm, outputc[i]);
+	//NanTracker("calculateAngles", 5, v1, v2, v1_norm, v2_norm, outputc[i]);
       }
       v1_norm = sqrt(v1_norm);
       v2_norm = sqrt(v2_norm);
       outputc[i] /= (v1_norm * v2_norm);
       outputc[i] = acos(outputc[i]);
-      NanTracker("calculateAngles::acos", 1, outputc[i]);
+      //NanTracker("calculateAngles::acos", 1, outputc[i]);
     }
 
     /* DECREF's */
@@ -881,7 +881,8 @@ calculateDihedrals(PyObject *dummy, PyObject *args)
 	free(njkl);
 	goto badargument;
       }
-      NanTracker("calculateDihedrals", 1, dp);
+//      if (!NanTracker("calculateDihedrals", 1, dp))
+//	  goto fail;
       dp /= sqrt(mod_nijk * mod_njkl);
       if (dp >= 1.0) {
 	      dp = 0.0;
@@ -894,7 +895,8 @@ calculateDihedrals(PyObject *dummy, PyObject *args)
       {
 	  dp = acos(dp);
       }
-      NanTracker("calculateDihedrals::acos", 1, dp);
+      //if (!NanTracker("calculateDihedrals::acos", 1, dp))
+      //	  goto fail;
       if (signbit(dsign))
 	dp *= -1.0;
 

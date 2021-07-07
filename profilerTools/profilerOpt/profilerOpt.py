@@ -43,11 +43,18 @@ from ..configuration import ensemble
 from ..writetraj import *
 from ..weightcalculator import *
 from ..evolstrat import *
+from ..linear_regression import *
 
 
 def my_fill(text):
     return fill(text, width=55)
 
+
+def useEvolStrat():
+    if vbgaOpts.strategy is not None:
+        return True
+    else:
+        return False
 
 def evolStratFactory(*args, **kargs):
     evolutionaryStrategy = vbgaOpts.strategy
@@ -293,24 +300,40 @@ class ProfilerOptRunner:
         # files and in the input file
         check_STP_Input_Consistency()
 
-        # initialize strategy
-        GA = evolStratFactory(popSize=vbgaOpts.popSize)
-
-        # run
-        GA.run(vbgaOpts.nGens, nprocs=cmdlineOpts.nProcs)
-
-        # This is for debugging purposes - also write E_MM energies.
-        if (cmdlineOpts.debugEmm):
-            for i, ind in enumerate(GA.population):
-                nonOpt = ind.getNonoptEnergy()
-                for j in range(nonOpt.shape[0]):
-                    np.savetxt(
-                        cmdlineOpts.outPrefix + '_' + str(i + 1) + '_' +
-                        str(j + 1) + '_mm.dat', nonOpt[j, :])
-
-        # write best ind
-        optind = GA.getBest()
-        optind.saveTraj(cmdlineOpts.outPrefix, 'xyz')
+        if useEvolStrat():
+            # initialize strategy
+            evolStrat = evolStratFactory(popSize=vbgaOpts.popSize)
+    
+            # run
+            evolStrat.run(vbgaOpts.nGens, nprocs=cmdlineOpts.nProcs)
+    
+            # This is for debugging purposes - also write E_MM energies.
+            if (cmdlineOpts.debugEmm):
+                for i, ind in enumerate(evolStrat.population):
+                    nonOpt = ind.getNonoptEnergy()
+                    for j in range(nonOpt.shape[0]):
+                        np.savetxt(
+                            cmdlineOpts.outPrefix + '_' + str(i + 1) + '_' +
+                            str(j + 1) + '_mm.dat', nonOpt[j, :])
+    
+            # write best ind
+            optind = evolStrat.getBest()
+            optind.saveTraj(cmdlineOpts.outPrefix, 'xyz')
+        else:
+            # LLS-SC
+            # ------
+            # Initialize a multiProfile object
+            mp = multiProfile()
+            # Initialize the LLS driver
+            lls_sc = LLS_SC(mp)
+            # Run
+            lls_sc.run(llsOpts.max_cycles, llsOpts.max_dpar,
+                       self.get_target_data(),
+                       wei=self.get_weis(),
+                       reg_center=llsOpts.reg_center)
+            
+            optind = mp
+            
         optind.saveProfile(cmdlineOpts.outPrefix)
         optind.saveParameters(cmdlineOpts.outPrefix + '.ifp')
 
@@ -332,9 +355,18 @@ class ProfilerOptRunner:
         return self.optind.getOptimizableParameters()
 
 
+    def get_optimal_individual(self):
+        return self.optind
+
+    def get_target_data(self):
+        return np.array(optOpts.refData).flatten()
+
+    def get_weis(self):
+        return np.array(optOpts.weiData).flatten()
+
+
 def main():
     job = ProfilerOptRunner(argv[1:])
-    return job
 
 
 if __name__ == '__main__':
