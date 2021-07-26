@@ -43,6 +43,19 @@ class EOFLine(Exception):
     pass
 
 
+def fourier_to_ryckbell(pars):
+    """Convert the dictionary of Fourier parameters into a dictionary of
+    RyckBell parameters."""
+    outpars = {
+        'c0': pars['f2'] + 0.5 * (pars['f1'] + pars['f3']),
+        'c1': 0.5 * (-pars['f1'] + 3 * pars['f3']),
+        'c2': -2 * pars['f3'],
+        'c4': -4 * pars['f4'],
+        'c5': 0,
+    }
+    return outpars
+
+
 def advance(stream):
     line = stream.readline()
     if (line == ''):
@@ -1188,12 +1201,30 @@ def itp_to_stp(itp_fn, stp_fn, use_interface):
                          dihedral['pars']['c4'][i], dihedral['pars']['c5'][i]))
                     idx += 1
                 elif shape == 'fourier':
+                    # NOTE: seg jul 26 14:24:20 -03 2021 
+                    # 
+                    # For compatibility with profilerOpt, all Fourier dihedrals
+                    # are now written in the STP file in the form of
+                    # Ryckaert-Bellemans dihedrals.
+                    #
+                    #fp.write(
+                    #    "%5d%5d%5d%5d%5d%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f" %
+                    #    (dihedral['ai'], dihedral['aj'], dihedral['ak'],
+                    #     dihedral['al'], dihedral['func'],
+                    #     dihedral['pars']['f1'][i], dihedral['pars']['f2'][i],
+                    #     dihedral['pars']['f3'][i], dihedral['pars']['f4'][i]))
+                    ryckbell_pars = fourier_to_ryckbell(
+                        [dihedral['pars'][ff][i] for ff in ['f1', 'f2', 'f3', 'f4']],
+                    )
+                    ryckbell_func = 3
                     fp.write(
-                        "%5d%5d%5d%5d%5d%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f" %
+                        "%5d%5d%5d%5d%5d%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f ; %s" %
                         (dihedral['ai'], dihedral['aj'], dihedral['ak'],
-                         dihedral['al'], dihedral['func'],
-                         dihedral['pars']['f1'][i], dihedral['pars']['f2'][i],
-                         dihedral['pars']['f3'][i], dihedral['pars']['f4'][i]))
+                         dihedral['al'], ryckbell_func,
+                         ryckbell_pars['c0'], ryckbell_pars['c1'],
+                         ryckbell_pars['c2'], ryckbell_pars['c3'],
+                         ryckbell_pars['c4'], ryckbell_pars['c5'],
+                         "converted from Fourier to Ryckaert-Bellemans"))
                     idx += 1
                 try:
                     fp.write((" ; %d -> " % idx) + dihedral['comment'][i] +
