@@ -335,6 +335,8 @@ class ProfilerOptRunner:
             optind = mp
             
         optind.saveProfile(cmdlineOpts.outPrefix)
+        optind.saveTraj(cmdlineOpts.outPrefix, 'xyz')
+
         optind.saveParameters(cmdlineOpts.outPrefix + '.ifp')
 
         # now, update minim, do final optimization and save

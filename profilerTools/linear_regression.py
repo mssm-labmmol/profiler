@@ -28,13 +28,13 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_squared_error
 from .readopts import MaskLooper
 from .geometry_factor import calculate_geometry_factor
-import gslpyridge 
 
 
 class GSLMultifitMixin:
     """This is a custom Mixin that may extend the functionality of
     LinearRegression with a method ``fit_gsl`` that relies on the GSL C API."""
     def fit_gsl(self, *args, **kwargs):
+        import gslpyridge 
         self.coef_ = gslpyridge.fit(*args, **kwargs)
 
 

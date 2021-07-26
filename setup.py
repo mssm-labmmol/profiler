@@ -15,7 +15,7 @@ ext_gsl_ridge = Extension(
         'profilerTools/gslpy_ridge/gslpy_ridge.c',
     ],
     libraries = [
-        'gsl',
+        'gsl', 'gslcblas'
     ],
 )
 

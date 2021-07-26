@@ -34,29 +34,29 @@ available as commands in your PATH.
 Note that, depending on your default installation path, you may need to run this
 command with administrative privileges.
 
-Part of the `profilerTools` code is a C extension to `numpy`, which requires the
-corresponding C header files to be compiled appropriately. Therefore, you may
-face issues when installing if your `numpy` installation did not include these C
-header files (e.g. when using `pip`). In this case, you may face compilation
+The `profilerTools` code includes two C extensions which require the `numpy` C
+header files and the GNU Scientific Library (GSL). Therefore, you will face
+issues if you do not have GSL installed of if your `numpy` installation did not
+include the corresponding header files. In this case, you may face compilation
 errors like
 
 	fatal errror: numpy/arrayobject.h: No such file or directory
 
-For users of the Ubuntu APT package manager, this can usually be remedied with
+For users of the APT package manager, this can usually be remedied with
 
 	sudo apt install python-numpy
 	
-Similar strategies should exist for other package managers. Alternatively, you
-can always install `numpy` from source code in the [official
-repository](https://github.com/numpy/numpy), which includes the necessary header
-files.
+Alternatively, you can always install `numpy` from the source code in the
+[official repository](https://github.com/numpy/numpy), which includes the
+necessary header files.
 
 # Requirements
 
 * `python` (preferably >3.4)
 * [numpy](https://github.com/numpy/numpy)
-* [DEAP](https://github.com/DEAP/deap) and
+* [DEAP](https://github.com/DEAP/deap)
 * [scikit-learn](https://github.com/scikit-learn/scikit-learn)
+* [GNU Scientific Library](https://www.gnu.org/software/gsl/)
 
 # Limitations
 

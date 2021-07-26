@@ -168,17 +168,19 @@ interactions.
 This suggests that these two types of force-field terms should ideally
 be parameterized simultaneously.
 %
-With that in mind, we developed \profileropt{}, a Python program that
-allows this by means of an evolutionary-computing-driven
-optimization.
-%
-As usual, the optimization is based on the reproduction of relative
-conformational energies, also supporting the use of reference data for
-several molecules at once.
+With this in mind, we developed \profileropt{}, a Python program that
+allows this parametrization based on several molecules and using one
+of several different strategies: $(i)$ a genetic algorithm (GA);
+$(ii)$ a covariance matrix adaptation evolution strategy (CMA-ES);
+$(iii)$ a linear least-squares self-consistent (LLS-SC) strategy.
 %
 Together with \profilergen{}, an auxiliary Python program to execute
 multidimensional molecular torsional scans, these two form the
 \profilertools{} suite.
+%
+The problem of simultaneously parameterizing the torsional and 1,4
+terms is discussed in details in the \profilertools{}
+paper\cite{PAPER}, specially the LLS-SC strategy.
 %
 
 More succinctly, \profilertools{} is composed of two programs:
@@ -190,22 +192,27 @@ More succinctly, \profilertools{} is composed of two programs:
   the related 1,4 Lennard-Jones terms;
 \end{itemize}
 
-The evolutionary algorithms are based on the DEAP library\cite{DEAP}.
-Two of them are implemented in \profilertools{}: genetic algorithms
-(GAs) and covariance matrix adaptation evolution strategy (CMA-ES).
-
-Another important feature of \profilertools{} is that it does not rely
-on external libraries for carrying out molecular-mechanics
-calculations and energy minimizations. The mathematical formluae and
-the supported physical models are described in \autoref{chap:mm}. They
-are implemented based on \texttt{numpy} and on a \texttt{C} extension
-to \texttt{numpy} called \texttt{geometrypy}, specifically implemented
-for \profilertools. This extension accelerates the calculation of
-geometric degrees of freedom (bond lengths, bond-angle angles, etc.)
-by transferring the loops over the involved atoms to the underlying
+The two evolutionary algorithms (GA and CMA-ES) are based on the DEAP
+library\cite{DEAP}.
+%
+The LLS-SC implementation is based on the \texttt{numpy} and
+\texttt{scikit-learn} libraries, as well as on the GNU Scientific
+Library.
+%
+\profilertools{} does not rely on external software for carrying out
+molecular-mechanics calculations and energy minimizations.
+%
+They are carried out based on \texttt{numpy} and on a C extension to
+\texttt{numpy} called \texttt{geometrypy}, specifically implemented
+for \profilertools{}. This extension accelerates the calculation of
+the values of bond lengths, bond angles, dihedral angles, etc., by
+transferring the loops over the involved atoms to the underlying
 \texttt{C} implementation, instead of carrying out these loops in
 Python (which is significantly slower).
-
+%
+The
+mathematical formluae and the supported physical models are described
+in \autoref{chap:mm}. 
 
 \chapter{Molecular Mechanics and Energy Minimization}
 \label{chap:mm}
@@ -756,7 +763,7 @@ given system $s$ is obtained with the following scheme:
     \begin{enumerate}
     \item Apply a dihedral restraint with a reference angle of
       $\phi_{ki}^{(s)}$ and a force constant defined by the group to
-      which it belongs;
+      which the RD belongs;
   \end{enumerate}
 \item [b.] Perform a restrained energy minization;
   \item [c.] Compute the value of the total potential energy
@@ -774,17 +781,20 @@ given system $s$ is obtained with the following scheme:
 The torsional-scan matrix for each system $s$, $\Phi_s$, can
 be set in three different ways:
 \begin{enumerate}
-\item From a systematic scan: In this case, each $i$-th
-  reference-dihedral group $\mathcal{R}_i^{(s)}$ corresponds to a
-  system-indepedent vector of evenly-spaced dihedral-angle values
+\item From a systematic scan: In this case, each $i$-th reference-dihedral group
+  $\mathcal{R}_i^{(s)}$ corresponds to a system-indepedent vector of
+  evenly-spaced dihedral-angle values from $\text{RFRST[I]}$ to $\text{RLST[I]}$
+  in steps of $\text{RSTEP[I]}$:
+  
   $$\mathcal{S}(\mathcal{R}_i^{(s)})  = (\text{RFRST[I]}, \text{RFRST[I]} + \text{RSTEP[I]}, \ldots , \text{RLST[I]}) \quad , \quad s=1 \ldots N_S $$
-  The $k$-th row vector of $\Phi_s$, $\boldsymbol{\phi}_k^{(s)}$, is
-  the $k$-th component of
-  $\mathcal{S}({\rho_1^{(s)}}) \times \mathcal{S}({\rho_2^{(s)}})
-  \times \ldots \times \mathcal{S}(\rho_{N_D}^{(s)})$, where
-  ``$\times$'' denotes the cartesian product.  The torsional-scan
-  angles along each dimension are configured in the STP file (see
-  \autoref{sec:file-formats-STP}).
+  The $k$-th row vector of $\Phi_s$, $\boldsymbol{\phi}_k^{(s)}$, is the $k$-th
+  component of
+  $\mathcal{S}({\rho_1^{(s)}}) \times \mathcal{S}({\rho_2^{(s)}}) \times \ldots
+  \times \mathcal{S}(\rho_{N_D}^{(s)})$, where ``$\times$'' denotes the
+  cartesian product.  For \profileropt{}, the torsional-scan angles along each
+  dimension are configured in the INP file (see \autoref{sec:file-formats-INP}).
+  For \profilergen{}, they are configured in the command-line options (see
+  \autoref{sec:program-gen}).
 
 \item From the input trajectory: In this case, the matrix $\Phi_s$ is
   filled with the values of the RDs calculated from the input
@@ -1135,25 +1145,27 @@ files.
 \subsection{Performing Multidimensional Torsional Scans: \profilergen{}}
 \label{sec:program-gen}
 
-To perform a multidimensional torsional scan using \profilergen{}, the
-user must supply the coordinates of the system of interest, an STP
-file with its topology and the specification of the reference
-dihedrals (see \autoref{sec:file-formats-STP}), and the definition of
-the torsional-scan angles. The coordinates can be of a single
-arbitrary conformation or of a trajectory with the same length of the
-desired torsional-scan.  The user can also optionally control the
-settings of the energy minimization algorithm involved in the
-calculation of the energy profiles.
+To perform a (multidimensional) torsional scan using \profilergen{}, the user
+must supply the coordinates of the system of interest, an STP file with its
+topology and the specification of the reference dihedrals (see
+\autoref{sec:file-formats-STP}), and the definition of the torsional-scan
+angles. The coordinates can be of a single arbitrary conformation or of a
+trajectory with the same length of the desired torsional-scan.  The user can
+also optionally control the settings of the energy minimization algorithm
+involved in the calculation of the energy profiles.
 
-The usage of \profilergen{} is as follows (optional arguments are enclosed in square brackets):
+The usage of \profilergen{} is as follows (optional arguments are enclosed in
+square brackets):
 
 \begin{lstlisting}
 profilerGen
     -c      <COORDS>             Torsional-scan trajectory or single molecular conformation (.xyz/.gro/.g96).
     -t      <STP>                Special topology (STP) file.
     -op     PREFIX               Prefix for output files.
-   [-dr     RFRST RSTEP RLST]... Torsional-scan angles (deg): from RFRST to RLST with a RSTEP step.
-   [-dk     RFCT]...             Force constant for dihedral restraint (default = 5000 kJ/(mol.rad^2)).
+   [-dr     RFRST RSTEP RLST]... Torsional-scan angles (deg) for each reference-dihedral group: from RFRST to RLST 
+                                 with a RSTEP step.
+   [-dk     RFCT...]             Dihedral-restraint force constant for each reference-dihedral group (default = 
+                                 5000 kJ/(mol.rad^2)).
    [-min    MALG]                Minimization algorithm: steepest descents (1: default) or conjugate-gradients (2).
    [-dx0    DX0]                 Initial step size DX0 in minimization algorithm (default = 0.05 nm).
    [-dxm    DXM]                 Maximal step size DXM in minimization algorithm (default = 0.20 nm).
@@ -1162,18 +1174,16 @@ profilerGen
    [-s      SPEC]                Dihedral-angle specification file (.spec).
 \end{lstlisting}\vspace{2ex} 
 
-The settings for the $i$-th torsional-scan type are specified in the
-$i$-th appearance of the \texttt{-dr}/\texttt{-dk} options. They are
-applied to the dihedral angles listed in the $i$-th
-\texttt{[~refdihedrals~]} block of the corresponding STP file (see
-\autoref{sec:file-formats-STP}).
+The settings for the $i$-th reference-dihedral group are specified in the $i$-th
+instance of the \texttt{-dr}/\texttt{-dk} options. They are applied to the
+dihedral angles listed in the $i$-th \texttt{[~refdihedrals~]} block of the
+corresponding STP file (see \autoref{sec:file-formats-STP}).
 %
 
 If a dihedral-angle specification file is supplied (see
-\autoref{sec:file-formats-spec}) in the option \texttt{-s}, the
-reference dihedrals are restrained to the sequence of values specified
-therein, using the force constants defined in the \texttt{-dk}
-options.
+\autoref{sec:file-formats-spec}) in the option \texttt{-s}, the reference
+dihedrals are restrained to the sequence of values specified therein, using the
+force constants defined in the corresponding \texttt{-dk} options.
 
 %
 If the options \texttt{-dr} and \texttt{-s} are omitted, the reference
@@ -1217,6 +1227,7 @@ enclosed in square brackets):
     -i  <INP>                     Input file containing profilerOpt parameters (.inp).
     -op PREFIX                    Prefix for output files.
    [-w  <WEI_1> ... <WEI_S>]      Weight files (default = derive weights from <INP> file).
+   [-s <SPEC_1> ... <SPEC_S>]     Dihedral-angle specification files (.spec) for each system.
 \end{lstlisting}\vspace{1ex}
 
 \noindent where $S$ is the number of systems.
@@ -1234,10 +1245,10 @@ The program will write the following files to disk:
 \end{itemize}
 where $S$ is the number of systems.
 
-The refined quantities mentioned above are obtained based on enhanced
-energy minimization settings, as described in \autoref{sec:torsional-scan-performance-issues}.
-The IFP file format is described in
-\autoref{sec:file-formats-IFP}.
+The ``refined'' quantities mentioned above are obtained based on enhanced energy
+minimization settings, as described in
+\autoref{sec:torsional-scan-performance-issues}.  The IFP file format is
+described in \autoref{sec:file-formats-IFP}.
 
 
 \section{Input Variables}
@@ -1513,24 +1524,21 @@ under optimzation which do not apply to all molecules.
 
 \paragraph{1--4 Pairs}
 
-The third-neighbor nonbonded pairs affected by the optimization can be
-specified in two mutually exclusive ways: either \textit{via}
-\texttt{[~optpairs~]} blocks or \textit{via} \texttt{[~optatoms~]}
-blocks. In both cases, the $i$-th block appearing in hte STP file
-contains the specification of the pairs/atoms to which the settings of
-the $i$-th Lennard-Jones type defined in the INP file (see
+The third-neighbor nonbonded pairs affected by the optimization can be specified
+in two mutually exclusive ways: either \textit{via} \texttt{[~optpairs~]} blocks
+or \textit{via} \texttt{[~optatoms~]} blocks. In both cases, the $i$-th block
+appearing in the STP file contains the specification of the pairs/atoms to which
+the settings of the $i$-th Lennard-Jones type defined in the INP file (see
 \autoref{sec:file-formats-INP}) apply.
 
-When optimization of specific nonbonded pairs is intended, the most
-effective strategy is to use the \texttt{[~optpairs~]} blocks, wherein
-each line describes a 1--4 nonbonded pair and contains the indexes of
-its two atoms separated by spaces.  When the molecular-mechanics
-calculations are performed, the evolutionary-algorithm parameters
-override the pair parameters of all pairs listed in these blocks,
-respecting the correspondence between the blocks and the Lennard-Jones
-types in the INP file.  For consistency, it is required that every
-listed pair must match one of the 1--4 pairs in the
-\texttt{[~nbpairs~]} block.
+When optimization of specific nonbonded pairs is intended, the most effective
+strategy is to use the \texttt{[~optpairs~]} blocks, wherein each line describes
+a 1--4 nonbonded pair and contains the indexes of its two atoms separated by
+spaces.  When the molecular-mechanics calculations are performed, the
+evolutionary-algorithm parameters override the pair parameters of all pairs
+listed in these blocks, respecting the correspondence between the blocks and the
+Lennard-Jones types in the INP file.  For consistency, it is required that every
+listed pair must match one of the 1--4 pairs in the \texttt{[~nbpairs~]} block.
 
 When optimization of the 1--4 Lennard-Jones parameters of
 \textit{atomtypes} is intended instead (which only makes sense if
@@ -1795,34 +1803,87 @@ Positions of the variables:
 \noindent Details of the variables:
 \vspace{2ex}
 
+\subsubsection{\texttt{[~lls\_sc~]}}
+\label{sec:descr:lls}
+
+Positions of the variables:
+\begin{center}
+  \begin{tabular}{lll}
+    CYCL & DPAR & \\
+    SREG &   & \\
+    CREG[1] & & \\
+    $\vdots$ & & \\
+    CREG[$N_P$] & & 
+  \end{tabular}
+\end{center}
+
+\noindent Details of the variables:
+\vspace{2ex}
+
+
 {
 \begin{tabular}{r@{ : }l}
-\label{descr:strat}
-   STRAT &\textbf{(Integer)} Evolutionary strategy.                                                                           \\ 
+\label{descr:cycl}
+   CYCL &\textbf{(Integer)} Maximum number of self-consistent cycles.                                  \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-    \(1\)&set strategy to CMA-ES                                                                       \\ 
-    \(2\)&set strategy to GA                                                                       \\ 
+    \(>0\)& set maximum number of cycles to CYCL                                    \\ 
 \end{tabular}
 \vspace{1ex}
 }
 
 {
 \begin{tabular}{r@{ : }l}
-\label{descr:popsize}
-   POPSIZE&\textbf{(Integer)} Size of the population.                                                                           \\ 
+\label{descr:dpar}
+   DPAR&\textbf{(Float)} Tolerance for the relative change in the values of the parameters.                                                                           \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-    \(>0\)&set population size to POPSIZE                                                                       \\ 
+    \(>0\)&set tolerance to DPAR         \\ 
 \end{tabular}
 \vspace{1ex}
 }
 
 {
 \begin{tabular}{r@{ : }l}
-\label{descr:ngens}
-     NGENS&\textbf{(Integer)} Number of generations.                                                             \\ 
+\label{descr:sreg}
+     SREG&\textbf{(Integer)} Controls the use of regularization in the linear regression.                                                             \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
-    \(>0\)&set number of generations to NGENS                                                                   \\ 
+    \(0\)& do not use regularization \\ 
+    \(1\)& use regularization \\
 \end{tabular}
+\vspace{1ex}
+}
+{
+
+\begin{tabular}{r@{ : }l}
+\label{descr:creg}
+     CREG[I]&\textbf{(Array of Float)} Reference values for the regularization distance.        \\ 
+\multicolumn{2}{l}{Allowed values:} \\ 
+    \( \in \mathbb{R} \)& set reference value of the I-th parameter to CREG[I]\\ 
+\multicolumn{2}{l}{Array index targets:} \\ 
+    \( I \)& I-th parameter\\ 
+\end{tabular}
+
+
+The enumeration of the parameters respects the following order.
+%
+First, the reference values corresponding to each Lennard-Jones type
+are listed.
+%
+These types should follow the same order they are defined in the
+\texttt{[~parameter\_optimization~]} block, with the reference value
+for $CS_6$ appearing just before the reference value for the
+corresponding $CS_{12}$.
+%
+After that, the reference values for the force constants (this
+includes the Ryckaert-Bellemans parameters) of each torsional type are
+listed, also following the order the types are defined in the
+\texttt{[~parameter\_optimization~]} block.
+%
+After \textit{all} force constants, the reference values for the
+phase-shift parameters are listed.
+%
+This only takes into account the parameters that are actually
+optimized; those that are not should be omitted from the enumeration.
+
 \vspace{1ex}
 }
 
@@ -2026,36 +2087,68 @@ the torsional types.
 \chapter{Tutorial}
 \label{chap:tutorial}
  
-In this chapter, the use of \profilertools{} is illustrated in a more
-didactic way in the form of a tutorial.
+In this chapter, the use of \profilertools{} is illustrated in a didactic way in
+the form of a tutorial.
 %
 The tutorial has two parts:
 \begin{enumerate}
-\item In \autoref{sec:tutorial-profilergen}, we illustrate the use of
-  \profilergen{} to obtain a 2-D torsional scan of a united-atoms
-  pentane molecule. The torsional-scan angles are specified in two
-  equivalent ways: $(i)$ explicitly, \textit{via} a SPEC file; $(ii)$
-  as a systematic scan over the values
-  $(\SI{-180}{\degree},\SI{-160}{\degree},\ldots,\SI{180}{\degree}) \times (\SI{-180}{\degree},\SI{-160}{\degree},\ldots,\SI{180}{\degree})$.
-\item In \autoref{sec:tutorial-profileropt}, we illustrate the use of
-  \profileropt{} to optimize the torsional (force constant and
-  phase-difference) and 1--4 Lennard-Jones parameters applying
-  simultaneously to a united-atoms butane and a united-atoms pentane
-  molecule. To explore the input options of the program, the
-  optimization of the Lennard-Jones parameters is done in two ways:
-  $(i)$ by adjusting the atomic $CS_6$ and $CS_{12}$ parameters of the
-  CH2 and CH3 atomtypes; $(ii)$ by adjusting the $CS_6$ and $CS_{12}$
-  parameters of the CH2-CH3 and CH3-CH3 pairtypes.
+
+\item In \autoref{sec:tutorial-profilergen}, \profilergen{} is used to obtain a
+  2D torsional scan of a united-atoms pentane molecule. The torsional-scan
+  angles are specified in two alternative ways:
+
+  \begin{enumerate}
+
+  \item explicitly, by running the program with an input file containing the
+    list of the values of the two reference dihedrals for each configuration of
+    the torsional scan:
+
+\begin{lstlisting}
+-180        -180
+-180        -160
+-180        -140
+      ...   
+180         140
+180         160
+180         180
+\end{lstlisting}
+
+  \item indirectly, by defining the pair of axes of a bidimensional grid of
+    angles of which the grid points (the cartesian product of the two axes)
+    are the torsional-scan angles:
+    $$\underbrace{(\SI{-180}{\degree},\SI{-160}{\degree},\ldots,\SI{180}{\degree})}_\text{Axis 1}
+    \times
+    \underbrace{(\SI{-180}{\degree},\SI{-160}{\degree},\ldots,\SI{180}{\degree})}_\text{Axis 2}$$
+
+    Note that the coordinates that result from the cartesian product above are
+    the values specified in the file mentioned in the previous item.
+
+\end{enumerate}
+  
+\item In \autoref{sec:tutorial-profileropt}, \profileropt{} is used to optimize
+  the torsional (force constant and phase-difference) and 1--4 Lennard-Jones
+  parameters modelling a united-atoms butane and a united-atoms pentane
+  molecule. To explore the input options of the program, the optimization of the
+  Lennard-Jones parameters is done in two alternative ways:
+
+  \begin{enumerate}
+  \item by adjusting the atomic $CS_6$ and $CS_{12}$ parameters of the CH2
+    and CH3 atomtypes;
+
+  \item by adjusting the $CS_6$ and $CS_{12}$ parameters of the CH2-CH3 and
+  CH3-CH3 pairtypes.
+
+\end{enumerate}
 \end{enumerate}
 
-We strongly suggest reading the following sections before starting the
-tutorial: \autoref{sec:ga-tpes}, where we explain how the concept of a
-multidimensional torsional-scan is interpreted in \profilertools{};
-and \autoref{sec:file-formats-STP}, where we describe the syntax of
-the special-topology (STP) file, central in the usage of
-\profilertools{}.  Also, you can consult \autoref{chap:program-usage}
-whenever the meaning of a command-line option for \profilergen{} or
-\profileropt{} is not clear from the examples.
+We strongly suggest reading the following sections before starting the tutorial:
+\autoref{sec:ga-tpes}, where we explain how the concept of a multidimensional
+torsional-scan is interpreted in \profilertools{}; and
+\autoref{sec:file-formats-STP}, where we describe the syntax of the
+special-topology (STP) file, central in the usage of \profilertools{}.  Also,
+you can consult \autoref{chap:program-usage} whenever the meaning of a
+command-line option for \profilergen{} or \profileropt{} is not clear from the
+context.
 
 Throughout this chapter, we assume the reader has access to a Linux
 terminal emulator and is familiarized with some type of shell
@@ -2088,13 +2181,13 @@ files.
 \label{sec:tutorial-profilergen}
 
 The files for this part of the tutorial are in
-\texttt{./doc/tutorial/profilerGen}. They are split into two
-subdirectories: \texttt{spec} and \texttt{systematic}.  The
-\texttt{spec} subdirectory contains the files for a \profilergen{} run
-in which the torsional-scan angles are specified via a SPEC file.  The
-\texttt{systematic} subdirectory contains the files for a run where
-\textit{the same torsional-scan angles} are specified using the
-command-line option for a systematic scan, \texttt{-dr}.
+\texttt{./doc/tutorial/profilerGen}. They are split into two subdirectories:
+\texttt{spec} and \texttt{systematic}.  The \texttt{spec} subdirectory contains
+the files for a \profilergen{} run in which the torsional-scan angles are
+specified explicitly (this is done via the SPEC file, hence the name).  The
+\texttt{systematic} subdirectory contains the files for a run where \textit{the
+  same torsional-scan angles} are specified using the command-line option for a
+systematic scan, \texttt{-dr}.
 
 The system considered in this example is a united-atoms pentane
 molecule, with 2 reference dihedrals, $\phi_1,\phi_2$ (see
@@ -2119,13 +2212,19 @@ forming a $19^2 \times 2$ matrix of angles,
   \right] \quad .
 \end{align}
 
-The STP file for pentane (\texttt{pe.stp}) is the same for both examples.
+The STP file for pentane (\texttt{pe.stp}) is the same for both examples, so
+there is no need to distinguish between them.
 %
 The first few blocks contain the topology and the force-field
 parameters.
 %
-There is a single reference-dihedral group, containing both dihedral
-angles ($\phi_1$ and $\phi_2$):
+They are pretty similar in concept and syntax to the contents of the ITP
+topology file of GROMACS, and users who have already done any type of
+force-field based molecular-mechanics calculation will probably very easily
+understand these blocks.
+%
+Following the topology part, there is a single reference-dihedral group,
+where both dihedral angles ($\phi_1$ and $\phi_2$) are listed:
 
 \begin{lstlisting}[language=gromacs]
 [ refdihedrals ]
@@ -2135,23 +2234,19 @@ angles ($\phi_1$ and $\phi_2$):
 \end{lstlisting}\vspace{2ex}\par
 
 \noindent
-This is because, for both examples, the same dihedral-restraint
-settings apply to $\phi_1$ and $\phi_2$.
+It is important to understand that, although there is a single
+reference-dihedral group, the torsional scan is \textit{bidimensional}, and the
+two dihedral angles vary \textit{independently}.  They are listed in the same
+group because (by choice) they share the same dihedral-restraint attributes,
+namely the harmonic force constants and, for the case of the systematic scan,
+also the same angle values along each dimension of the scan. If different
+harmonic force constants were used for each dihedral angle, or, for the
+systematic scan, if different base angles were used along each dimension (for
+instance,
+$(\SI{-180}{\degree},\SI{-160}{\degree},\ldots,\SI{180}{\degree}) \times
+(\SI{0}{\degree},\SI{90}{\degree},\ldots,\SI{360}{\degree})$), each dihedral
+angle would have to be listed in its own \texttt{[~refdihedrals~]} block.
 %
-For the sake of clarity, the only reasons for having more than one
-reference-dihedral group are:
-\begin{itemize}
-\item Using different harmonic force constants when restraining different reference dihedrals;
-\item Exclusively for multidimensional systematic scans: specifying different torsional-scan angles along each dimension.
-\end{itemize}
-These reasons do not apply to these examples, since:
-\begin{itemize}
-\item We (choose to) use the same force constant when restraining
-  $\phi_1$ and $\phi_2$.
-\item For the systematic-scan example, the torsional-scan angles are
-  the same along each dimension, namely, 
-  $(\SI{-180}{\degree},\SI{-160}{\degree},\ldots,\SI{180}{\degree})$.
-\end{itemize}
 
 \begin{figure}[tb]
   \centering
@@ -2203,14 +2298,16 @@ Notice that we used a single restraint force constant of
 is compatible with listing both of them
 under a single \texttt{[~refdihedrals~]} block.
 
-The output files of this run are the XYZ trajectory file
-\texttt{pe\_spec.xyz} and the DAT file \texttt{pe\_spec.dat}
-containing the energy profile of the torsional scan. The energies are
-listed in a ``flattened'' fashion, as a single column with $19^2$
-rows, one for each torsional-scan configuration. When plotted as a
-$19\times 19$ matrix using the corresponding values of $\phi_1$ and
-$\phi_2$ as axes labels, the results is a nice-looking torsional PES,
-as shown in \autoref{fig:pentane-pes}.
+The output files of this run are the XYZ trajectory file \texttt{pe\_spec.xyz}
+and the DAT file \texttt{pe\_spec.dat} containing the energy profile of the
+torsional scan. The energies (and configurations of the trajectory) are listed
+in a ``flattened'' fashion, as a single column with $19^2$ rows, one for each
+torsional-scan configuration. Also, for plotting convenience, the energy values
+are shifted so that their minima lies at zero (in the program, they are stored
+with the \textit{average} value lying at zero).  When plotted as a $19\times 19$
+matrix using the corresponding values of $\phi_1$ and $\phi_2$ as axes labels,
+the result is a nice-looking torsional PES, as shown in
+\autoref{fig:pentane-pes}.
 
 \begin{figure}[tb]
   \centering
@@ -2252,12 +2349,14 @@ $\phi_2$ under a single \texttt{[~refdihedrals~]} block.
 
 The output files of this run are the XYZ trajectory file
 \texttt{pe\_systematic.xyz} and the DAT file \texttt{pe\_systematic.dat}
-containing the energy profile of the torsional scan. The energies are
-listed in a ``flattened'' fashion, as a single column with $19^2$
-rows, one for each torsional-scan configuration. When plotted as a
-$19\times 19$ matrix using the corresponding values of $\phi_1$ and
-$\phi_2$ as axes labels, the results is a nice-looking torsional PES,
-as shown in \autoref{fig:pentane-pes}.
+containing the energy profile of the torsional scan. The energies are listed in
+a ``flattened'' fashion, as a single column with $19^2$ rows, one for each
+torsional-scan configuration. Also, for plotting convenience, the energy values
+are shifted so that their minima lies at zero (in the program, they are stored
+with the \textit{average} value lying at zero).  When plotted as a $19\times 19$
+matrix using the corresponding values of $\phi_1$ and $\phi_2$ as axes labels,
+the results is a nice-looking torsional PES, as shown in
+\autoref{fig:pentane-pes}.
 
 \section{Optimizing the Parameters}
 \label{sec:tutorial-profileropt}
@@ -2277,10 +2376,9 @@ quantum-mechanical data for this molecule corresponds to a 1D scan along
 the 3-1-4-2 dihedral angle.
 %
 
-Our intention is to derive a torsional potential that apply to all
-dihedral angles, including the 5-2-4-1 dihedral angle of pentane,
-together with 1--4 Lennard-Jones parameters that applies to all 1--4
-pairs.
+Our intention is to derive a torsional potential that applies to all dihedral
+angles, including the 5-2-4-1 dihedral angle of pentane, together with 1--4
+Lennard-Jones parameters that apply to all 1--4 pairs.
 %
 There are two ways to address the optimization of the Lennard-Jones
 terms: the CH2-CH3 and CH3-CH3 pairtypes can be optimized explicitly
@@ -2329,26 +2427,24 @@ The first block of the INP files is
 \end{lstlisting}\vspace{2ex}\par
 
 \noindent
-NTORS controls the number of optimized torsional types.
-\varset{NTORS}{1} means that a single torsional type is optimized.
-NLJ controls the number of optimized Lennard-Jones types.
-\varset{NLJ}{2} means that two Lennard-Jones types are optimized (one
-for each pair or one for each atom, depending on the example).  FTORS
-controls the functional form of the torsional type in optimization.
-\varset{FTORS}{1} means that the functional form is the standard
-periodic one (\autoref{eq:proper-standard-energy}).  The matrix
-TORSNT, with NTORS rows and 6 columns, controls which summands of the
-torsional potential energy function are considered for each torsional
-type, and also whether to optimize only the force constant or also the
-phase.  It is set such that only the term with multiplicity 3 is used
-in the torsional type, optimizing both the force constant and the
-phase.  The matrix LJNT, with NLJ rows and 2 columns, controls which
-components of the Lennard-Jones potential are optimized for each
-Lennard-Jones type. It is set such that both the attractive and
-repulsive components are optimized, for both types. WTEMP is the
-temperature used for Boltzmann-weighting of the reference data.
-\varset{WTEMP}{0} actually means an infinite temperature, which is
-equivalent to setting all weights to 1.
+NTORS controls the number of optimized torsional types.  \varset{NTORS}{1} means
+that a single torsional type is optimized.  NLJ controls the number of optimized
+Lennard-Jones types.  \varset{NLJ}{2} means that two Lennard-Jones types are
+optimized (one for each pairtype or one for each atomtype, depending on the
+example).  FTORS controls the functional form of the torsional type in
+optimization.  \varset{FTORS}{1} means that the functional form is the standard
+periodic one (\autoref{eq:proper-standard-energy}).  The matrix TORSNT, with
+NTORS rows and 6 columns, controls which summands of the torsional potential
+energy function are considered for each torsional type, and also whether to
+optimize only the force constant or also the phase.  It is set such that only
+the term with multiplicity 3 (third column) is used in the torsional type,
+optimizing both the force constant and the phase (value is 2).  The matrix LJNT,
+with NLJ rows and 2 columns, controls which components of the Lennard-Jones
+potential are optimized for each Lennard-Jones type. It is set such that both
+the attractive (first column) and repulsive (second column) components are
+optimized, for both types. Finally, WTEMP is the temperature used for
+Boltzmann-weighting of the reference data.  \varset{WTEMP}{0} actually means an
+infinite temperature, which is equivalent to setting all weights to 1.
 
 The second block is
 
@@ -2370,7 +2466,8 @@ values are drawn, respectively, are specified along with their mean
 (MEAN), standard deviation (STDDEV) and minimum (MIN) and maximum
 allowed (MAX) values.
 %
-All of these distributions are LogNormal.
+With the values above, all of these distributions are LogNormal
+(\varset{DIST}{2}).
 %
 In the case of torsional parameters, after randomly obtained, they may
 have their sign reversed with a probability of 0.50 (PINV).
@@ -2412,18 +2509,17 @@ The fifth block is
        1   0.001  0.1 10000  1e-9
 \end{lstlisting}\vspace{2ex}\par
 
-\noindent and contains the settings of the minimization algorithms.
-They correspond to two steepest-descents algorithms (MALG) of
-different precision (DELE) and duration (NMAX).
+\noindent and contains the settings of the minimization algorithms.  They
+correspond to two steepest-descents algorithms (\varset{MALG}{1}) of different
+precision (DELE) and duration (NMAX).
 %
-The first one refers to the routine minimization performed for every
-individual; it runs for at most 5000 steps or until the energy
-difference between successive steps is less than $1\times 10^{-5}$ kJ~mol$^{-1}$.
+The first one refers to the routine minimization performed for every individual;
+it runs for at most 5000 steps or until the energy difference between successive
+steps is less than $1\times 10^{-5}$ kJ~mol$^{-1}$.
 %
-The second one refers to the final minimization performed only for the
-optimal individual; it runs for at most 10000 steps or until the energy
-difference between successive steps is less than 10$^{-9}$
-kJ~mol$^{-1}$.
+The second one refers to the final minimization performed only for the optimal
+individual; it runs for at most 10000 steps or until the energy difference
+between successive steps is less than 10$^{-9}$ kJ~mol$^{-1}$.
 %
 
 The last block is
@@ -2438,36 +2534,35 @@ The last block is
         0     10   360   5000
 \end{lstlisting}\vspace{2ex}\par
 
-\noindent and specifies the settings of the torsional scan.
-\varset{NTSCAN}{1} means that the torsional-scan angles are generated
-by the program based on a multidimensional systematic scan.
-\varset{NRESTR}{1} means that a single set of dihedral-restraint
-settings is specified.  Note that NRESTR \textit{must be equal} to the
-number of reference-dihedral groups in \textit{each and all} of the
-STP files provided to \profileropt{}. The NRESTR following uncommented
-lines specify the torsional-scan angles (RFRST, RSTEP and RLST) and
-force-constant (RFCT) that apply to all the dihedrals of each
-reference-dihedral group.  RFRST, RSTEP and RLST are ignored if the
-torsional-scan angles originate from an external source (for example,
-from a SPEC file).  The molecules considered in this example have only
-one reference-dihedral group, with one dihedral angle that is
-restrained to the values
-$(\SI{0}{\degree},\SI{10}{\degree},\ldots,\SI{360}{\degree})$ using a
+\noindent and specifies the settings of the torsional scan.  \varset{NTSCAN}{1}
+means that the torsional-scan angles are generated by the program based on a
+multidimensional systematic scan.  \varset{NRESTR}{1} means that a single set of
+dihedral-restraint settings is specified.  Note that NRESTR \textit{must be
+  equal} to the number of reference-dihedral groups in \textit{each and all} of
+the STP files provided to \profileropt{}. The NRESTR following uncommented lines
+specify the systematic-scan parameters (RFRST, RSTEP and RLST) and the force
+constant (RFCT) that apply to all the dihedrals of each reference-dihedral
+group.  RFRST, RSTEP and RLST are ignored if the torsional-scan angles originate
+from an external source (for example, from a SPEC file, which can be achieved
+with \varset{NTSCAN}{3}).  The molecules considered in this example have only
+one reference-dihedral group, with one dihedral angle that is restrained to the
+values $(\SI{0}{\degree},\SI{10}{\degree},\ldots,\SI{360}{\degree})$ using a
 force constant of \SI{5000}{\kJ\per\mole\per\radian\squared}.
 
 \subsection{Optimizing Atomtypes}
 \label{sec:tutorial-profileropt-atoms}
 
-To carry out the optimization, it is necessary to specify the atom
-indexes of the reference dihedrals and of the optimized dihedral
-angles and atomtypes.
+To carry out the optimization, it is necessary to specify the atom indexes of
+the reference dihedrals, as before, and also those of the dihedral angles and
+atoms to which the optimized parameters will apply.
 %
 This is done in the STP files
 \texttt{./doc/tutorial/profilerGen/atoms/bu.stp} and
 \texttt{./doc/tutorial/profilerGen/atoms/pe.stp}, together with the
 specification of the topology itself.
 %
-For butane and pentane, the reference dihedral $\phi_1$ is
+In particular, the reference dihedrals for butane and pentane have the same atom
+indexes:
 
 \begin{lstlisting}[language=gromacs]
 [ refdihedrals ]
@@ -2475,10 +2570,42 @@ For butane and pentane, the reference dihedral $\phi_1$ is
 3   1   4   2
 \end{lstlisting}\vspace{2ex}\par
 
-The optimized atomtypes are a bit more trickier to specify.
-If the atomtypes are $(\text{CH2}, \text{CH3})$, then butane has no atoms
-of the first atomtype and two atoms of the second atomtype: 2 and 3.
-This is indicated in the STP file by
+The optimized dihedral angles are a bit more trickier to configure.
+For butane, it is obvious:
+
+\begin{lstlisting}[language=gromacs]
+[ optdihedrals ]
+; idxs
+3   1   4   2   
+\end{lstlisting}\vspace{2ex}\par
+
+\noindent However, for pentane, they are \textit{both} 3-1-4-2 and 5-2-4-1,
+since the optimized parameters are supposed to apply to both of these dihedrals.
+They are listed in the same \texttt{[~optdihedrals~]} block, since they are
+modelled by the same torsional parameters:
+
+\begin{lstlisting}[language=gromacs]
+[ optdihedrals ]
+    3    1    4    2
+    5	 2    4	   1
+\end{lstlisting}\vspace{2ex}\par
+
+\noindent It is important to understand the following difference: the dihedral
+angle 5-2-4-1 \textit{is not} a reference dihedral\textemdash{}its torsion is
+relaxed (as opposed to restrained) at each torsional-scan
+configuration. However, it \textit{is} an optimized dihedral\textemdash{}it is
+modelled by the optimized torsional parameters obtained by \profileropt{}.  This
+situation is, of course, not ideal, since, in general, we want each optimized
+dihedral to also be a reference dihedral, in order to better isolate its
+influence on the torsional-scan energy profile. However, this ideal scenario is
+limited, in practice, by the cost of obtaining reference quantum-mechanical data
+for a large number of reference dihedrals. In this particular case, we only have
+such data for the torsional scan along the 3-1-4-2 dihedral, and this is why
+this is the only reference dihedral angle considered in this example.
+
+The optimized atomtypes are specified analogously.  If the atomtypes are
+$(\text{CH2}, \text{CH3})$, then butane has no atoms of the first atomtype and
+two atoms of the second atomtype: 2 and 3.  This is indicated in the STP file by
 
 \begin{lstlisting}[language=gromacs]
 [ optatoms ]
@@ -2489,7 +2616,7 @@ This is indicated in the STP file by
 2   3
 \end{lstlisting}\vspace{2ex}\par
 
-\noindent Analogously, for pentane, we have:
+\noindent Similarly, for pentane:
 
 \begin{lstlisting}[language=gromacs]
 [ optatoms ]
@@ -2501,44 +2628,21 @@ This is indicated in the STP file by
 3    5
 \end{lstlisting}\vspace{2ex}\par
 
-The optimized dihedral angle for butane is obvious:
 
-\begin{lstlisting}[language=gromacs]
-[ optdihedrals ]
-; idxs
-3   1   4   2   
-\end{lstlisting}\vspace{2ex}\par
-
-\noindent{}
-The optimized dihedral angles for pentane are \textit{both} 3-1-4-2
-and 5-2-4-1.
-%
-They are listed in the same \texttt{[~optdihedrals~]} block, since
-they are modelled by the same torsional type:
-
-\begin{lstlisting}[language=gromacs]
-[ optdihedrals ]
-    3    1    4    2
-    5	 2    4	   1
-\end{lstlisting}\vspace{2ex}\par
-
-Contrary to \profilergen{}, \profileropt{} requires complete
-torsional-scan trajectories as input. The trajectories
+Contrary to \profilergen{}, \profileropt{} requires complete torsional-scan
+trajectories as input. The trajectories
 \texttt{./doc/tutorial/profilerOpt/atoms/bu.xyz} (of butane) and
-\texttt{./doc/tutorial/profilerOpt/atoms/pe.xyz} (of pentane) consist
-of 37 configurations where the reference torsional-scan dihedral angle
-assumes, in turn, the values
-$(\SI{0}{\degree}, \SI{10}{\degree}, \ldots, \SI{360}{\degree})$.
-These input trajectories can be obtained with \profilergen{}, as
-illustrated in \autoref{sec:tutorial-profilergen}.
+\texttt{./doc/tutorial/profilerOpt/atoms/pe.xyz} (of pentane) each consists of
+37 configurations where the reference torsional-scan dihedral angle assumes, in
+turn, the values
+$(\SI{0}{\degree}, \SI{10}{\degree}, \ldots, \SI{360}{\degree})$.  These input
+trajectories can be obtained with \profilergen{}, as illustrated in
+\autoref{sec:tutorial-profilergen}.
 
-The reference energy values for the optimization can be found in the
-files \texttt{bu.dat} (of butane) and \texttt{pe.dat} (of pentane) in
-the subdirectory \texttt{./doc/tutorial/profilerOpt/atoms}. They were
-obtained from quantum-mechanical dihedral scans along the reference
-dihedrals, using settings that match the torsional-scan settings
-specified in the INP file (see
-\autoref{sec:tutorial-profileropt-inp}).
+The reference energy values for the optimization can be found in the files
+\texttt{bu.dat} (of butane) and \texttt{pe.dat} (of pentane) in the same
+directory. They are simply single-column files where the $k$-th row is the
+reference energy for the $k$-th torsional scan configuration.
 
 To run the \profileropt{} job, enter the appropriate directory
 
@@ -2582,19 +2686,18 @@ rmsd = 0.4175188710494903
 \end{lstlisting}\vspace{2ex}\par
 
 \noindent
-and contain the main results of the parameter optimization.  The last
-line contains the value of the WRMSD (in \si{\kJ\per\mole}) for the
-best individual.  The lines above list the optimized parameter values
-for each parameter type.  The first parameters are those of the
-Lennard-Jones types, in the order they are defined in the STP and INP
-files.  Therefore, in this case, type 0 applies to the CH2 atomtype,
-while type 1 applies to the CH3 atomtype.  After that, the parameters
-of the torsional types are listed, also in the order they are defined
-in the STP and INP files.  Therefore, in this case, type 2 is the
-single torsional type defined in this example. The subscripts in the
-torsional parameters indicate the summand of the torsional potential
-function\textemdash{}in this case, the optimized parameters are the
-force constant and the phase of the term with multiplicity 3.
+and contains the main results of the parameter optimization.  The last line
+contains the value of the weighted root-mean-square deviation (in
+\si{\kJ\per\mole}) for the best individual.  The lines above list the optimized
+parameter values for each parameter type.  The first parameters are those of the
+Lennard-Jones types, in the order they are defined in the STP and INP files.
+Therefore, in this case, type 0 applies to the CH2 atomtype, while type 1
+applies to the CH3 atomtype.  After that, the parameters of the torsional types
+are listed, also in the order they are defined in the STP and INP files.
+Therefore, in this case, type 2 is the single torsional type defined in this
+example. The subscripts in the torsional parameters indicate the summand of the
+torsional potential function\textemdash{}in this case, the optimized parameters
+are the force constant and the phase of the term with multiplicity 3.
 
 The energy profiles for the best individual are listed for two
 different energy-minimization settings. The files
@@ -2669,10 +2772,11 @@ molecule, one for each pairtype. In \texttt{bu.stp}
 ; CH3-CH3 - empty
 \end{lstlisting}\vspace{2ex}\par
 
-Apart from this difference in the STP files, the optimization of
+\noindent Apart from this difference in the STP files, the optimization of
 pairtypes follows the same steps as the optimization of atomtypes
 described in the previous section.
 %
+
 To run the \profileropt{} job, enter the appropriate directory
 
 \begin{lstlisting}[language=bash]
@@ -2710,10 +2814,11 @@ rule). In spite of that, the energy profiles are almost
 indistinguishable, as indicated by the WRMSD values (difference is
 less than \SI{1e-2}{\kJ\per\mole}).
 
-For a complete description of the output files, see the previous
-section.
+For a complete description of the output files, see the previous section on the
+optimization of atomtypes.
 
 \begin{thebibliography}{9}
+\bibitem{PAPER} Paper Profiler.
   \bibitem{DEAP}
     Fortin, F., Fran\c{c}ois-Michel De Rainville, Gardner, M., Parizeau, M. and Gagn\'e, C. DEAP: evolutionary algorithms made easy. Journal of Machine Learning Research, 13, 2171–2175 (2012). 
 \bibitem{GROMOS-doc} van Gunsteren, W. F., Billeter, S. R., Eising,
