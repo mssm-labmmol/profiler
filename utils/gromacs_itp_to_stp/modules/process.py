@@ -43,16 +43,22 @@ class EOFLine(Exception):
     pass
 
 
-def fourier_to_ryckbell(pars):
-    """Convert the dictionary of Fourier parameters into a dictionary of
-    RyckBell parameters."""
-    outpars = {
-        'c0': pars['f2'] + 0.5 * (pars['f1'] + pars['f3']),
-        'c1': 0.5 * (-pars['f1'] + 3 * pars['f3']),
-        'c2': -2 * pars['f3'],
-        'c4': -4 * pars['f4'],
-        'c5': 0,
-    }
+def fourier_to_standard(pars):
+    """Convert a dictionary of Fourier parameters into a list of dictionaries
+    of standard parameters."""
+    outpars = []
+    for m in range(4):
+        if m in [0, 2]:
+            mpars = {
+                'phi0': 0,
+                'k': 0.5 * pars['f' + str(m + 1)],
+            }
+        elif m in [1, 3]:
+            mpars = {
+                'phi0': 180.00,
+                'k': 0.5 * pars['f' + str(m + 1)],
+            }
+        outpars.append(mpars)
     return outpars
 
 
@@ -1201,11 +1207,11 @@ def itp_to_stp(itp_fn, stp_fn, use_interface):
                          dihedral['pars']['c4'][i], dihedral['pars']['c5'][i]))
                     idx += 1
                 elif shape == 'fourier':
-                    # NOTE: seg jul 26 14:24:20 -03 2021 
+                    # NOTE: seg jul 26 18:12:21 -03 2021 
                     # 
                     # For compatibility with profilerOpt, all Fourier dihedrals
                     # are now written in the STP file in the form of
-                    # Ryckaert-Bellemans dihedrals.
+                    # standard dihedrals.
                     #
                     #fp.write(
                     #    "%5d%5d%5d%5d%5d%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f" %
@@ -1213,24 +1219,24 @@ def itp_to_stp(itp_fn, stp_fn, use_interface):
                     #     dihedral['al'], dihedral['func'],
                     #     dihedral['pars']['f1'][i], dihedral['pars']['f2'][i],
                     #     dihedral['pars']['f3'][i], dihedral['pars']['f4'][i]))
-                    ryckbell_pars = fourier_to_ryckbell(
-                        [dihedral['pars'][ff][i] for ff in ['f1', 'f2', 'f3', 'f4']],
+                    st_pars = fourier_to_standard(
+                        {ff: dihedral['pars'][ff][i] for ff in ['f1', 'f2', 'f3', 'f4']},
                     )
-                    ryckbell_func = 3
-                    fp.write(
-                        "%5d%5d%5d%5d%5d%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f ; %s" %
-                        (dihedral['ai'], dihedral['aj'], dihedral['ak'],
-                         dihedral['al'], ryckbell_func,
-                         ryckbell_pars['c0'], ryckbell_pars['c1'],
-                         ryckbell_pars['c2'], ryckbell_pars['c3'],
-                         ryckbell_pars['c4'], ryckbell_pars['c5'],
-                         "converted from Fourier to Ryckaert-Bellemans"))
+                    st_func = 9
+                    mmax = len(st_pars)
+                    for m, st_par in enumerate(st_pars):
+                        if m == mmax - 1:
+                            comment = "converted from Fourier to standard"
+                        else:
+                            comment = "converted from Fourier to standard\n"
+                        fp.write(
+                            "%5d%5d%5d%5d%5d%18.6e%18.6e%5d ; %s" %
+                            (dihedral['ai'], dihedral['aj'], dihedral['ak'],
+                             dihedral['al'], st_func,
+                             st_par['phi0'], st_par['k'], m + 1,
+                             comment))
                     idx += 1
-                try:
-                    fp.write((" ; %d -> " % idx) + dihedral['comment'][i] +
-                             "\n")
-                except IndexError:
-                    fp.write("\n")
+                fp.write("\n")
     fp.write("\n")
 
     # improper dihedrals

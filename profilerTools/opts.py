@@ -47,6 +47,7 @@ class optOpts(object):
     kMask = []  # Mask of force constants to be optimized.
     phiMask = []  # Mask of phases to be optimized.
     dihType = 'standard'  # Dihedral type ('standard' or 'ryckaert')
+    isFourier = False # Flag to indicate optimization of Fourier (this sets phis and k's appropriately)
     wTemp = 0.0  # Temperature for Boltzmann weight calculation. 0 = infinity.
     nLJ = 1  # Controls optimization of Lennard-Jones parameters; >0
              # is the number of LJ types.

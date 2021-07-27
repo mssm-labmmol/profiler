@@ -462,9 +462,9 @@ class generalizedOptDihedralTerms(object):
     The difference between this one and the usual dihedralTerm is
     that, for performance reasons, this term includes the sum of all
     multiplicities, while the usual term refers to only one
-    multiplicity. 
+    multiplicity.
     """
-    def __init__(self, size):
+    def __init__(self, size, isFourier=False):
         self.size = size
         self.ai = np.zeros(self.size, dtype=np.int32)
         self.aj = np.zeros(self.size, dtype=np.int32)
@@ -474,6 +474,17 @@ class generalizedOptDihedralTerms(object):
         self.phi = np.zeros((6, self.size))
         self.m = np.array([1, 2, 3, 4, 5, 6], dtype=np.uint8)
         self.isRef = [False for i in range(size)]
+        if isFourier:
+            for i in range(6):
+                for j in range(self.size):
+                    if (i % 2 == 0):
+                        # i = 0, 2, 4 -> m = 1, 3, 5
+                        # cos(phi) = +1.0
+                        self.phi[i, j] = 0.00
+                    else:
+                        # i = 1, 3, 5 -> m = 2, 4, 6
+                        # cos(phi) = -1.0
+                        self.phi[i, j] = 180.0
 
     def print(self, fp, minim=False):
         if (minim):
@@ -1045,14 +1056,14 @@ class MMCalculator(object):
 
 
     def idx_to_OptIdx(self, idx):
-        """Converts a global index `idx` of a dihedral into the index within the
-        `optDihedralTerms` terms. If the type of optimized dihedrals is
-        Ryckaert-Bellemanns, this method raises a ValueError. If the dihedral of
-        index `idx` is not an optimized dihedral, this method returns None.
-        
+        """Converts a global index `idx` of a dihedral into the index within
+        the `optDihedralTerms` terms. If the type of optimized dihedrals is
+        Ryckaert-Bellemanns, this method raises a ValueError. If the dihedral
+        of index `idx` is not an optimized dihedral, this method returns None.
+
         :param idx: (int) Global index of a dihedral.
 
-        :returns: (int) Index of the dihedral within `self.optDihedralTerms`.
+        returns: (int) Index of the dihedral within `self.optDihedralTerms`.
         """
         if (optOpts.dihType == 'ryckaert'):
             raise ValueError("Can't request OptIdx of Ryckaert-Bellemans "
@@ -1154,7 +1165,7 @@ class MMCalculator(object):
                 noptimized = len(optdihedrals)
                 self.dihedralTerms = generalizedDihedralTerms(ndofs -
                                                               noptimized)
-                self.optDihedralTerms = generalizedOptDihedralTerms(noptimized)
+                self.optDihedralTerms = generalizedOptDihedralTerms(noptimized, optOpts.isFourier)
                 j = 0
                 for i in range(ndofs):
                     if i not in optdihedrals:

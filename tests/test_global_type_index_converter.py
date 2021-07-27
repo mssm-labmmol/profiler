@@ -40,8 +40,7 @@ class TestGlobal_Type_IndexConverter(unittest.TestCase):
         self.assertEqual(gb.type_to_global(1), [1,2])
         self.assertEqual(gb.type_to_global(2), [3,4,5,6,7,8])
         self.assertEqual(gb.type_to_global(3), [9])
-        self.assertEqual(gb.get_k_phi_pairs(), [(3,6), (4,7), (5,8), (11,12)])
-        
-        
+        self.assertEqual(gb.get_k_phi_pairs(), [(3,6), (4,7), (5,8), (9, None), (10, None), (11,12)])
+
 if __name__ == '__main__':
     unittest.main()

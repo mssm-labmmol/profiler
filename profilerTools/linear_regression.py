@@ -49,7 +49,7 @@ class ProfilerLinearRegression (LinearRegression, GSLMultifitMixin):
             #return super().fit_gsl(lamb=0, *args, **kwargs)
             return super().fit(*args, **kwargs)
 
-    
+
 class LinearParameterOptimizer:
     """This class implements the LLS solution of the parameter optimization
     problem. It is actually a driver class to construct the LLS problem in
@@ -110,6 +110,7 @@ class LinearParameterOptimizer:
         """
         confs = self.mp.calculateNumberOfConfigurations()
         npars = self.mp.getNumberOfOptimizableParameters()
+        k_phi_pairs = self.mp.getIndexConverter().get_k_phi_pairs()
 
         Am = np.zeros((np.sum(confs), npars))
 
@@ -125,6 +126,25 @@ class LinearParameterOptimizer:
                 Am[k,p] += np.sum(
                     calculate_geometry_factor(
                         conf, selstring, dof_atom_idxs, self.mp.dihType))
+
+        # Fix geometry factors in case of optimization of force constant only.
+        for k, (conf, profile) in enumerate(self.mp.getConfigurationsAndProfiles()):
+            for kp, phi in k_phi_pairs:
+                if phi is None:
+                    # This means that the optimization is of force constant
+                    # only, so the geometry factors must be corrected to
+                    # account for the phase shifts initialized in the
+                    # multiprofile.
+                    ktp, name = self.mp.getIndexConverter().global_to_type(kp)
+                    km = int(name.split('_')[1]) - 1
+                    # It suffices to take one dihedral from the list of
+                    # dihedrals associated with `kp', because the same
+                    # correction factor multiplies each of them.
+                    dih = profile.indexList.get(ktp)[0]
+
+                    kidx = profile.mmCalc.idx_to_OptIdx(dih)
+                    corr_factor = np.cos(np.radians(profile.mmCalc.optDihedralTerms.phi[km, kidx]))
+                    Am[k, kp]  *= corr_factor
 
         return Am
 
@@ -261,13 +281,13 @@ class LLS_SC:
             self.data['wrmsd'] = []
             self.data['parameters'] = []
 
-        
+
     def __init__(self, multiprofile):
         self.regressor = LinearParameterOptimizer(multiprofile)
         self.mp = multiprofile
         self.logbook = self.LLS_SC_Logbook()
 
-        
+
     def run(self, max_cycles, max_dpar, target_data, wei=None, reg_center=None):
         """Runs the self-consistent scheme for at most `max_cycles` or until the
         maximum relative change in the values of the parameters is at most
@@ -338,8 +358,12 @@ class LLS_SC:
 
     @staticmethod
     def hr2standard(A_m, B_m):
-        k = np.sqrt(A_m**2 + B_m**2)
+        if A_m is None:
+            return None, B_m
+        if B_m is None:
+            return A_m, None
         phi = np.arctan2(B_m, A_m)
+        k = A_m/np.cos(phi) # this form is sign-aware
         return k, np.degrees(phi)
 
     def get_parameters(self):
@@ -348,7 +372,17 @@ class LLS_SC:
         pars = self.regressor.get_parameters()
         k_phi_pairs = self.mp.getIndexConverter().get_k_phi_pairs()
         for k, phi in k_phi_pairs:
-            A_m = pars[k]
-            B_m = pars[phi]
-            pars[k], pars[phi] = self.hr2standard(A_m, B_m)
+            if k is None:
+                A_m = None
+            else:
+                A_m = pars[k]
+            if phi is None:
+                B_m = None
+            else:
+                B_m = pars[phi]
+            k_new, phi_new = self.hr2standard(A_m, B_m)
+            if k is not None:
+                pars[k] = k_new
+            if phi is not None:
+                pars[phi] = phi_new
         return pars

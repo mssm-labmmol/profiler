@@ -79,7 +79,9 @@ def read_PARAMETEROPTIMIZATION(blockdict):
     blocklist = blockdict[blockname]
     optOpts.nTors = int(blocklist.pop(0))
     optOpts.nLJ = int(blocklist.pop(0))
-    optOpts.dihType = {1: 'standard', 2: 'ryckaert'}[int(blocklist.pop(0))]
+    #optOpts.dihType = {1: 'standard', 2: 'ryckaert'}[int(blocklist.pop(0))]
+    optOpts.dihType = 'standard'
+    optOpts.isFourier = {1: False, 2: True}[int(blocklist.pop(0))]
     randOpts.mslots = True
     optOpts.kMask = []
     optOpts.phiMask = []
@@ -93,6 +95,9 @@ def read_PARAMETEROPTIMIZATION(blockdict):
         for i in range(6):
             nt = int(blocklist.pop(0))
             if (nt == 0):
+                pass
+            elif ((i > 3) and optOpts.isFourier):
+                print("Warning: Setting k_%d = 0 for Fourier functional form." % (i + 1))
                 pass
             elif (nt == 1):
                 currKMask[i] = 1
@@ -555,18 +560,43 @@ class Global_Type_IndexConverter:
     def get_k_phi_pairs(self):
         """Returns a list of tuples with the indexes of all corresponding 'k',
         'phi' pairs."""
+        def _check(elem, tuplelist):
+            for x, y in tuplelist:
+                if (elem == x) or (elem == y):
+                    return True
+            return False
+
         out = []
         for p_i, t_i in self._global2type_tors.items():
+            pair_i = None
+            pair_j = None
             name_i = self._global2string[p_i]
+            if _check(p_i, out):
+                # This means p_i is already listed.
+                continue
             for p_j, t_j in self._global2type_tors.items():
                 if p_j > p_i:
                     name_j = self._global2string[p_j]
-                    if (t_i == t_j) and (name_i.replace('k', 'phi') == name_j):
-                        out.append((p_i, p_j))
+                    if (t_i == t_j):
+                        if (name_i.replace('k', 'phi') == name_j):
+                            pair_i = p_i
+                            pair_j = p_j
+                            break
+                        elif (name_i.replace('phi', 'k') == name_j):
+                            pair_i = p_j
+                            pair_j = p_i
+                            break
+            if name_i.startswith('k'):
+                pair_i = p_i
+            elif name_i.startswith('phi'):
+                pair_j = p_i
+            else:
+                raise ValueError
+            out.append((pair_i, pair_j))
         return out
 
 
-    
+
 def RandomizerSwitch2Type(sw):
     switch2type = {
         1: 'uniform',
