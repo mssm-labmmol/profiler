@@ -68,15 +68,20 @@ class NonNegativeConditionedParameter(MaybeConditionedParameter):
 
 
 class DihedralForceConstant(MaybeConditionedParameter):
-    def __init__(self, value, m=None):
+    def __init__(self, value, m=None, isFourier=False):
         super().__init__(value)
         if (m is not None):
             self.m = m
         self.id_string = "k"
+        self.isFourier = isFourier
 
     def __repr__(self):
-        return "{:>8}_{} = {:<18.7e}\n".format(self.get_string(), self.m,
-                                               self.value)
+        if self.isFourier:
+            return "{:>8}_{} = {:<18.7e}\n".format(self.get_string().replace('k', 'f'), self.m,
+                                                   2.0 * self.value)
+        else:
+            return "{:>8}_{} = {:<18.7e}\n".format(self.get_string(), self.m,
+                                                   self.value)
 
 
 class DihedralPhase(MaybeConditionedParameter):
@@ -109,7 +114,7 @@ def ParameterFactory(typestr, m=None):
     elif (typestr == 'c12'):
         return LJC12(0.0)
     elif (typestr == 'k'):
-        return DihedralForceConstant(0.0, m)
+        return DihedralForceConstant(0.0, m, isFourier=optOpts.isFourier)
     elif (typestr == 'phi'):
         return DihedralPhase(0.0, m)
 

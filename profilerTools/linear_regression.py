@@ -348,9 +348,9 @@ class LLS_SC:
             cycles += 1
 
             print("Done.")
-            print(f"Parameters:")
-            for p in curr_pars:
-                print("%14.6e" % p)
+            #print(f"Parameters:")
+            #for p in curr_pars:
+            #    print("%14.6e" % p)
             print(f"WRMSD:")
             print("%14.6e" % wrmsd)
 
