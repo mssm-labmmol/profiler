@@ -11,6 +11,8 @@
 \makeoddfoot{plain}{}{}{\thepage}
 \clearmark{section}
 \setsecnumdepth{subsection}
+\usepackage{bibentry}
+\nobibliography*
 \usepackage{siunitx}
 \usepackage{overcite}
 \usepackage{microtype}
@@ -32,6 +34,11 @@
 \def\subsectionautorefname{Section}
 \def\pageautorefname{p.}
 \DeclareMathOperator{\sign}{sign}
+\newcommand*\eg[0]{\textit{e.g.}}
+\newcommand*\ie[0]{\textit{i.e.}}
+\newcommand*\unitener{kJ mol$^{-1}$}
+\newcommand*\unitljattr{kJ mol$^{-1}$ nm$^6$}
+\newcommand*\unitljrepl{kJ mol$^{-1}$ nm$^{12}$}
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \newcommand{\under}{\_}
 \newcommand{\rsub}[1]{\mathbf{r}_{#1}}
@@ -126,16 +133,13 @@
   %   (v1.0)}. \url{https://github.com/mssm-labmmol/profiler} (2020).
   % \end{quote}
 
-  In the absence of a scientific publication, we kindly ask you to
-  cite this manual if the \profilertools{} suite was helpful in
-  achieving your results, referring to it as
+  If the \profilertools{} suite was helpful in
+  achieving your results, we kindly ask you to cite it in your work as
 
-  \begin{quote}
-    Gonçalves, Y.~M.~H. and the MSSM Group. \textit{profilerTools: User Manual
-      (Version 1.0)}.\\
-    \url{https://github.com/mssm-labmmol/profiler}
-    (2020).
-  \end{quote}
+  \begin{itemize}
+    \item \bibentry{PAPER}
+  \end{itemize}
+
 
   \section{License}
 
@@ -210,9 +214,8 @@ transferring the loops over the involved atoms to the underlying
 \texttt{C} implementation, instead of carrying out these loops in
 Python (which is significantly slower).
 %
-The
-mathematical formluae and the supported physical models are described
-in \autoref{chap:mm}. 
+The mathematical formulae and the supported physical models are
+described in \autoref{chap:mm}. 
 
 \chapter{Molecular Mechanics and Energy Minimization}
 \label{chap:mm}
@@ -339,15 +342,6 @@ torsion degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
   \end{align}
   with $\phi_{0,m} \in (-\pi, \pi]$.
   
-\item [---]\textit{Ryckaert-Bellemans}
-  \par
-  Potential energy form:
-  \begin{align}
-    \label{eq:proper-rb-energy}
-    V(\phi_{ijkl} ; \{c_m\}_{m=0..5}) & = \sum_{m=0}^{5} c_m \cos^m{(\phi_{ijkl}-\pi)} \quad , \\ \nonumber
-    \frac{\partial V(\phi_{ijkl} ; \{c_m\}_{m=0..5})}{\partial \phi_{ijkl}} & = \sum_{m=1}^{5} mc_m \sin{\phi_{ijkl}} \cos^{m-1}{(\phi_{ijkl}-\pi)} \quad , 
-  \end{align}
-
 \item [---]\textit{Fourier}
   \par
   Potential energy form:
@@ -357,16 +351,6 @@ torsion degree of freedom:\cite{GROMOS-doc,GROMACS-doc}
      \frac{\partial V(\phi_{ijkl} ; \{f_m\}_{m=1..4})}{\partial \phi_{ijkl}} & = \frac{1}{2} \sum_{m=1}^{4} m f_m (-1)^{m}\sin m\phi_{ijkl} \quad ,
    \end{align}
    
-   Internally, this potential is computed as a Ryckaert-Bellemans potential with
-   \begin{align*}
-     c_0 & = f_2 + \frac{1}{2} (f_1 + f_3)\\
-     c_1 & = \frac{1}{2} (-f_1 + 3f_3)\\
-     c_2 & = -f_2 + 4f_4\\
-     c_3 & = -2 f_3\\
-     c_4 & = -4 f_4\\
-     c_5 & = 0
-   \end{align*}
-
 \item [---]\textit{Harmonic restraint}
   \par
   Potential energy form:
@@ -765,7 +749,7 @@ given system $s$ is obtained with the following scheme:
       $\phi_{ki}^{(s)}$ and a force constant defined by the group to
       which the RD belongs;
   \end{enumerate}
-\item [b.] Perform a restrained energy minization;
+\item [b.] Perform a restrained energy minimization;
   \item [c.] Compute the value of the total potential energy
     subtracted by the dihedral-restraint energy (\textit{i.e.} the
     unrestrained potential energy), referred to as $\mathcal{V}_{sk}$;
@@ -782,7 +766,7 @@ The torsional-scan matrix for each system $s$, $\Phi_s$, can
 be set in three different ways:
 \begin{enumerate}
 \item From a systematic scan: In this case, each $i$-th reference-dihedral group
-  $\mathcal{R}_i^{(s)}$ corresponds to a system-indepedent vector of
+  $\mathcal{R}_i^{(s)}$ corresponds to a system-independent vector of
   evenly-spaced dihedral-angle values from $\text{RFRST[I]}$ to $\text{RLST[I]}$
   in steps of $\text{RSTEP[I]}$:
   
@@ -851,48 +835,58 @@ be set in three different ways:
 % consist of only [CS_{12}, k_1, k_5]. 
 
 In this chapter, we describe the structure of the parameter
-optimization and how it is carried out in the context of the
-evolutionary algorithms in DEAP.  It is instructive to think of the
-optimization in terms of three main parts:
-\begin{enumerate}
-\item The definition of the boundary conditions of the generation of
-  trial parameters, \textit{i.e} setting the functional form of the
-  torsional and Lennard-Jones terms involved in the optimization algorithm
-  (\autoref{sec:ga-bound}).
+optimization, which can be performed based on a genetic algorithm
+(GA), a covariance matrix adaptation evolution strategy (CMA-ES) or  
+the linear least-squares self-consistent method (LLS-SC) described in
+Ref.\cite{PAPER}.
 
-\item The application of these trial parameters in the modelling of
-  the molecular systems of interest, whereby they acquire physical
-  meaning as force-field parameters and their fitness can be assessed
-  and used as feedback for the evolutionary process
-  (\autoref{sec:ga-opt-control}, \autoref{sec:ga-fitness-wei}).
-  
-\item The generation and evolution of trial parameters, controlled by
-  the details of the evolutionary algorithm (\textit{e.g.} crossover
-  and mutation operators for GA) and carried out in conformity with
-  the items above (\autoref{sec:ga}).
-\end{enumerate}
+% It is instructive to think of the optimization in terms of three main
+% parts:
+% \begin{enumerate}
+% \item The definition of the boundary conditions of the generation of
+%   trial parameters, \textit{i.e} setting the functional form of the
+%   torsional and Lennard-Jones terms involved in the optimization algorithm
+%   (\autoref{sec:ga-bound}).
+% 
+% \item The application of these trial parameters in the modelling of
+%   the molecular systems of interest, whereby they acquire physical
+%   meaning as force-field parameters and their fitness can be assessed
+%   and used as feedback for the evolutionary process
+%   (\autoref{sec:ga-opt-control}, \autoref{sec:ga-fitness-wei}).
+%   
+% \item The generation and evolution of trial parameters, controlled by
+%   the details of the evolutionary algorithm (\textit{e.g.} crossover
+%   and mutation operators for GA) and carried out in conformity with
+%   the items above (\autoref{sec:ga}).
+% \end{enumerate}
 
-\section{Boundary Conditions}
-\label{sec:ga-bound}
+\section{Parameter Types}
+\label{sec:parameter-types}
 
 \profilertools{} relies on the definition of multiple
 \textit{parameter types}.
 %
 Each parameter type corresponds either to one torsional term with all
-its summands (standard periodic or Ryckaert-Bellemans) or to one
-Lennard-Jones term with both attractive and repulsive terms.
+its summands (standard periodic or Fourier) or to one Lennard-Jones
+term with both attractive and repulsive components.
 %
-\profileropt{} admits a fairly flexible setup of boundary conditions
-for the parameters in optimization:
+\profilertools{} admits a fairly flexible setup of boundary conditions
+to optimize these parameters
+\textemdash{}
+most components of a parameter type can be individually included or
+ignored in the optimization.
 %
-each individual component of a parameter type can be included or not
-in the optimization.
+For example, it is possible to carry out a \profileropt{} run where
+only $CS_{12}$ and odd-multiplicity terms of a standard proper
+dihedral form are taken into account.
 %
-For example, it is possible to carry out a \profileropt{} run
-where only $CS_{12}$ and odd-multiplicity terms of a standard proper
-dihedral form are taken into account. The configuration of these
-boundary conditions is performed in the INP input file, as described
-in \autoref{sec:inp-parameter_optimization}.
+Currently, only the optimization of torsional phase-shift terms cannot
+be toggled independently \textemdash{} they are either optimized
+together with the corresponding force constants or not optimized at
+all.
+
+The definition of the parameter types is performed in the INP input
+file, as described in \autoref{sec:inp-parameter_optimization}.
 
 \section{From Trial Parameters to Force-field Terms}
 \label{sec:ga-opt-control}
@@ -900,42 +894,42 @@ in \autoref{sec:inp-parameter_optimization}.
 In general, each molecular system contains several torsional and
 Lennard-Jones degrees of freedom, and $(i)$ not all of them might be
 modelled by the optimized parameters; $(ii)$ different
-degrees of fredom in optimization might be modelled by different
+degrees of freedom in optimization might be modelled by different
 \textit{parameter types}.
 %
 In fact, for each system and each parameter type there is a specific
 list of \textit{Optimized Dihedrals} (ODs) or \textit{Optimized Pairs}
-(OPs) that convey the information of the dihedral-angle terms or 1--4
-nonbonded pairs of which the force-field parameters should be replaced
-by the evolutionary-algorithm parameters of the parameter type. The
-specification of the OPs and ODs for each parameter type is performed
-in the STP file of each system, as described in
+(OPs) that convey the information of the dihedral-angle quadruples or
+1--4 nonbonded pairs relevant to the parameters in optimization.
+
+The specification of the OPs and ODs for each parameter type is
+performed in the STP file of each system, as described in
 \autoref{sec:stp-optterms}.
 
-\section{Torsional-scan Performance Issues}
-\label{sec:torsional-scan-performance-issues}
-
-The number of energy and force evaluations performed during one
-generation of the evolutionary algorithm increase approximately
-linearly with the number of energy-minimization steps carried out in
-the torsional scans.  For this reason, it is important to try to
-reduce as much as possible the duration of the energy minimizations
-without significantly affecting the accuracy of the optimal
-torsional-scan energy profile.
-
-For \profileropt{}, two settings of energy minimization can be
-configured in the INP file for carrying out the torsional scans (see
-\autoref{sec:inp-minimization}). The first is the one used during the
-execution of the algorithm for every individual and every generation
-and is critical to performance.  The second is used only once, after
-the algorithm has finished, to refine the torsional-scan energy
-profiles of the optimal individual. Comparatively speaking, this final
-energy minimization barely affects performance. By comparing the
-energy profiles obtained with these two settings, one should be able
-to at least estimate the magnitude of the errors introduced by using
-time-saving configurations in the first. For \profilergen{}, only one
-energy-minimization setting is available, configured in the
-command-line options (see \autoref{sec:program-gen}).
+% \section{Torsional-scan Performance Issues}
+% \label{sec:torsional-scan-performance-issues}
+% 
+% The number of energy and force evaluations performed during one
+% generation of the evolutionary algorithm increase approximately
+% linearly with the number of energy-minimization steps carried out in
+% the torsional scans.  For this reason, it is important to try to
+% reduce as much as possible the duration of the energy minimizations
+% without significantly affecting the accuracy of the optimal
+% torsional-scan energy profile.
+% 
+% For \profileropt{}, two settings of energy minimization can be
+% configured in the INP file for carrying out the torsional scans (see
+% \autoref{sec:inp-minimization}). The first is the one used during the
+% execution of the algorithm for every individual and every generation
+% and is critical to performance.  The second is used only once, after
+% the algorithm has finished, to refine the torsional-scan energy
+% profiles of the optimal individual. Comparatively speaking, this final
+% energy minimization barely affects performance. By comparing the
+% energy profiles obtained with these two settings, one should be able
+% to at least estimate the magnitude of the errors introduced by using
+% time-saving configurations in the first. For \profilergen{}, only one
+% energy-minimization setting is available, configured in the
+% command-line options (see \autoref{sec:program-gen}).
 
 \section{Reference Data and Weights}
 \label{sec:ga-fitness-wei}
@@ -959,44 +953,47 @@ weights
 \begin{equation*}
   w_{sk} = \exp{(-r_{sk}/RT)} \quad , 
 \end{equation*}
-where $R$ is the universal gas constant and $T$ is a customizable temperature.
-Note that it is implicitly assumed that the minimum of the reference data
-lies at zero for each system, \textit{i.e.} $\min_k{r_{sk}} = 0$ for all $s$.
+where $R$ is the universal gas constant and $T$ is a customizable
+temperature.  Note that it is implicitly assumed that the minimum of
+the reference data lies at zero for each system, \textit{i.e.}
+$\min_k{r_{sk}} = 0$ for all $s$.  To guarantee this condition, the
+reference data for each molecule is always shifted by $\min_k{r_{sk}}$
+before the evaluation of the fitness function.
 
-\section{Evolutionary Algorithm}
+\section{Evolutionary Algorithms}
 \label{sec:ga}
 
 In this section, we describe the main aspects of the implementation of
-the evolutionary algorithm used in the parameter optimization.  In
+the evolutionary algorithms used in the parameter optimization.  In
 particular, we discuss the random initialization of parameters
 (\autoref{sec:ga-parameter-randomization}), the calculation of the
 fitness function (\autoref{sec:ga-fitness}) and the (hard-coded)
-evolutionary operators for the GA
-(\autoref{sec:ga-evolutionary-operators}).
+genetic operators (\autoref{sec:ga-evolutionary-operators}).
 
 \subsection{Parameter Randomization}
 \label{sec:ga-parameter-randomization}
 
-Parameter randomization is treated differently according to the
+The obtention of random parameters depends on the particular
 evolutionary algorithm selected for the optimization.
 
 \subsubsection{Genetic Algorithm}
 
 When GA is selected as the evolutionary algorithm, whenever random
 parameters for the individuals are requested, they are obtained from
-three individual random distributions: one for the torsional force
-constants, one for $CS_6$ and one for $CS_{12}$.  Torsional
-phase-differences are an exception: they are always obtained from a
-uniform distribution in the interval
-$[\SI{-180}{\degree}, \SI{180}{\degree})$.  The types of
-distributions, the ranges of acceptable values and their mean and
-standard deviation are configured in the INP file, as described in
+three individually customizable random distributions: one for the
+torsional force constants, one for $CS_6$ and one for $CS_{12}$.
+Torsional phase-differences are an exception: they are always obtained
+from a uniform distribution in the interval $[\SI{-180}{\degree},
+\SI{180}{\degree})$.  The types of distributions, the ranges of
+acceptable values and their mean and standard deviation are configured
+in the INP file, as described in
 \autoref{sec:inp-parameter_randomization}.  Four types of
 distributions are available: Uniform, LogNormal, Normal and
-LogUniform. In the case of the torsional force constants, after a sample
-within the acceptable range of values is drawn from the distribution,
-its sign can be reversed with a fixed probability specified in the INP
-file, as described in \autoref{sec:inp-parameter_randomization}.
+LogUniform. In the case of the torsional force constants, after a
+sample within the acceptable range of values is drawn from the
+distribution, its sign can be reversed with a fixed probability
+specified in the INP file, as described in
+\autoref{sec:inp-parameter_randomization}.
 
 \subsubsection{CMA-ES}
 
@@ -1004,7 +1001,7 @@ When CMA-ES is selected as the evolutionary algorithm, random
 parameters are chosen from a multivariate normal distribution that
 evolves during the execution of the algorithm. For this reason, the
 mean $\boldsymbol{\mu}_i$ and the covariance matrix
-$\sigma_i \boldsymbol{C}_i$ of this distribution are specific for each
+$\sigma_i \boldsymbol{C}_i$ of this distribution are specific to each
 generation $i$.
 
 The initial value of the mean, $\boldsymbol{\mu}_0$,
@@ -1037,18 +1034,18 @@ reference-data profiles, encoding them into a real number
 $\mathcal{R}$ \textit{via} a suitable metric and finally converting
 this distance-like value into a fitness $\mathcal{F}$.
 
-First, each individual $I_i$ of the population is evaluated in terms
+First, each individual $\mathbf{X}_i$ of the population is evaluated in terms
 of the weighted root-mean-square deviation
 \begin{equation}
   \label{eq:ga-fitness-rmsd}
-  \mathcal{R}\left(I_i;\{w_{sk},r_{sk}\}_{\substack{s\\k}} \right) = \sqrt{\frac{\sum_{s=1}^{N_S} \sum_{k=1}^{N_K} w_{sk}(\mathcal{V}_{sk}(I_i)-r_{sk})^2}{N_S \sum_{k=1}^{N_R} w_{sk}}} \quad ,
+  \mathcal{R}\left(\mathbf{X}_i\right) = \sqrt{\frac{\sum_{s=1}^{N_S} \sum_{k=1}^{N_K} w_{sk}(\mathcal{V}_{sk}(\mathbf{X}_i)-r_{sk})^2}{N_S \sum_{k=1}^{N_R} w_{sk}}} \quad ,
 \end{equation}
 where the $w_{sk},r_{sk}$ are the weights and reference data described in \autoref{sec:ga-fitness-wei}
-and each $\mathcal{V}_{sk}(I_i)$ is the $k$-th step of the energy profile $\mathcal{V}_s(I_i)$ described in \autoref{sec:ga-tpes}.
+and each $\mathcal{V}_{sk}(\mathbf{X}_{i})$ is the $k$-th step of the energy profile $\mathcal{V}_s(\mathbf{X}_i)$ described in \autoref{sec:ga-tpes}.
 This distance-like quantity is converted into a fitness value \textit{via}
 \begin{equation}
   \label{eq:ga-fitness}
-  \mathcal{F}(I_i) =\frac{\left[\mathcal{R}(I_i)\right]^{-1}}{\sum_{j=1}^{N_P} \left[\mathcal{R}(I_j)\right]^{-1}} \quad .
+  \mathcal{F}(\mathbf{X}_i) =\frac{\left[\mathcal{R}(\mathbf{X}_i)\right]^{-1}}{\sum_{j=1}^{N_P} \left[\mathcal{R}(\mathbf{X}_j)\right]^{-1}} \quad .
 \end{equation}
 
   The $\mathcal{R}$ and $\mathcal{F}$ quantities differ in terms of normalization, ordering and interpretability.
@@ -1116,6 +1113,106 @@ The probability of applying the operators are:
 \item Crossover: 0.23
 \item Mutation: 0.39
 \end{itemize}
+
+\section{Self-consistent Linear Least-Squares Optimization}
+
+\subsection{Basic Aspects}
+
+The self-consistent linear least-squares optimization (LLS-SC) is
+based on two main ideas:
+
+\begin{enumerate}
+  \item For fixed torsional-scan trajectories, the parametrization of
+    torsional and third-neighbor Lennard-Jones terms can be recast as
+    a linear least-squares regression problem, which is solved using
+    the linear regression model in the \texttt{scikit-learn} library.
+  \item In practice, the torsional-scan trajectories may depend
+    implicitly on the parameters being calibrated. For this reason, a
+    self-consistent scheme is used, where each set of newly estimated
+    parameters is used to reobtain the torsional-scan trajectories.
+    These trajectories are then used to obtain new parameters, and so
+    on, until convergence.
+\end{enumerate}
+
+The LLS-SC method is explained in details in the \profilertools{}
+paper\cite{PAPER}. The main difference is that, here, the square of
+the weighted residual function in \autoref{eq:ga-fitness-rmsd},
+$\mathcal{R}^{2}$, is used as the actual residual function.
+
+
+\subsection{Regularized Optimization}
+\label{sec:regularization}
+
+This section complements the description of the LLS-SC method and
+relies on notation defined both in the \profilertools{}
+paper\cite{PAPER} and in this document.
+
+The solution of the LLS problem by means of standard matrix techniques
+does not impose any conditions on the values of parameter estimates.
+%
+Consequently, it may yield unphysical results, where the
+third-neighbor parameters have negative values.
+%
+To avoid this outcome, a type of regularization term can be included
+in the residual function, designed to prevent the minimum of the
+residual function to stray too far away from some reference parameter
+vector
+$\mathbf{X}^0 \equiv (X^0_{1},\ldots,X^0_{\mathcal{T}+\mathcal{P}})$.
+%
+
+Using $\mathcal{R}$ from \autoref{eq:ga-fitness-rmsd}, the regularized
+residual function is
+\begin{align}\label{eq:chisq-regularized}
+  \chi^2_\text{R}(\mathbf{X}) = \mathcal{R}^2(\mathbf{X}) + \lambda^2 \sum_{t=1}^{\mathcal{T}+\mathcal{P}} \left[ l_t^{-1}(X_{\Omega,t}-X_{t}^0)\right]^2,
+\end{align}
+where $l_t$, with $t=1,\ldots,\mathcal{T}+\mathcal{P}$, controls the
+relative weights attributed to the deviations of each parameter with
+respect to its reference value, and the regularization parameter
+$\lambda$ quantifies the balance between minimizing the original
+residual function or the regularization term.
+%
+A reasonable strategy to choose the value of $l_t$ for one parameter
+is to set it to the expected distance between its value in the
+solution and in the reference parameter vector, in orders of
+magnitude. For example, one may set the $l_t$ factors to 1 \unitener{}
+for torsional parameters, $10^3$ \unitljattr{} for attractive
+Lennard-Jones parameters and $10^6$ \unitljrepl{} for repulsive
+Lennard-Jones parameters, based on typical values for these
+parameters.
+%
+Regarding $\lambda$, there are established methods for estimating a
+balanced value, such as picking the corner of the $L$-curve.
+
+We note that the regularization strategy proposed above is slightly
+different from the usual kind of regularization adopted in LLS
+problems.  Commonly, the residual function is used to control the
+\textit{norm} $\left\Vert{\mathbf{X}}\right\Vert^2_2$ of the solution,
+and not the \textit{distance} $\left\Vert\mathbf{X} -
+\mathbf{X}^{0}\right\Vert^2_2$ between the solution and a reference
+parameter vector $\mathbf{X}^0$.  This distance-based regularization,
+however, is easily achieved by first carrying out a change of
+variables where the origin is shifted to $\mathbf{X}^0$, and then
+solving the usual regularized regression.  With this caveat in mind,
+the optimization of the regularized residual function
+$\chi^2_\text{R}$ can be carried out by relying essentially on the
+same methods and tools as the optimization of the original residual
+function $\mathcal{R}^2$.
+%
+In particular, the regularized minimization is still a LLS problem,
+amenable to be solved by standard matrix techniques, such as SVD,
+implemented in commonly used scientific libraries (\eg{}, \texttt{GSL}
+for C/C++, and \texttt{numpy} for Python).
+
+%
+% Alternatively, for methods that support this feature, the use of
+% inequality constraints $X_{*,t} \geq 0$, $t=\mathcal{T},\ldots,\mathcal{T}+\mathcal{P}$ can be
+% considered as an option to avoid negative third-neighbor parameters as
+% output of the regression.
+
+In \profilertools{}, regularization is carried out based on the
+\texttt{GSL} library.  This is achieved by implementing a C extension
+to call the appropriate \texttt{GSL} functions to solve the regression
+problem within Python.
 
 \chapter{Program Usage, Input Variables and File Formats}
 \label{chap:file-formats}
@@ -1245,24 +1342,23 @@ The program will write the following files to disk:
 \end{itemize}
 where $S$ is the number of systems.
 
-The ``refined'' quantities mentioned above are obtained based on enhanced energy
-minimization settings, as described in
-\autoref{sec:torsional-scan-performance-issues}.  The IFP file format is
-described in \autoref{sec:file-formats-IFP}.
+The ``refined'' quantities mentioned above are obtained based on
+enhanced energy minimization settings, as explained in the description
+of the IFP file format (\autoref{sec:file-formats-INP}).
 
 
-\section{Input Variables}
-\label{sec:file-formats-input-variables}
-
-The input variables control the details of execution of the programs
-and are of two major types: numeric values (integer or float) and
-arrays of numeric values. They can be supplied either as command-line
-options or in an appropriate input file, depending on its kind.  For
-example, the input variable NPROCS (number of processes for
-parallelization) is an integer specified in the command-line option
-\texttt{-np} of \profileropt{}; the input variable LJNT (controls the
-optimization of Lennard-Jones terms) is an array of two integers
-specified in the INP input file.
+% \section{Input Variables}
+% \label{sec:file-formats-input-variables}
+% 
+% The input variables control the details of execution of the programs
+% and are of two major types: numeric values (integer or float) and
+% arrays of numeric values. They can be supplied either as command-line
+% options or in an appropriate input file, depending on its kind.  For
+% example, the input variable NPROCS (number of processes for
+% parallelization) is an integer specified in the command-line option
+% \texttt{-np} of \profileropt{}; the input variable LJNT (controls the
+% optimization of Lennard-Jones terms) is an array of two integers
+% specified in the INP input file.
 
 \section{File Formats}
 \label{sec:file-formats-file-formats}
@@ -1275,9 +1371,10 @@ specification of the RDs (\autoref{sec:ga-tpes}), the ODs and the OPs
 (\autoref{sec:ga-opt-control}). Comments can be inserted after a ``;''
 character.  This file is organized into blocks, each starting with a
 line consisting of \texttt{[~blockname~]} (where \texttt{blockname} is
-the name of the block) and ending with an empty line.  The structure
-of the STP file is based on three parts, composed by the following
-blocks:
+the name of the block) and ending with an empty line.
+
+The structure of the STP file is based on three parts, composed by the
+following blocks:
 \begin{enumerate}
 \item Topology and interaction parameters:\par \texttt{[~defaults~]}; \texttt{[~atoms~]}; \texttt{[~nbpairs~]}; \texttt{[~bonds~]}; \texttt{[~angles~]}; \texttt{[~dihedrals~]}.
 \item Reference dihedrals (RDs):\par\texttt{[~refdihedral~]}.
@@ -1388,7 +1485,6 @@ Angles & &  &  & \\
 \hline
 Proper dihedrals &  &  &  & \\
 \hspace{1ex} Standard periodic$^{(c)}$  & \texttt{dihedrals} &  1 & \(\phi_{0,m}\) (deg); \(k_{d,m}^s\) (kJ~mol$^{-1}$); \(m\) & \autoref{eq:proper-standard-energy}\\
-\hspace{1ex} Ryckaert-Bellemans & \texttt{dihedrals} &  3 & \(c_0\); \(c_1\); \(c_2\); \(c_3\); \(c_4\); \(c_5\) (kJ~mol$^{-1}$)& \autoref{eq:proper-rb-energy}\\
 \hspace{1ex} Fourier & \texttt{dihedrals} &  5 & \(f_1\); \(f_2\); \(f_3\); \(f_4\) (kJ~mol$^{-1}$) & \autoref{eq:proper-fourier-energy}\\
     \hspace{1ex} Standard periodic$^{(d)}$  & \texttt{dihedrals} &  9 & \(\phi_{0,m}\) (deg); \(k_{d,m}^s\) (kJ~mol$^{-1}$); \(m\) & \autoref{eq:proper-standard-energy}\\
     \hspace{1ex} Harmonic restraint & \texttt{dihedrals} &  \(-1\) & \(\phi_{0}\) (deg); \(k_{d}^r\) (kJ~mol$^{-1}$rad$^{-2}$) & \autoref{eq:proper-restraint-energy}\\
@@ -1436,21 +1532,9 @@ separated by spaces, the indexes $a_i$ \textbf{(Integer)}, $a_j$
 in a specific order (see \autoref{table:stp-types}). Note that the
 format of this block is the same as its correspondent in the ITP file
 format, except that: $(i)$ the interaction parameters must always be
-listed explicitly and $(ii)$ this block also accomodates dihedral
+listed explicitly and $(ii)$ this block also accommodates dihedral
 restraints.
-% \begin{itemize} 
-% \item [---] 1: Single-term standard periodic dihedral
-% \item [---] 2: Harmonic improper dihedral
-% \item [---] 3: Ryckaert-Bellemans proper dihedral
-% \item [---] 4: Periodic improper dihedral
-% \item [---] 5: Fourier proper dihedral
-% \item [---] 9: Multiple-term standard periodic dihedral
-% \end{itemize} In addition to the above and diverging from the ITP file
-% format, dihedral restraints are also set in this block with the
-% following type code:
-% \begin{itemize} 
-% \item [---]$-1$: Harmonic dihedral restraint
-% \end{itemize}
+%
 However, bear in mind that the dihedral restraints specified in this
 manner have no connection with the dihedral restraints used to perform
 the torsional scans in \profilergen{} and \profileropt{} (except for
@@ -1492,7 +1576,7 @@ separated by spaces. For consistency, it is required that each
 reference dihedral match one of the dihedral angles listed in a
 \texttt{[~dihedrals~]} block. For \profileropt{} jobs involving many
 molecules, empty \texttt{[~refdihedrals~]} blocks can be used when
-there are torsional-scan settings that do not apply to all moleules
+there are torsional-scan settings that do not apply to all molecules
 (see \autoref{chap:tutorial} for an example).
 
 \subsubsection{Optimization Targets (exclusive to \profileropt{})}
@@ -1524,36 +1608,36 @@ under optimzation which do not apply to all molecules.
 
 \paragraph{1--4 Pairs}
 
-The third-neighbor nonbonded pairs affected by the optimization can be specified
-in two mutually exclusive ways: either \textit{via} \texttt{[~optpairs~]} blocks
-or \textit{via} \texttt{[~optatoms~]} blocks. In both cases, the $i$-th block
-appearing in the STP file contains the specification of the pairs/atoms to which
-the settings of the $i$-th Lennard-Jones type defined in the INP file (see
+The third-neighbor nonbonded pairs affected by the optimization can be
+specified in two mutually exclusive ways: either \textit{via}
+\texttt{[~optpairs~]} blocks or \textit{via} \texttt{[~optatoms~]}
+blocks. In both cases, the $i$-th block appearing in the STP file
+contains the specification of the pairs/atoms to which the settings of
+the $i$-th Lennard-Jones type defined in the INP file (see
 \autoref{sec:file-formats-INP}) apply.
 
-When optimization of specific nonbonded pairs is intended, the most effective
-strategy is to use the \texttt{[~optpairs~]} blocks, wherein each line describes
-a 1--4 nonbonded pair and contains the indexes of its two atoms separated by
-spaces.  When the molecular-mechanics calculations are performed, the
-evolutionary-algorithm parameters override the pair parameters of all pairs
-listed in these blocks, respecting the correspondence between the blocks and the
-Lennard-Jones types in the INP file.  For consistency, it is required that every
-listed pair must match one of the 1--4 pairs in the \texttt{[~nbpairs~]} block.
+When optimization of specific nonbonded pairs is intended, the most
+effective strategy is to use the \texttt{[~optpairs~]} blocks, wherein
+each line describes a 1--4 nonbonded pair and contains the indexes of
+its two atoms separated by spaces.  When the molecular-mechanics
+calculations are performed, the estimated parameters override the pair
+parameters of all pairs listed in these blocks, respecting the
+correspondence between the blocks and the Lennard-Jones types in the
+INP file.  For consistency, it is required that every listed pair must
+match one of the 1--4 pairs in the \texttt{[~nbpairs~]} block.
 
 When optimization of the 1--4 Lennard-Jones parameters of
 \textit{atomtypes} is intended instead (which only makes sense if
 \texttt{gen-pairs} is \texttt{atomic}, which is not the case for most
-force fields\footnote{To our knowledge, only GROMOS-type force fields
-  are compatible with setting \texttt{gen-pairs} to
-  \texttt{atomic}.}), \texttt{[~optatoms~]} blocks can be used.  In
-this case, the indexes of the atoms of the desired atomtype are
-listed, separated by spaces or line breaks.  When the
-molecular-mechanics calculations are performed, the
-evolutionary-algorithm parameters override the atomic parameters of
-all atoms listed in these blocks, respecting the correspondence
-between the blocks and the Lennard-Jones types in the INP file.  This
-in turn affects (\textit{via} mixing rule) \textit{all} 1--4 nonbonded
-pair interactions involving at least one of these atoms.
+force fields), \texttt{[~optatoms~]} blocks can be used.  In this
+case, the indexes of the atoms of the desired atomtype are listed,
+separated by spaces or line breaks.  When the molecular-mechanics
+calculations are performed, the estimated override the atomic
+parameters of all atoms listed in these blocks, respecting the
+correspondence between the blocks and the Lennard-Jones types in the
+INP file.  This in turn affects (\textit{via} mixing rule)
+\textit{all} 1--4 nonbonded pair interactions involving at least one
+of these atoms.
 
 \subsection{Input Parameters File (INP)}
 \label{sec:file-formats-INP}
@@ -1561,7 +1645,7 @@ pair interactions involving at least one of these atoms.
 The input parameters (INP) file contains the definition of the
 majority of the input variables of \profileropt{}.  Like the STP file,
 the INP file is organized into blocks, wherein input variables of
-similar nature are defined according to their position.  Sucessive
+similar nature are defined according to their position.  Successive
 positions in a block are separated by spaces or by a line break, with
 no syntactic distinction between the two.  However, the use of line
 breaks is recommended to separate clusters of closely related
@@ -1613,25 +1697,25 @@ Positions of the variables:
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:ftors}
-     FTORS&\textbf{(Integer)} Controls functional form of torsional terms.                                                         \\ 
+     FTORS&\textbf{(Integer)} Controls functional form of optimized torsional terms.                                                         \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
      \(1\)&Standard periodic dihedral                                                                           \\ 
-     \(2\)&Ryckaert-Bellemans dihedral                                                                          \\ 
+     \(2\)&Fourier dihedral                                                                          \\ 
 \end{tabular}
 \vspace{1ex}
 }
 
 {
-\begin{tabular}{r@{ : }l}
+  \begin{tabular}{r@{ : }p{80ex}}
 \label{descr:torsnt}
     TORSNT[I][J]&\textbf{(Matrix of Integers)} Fine control of the functional form of torsional terms.                                               \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
      \(0\)&set (I,J)-th term to zero                                                                                \\ 
-  \(1\)&optimize force constant of (I,J)-th term                                                                                   \\
-  \(2\)&optimize force constant and phase difference of (I,J)-th term                                                                                   \\ 
+     \(1\)&optimize force constant of (I,J)-th term; the corresponding phase shifts are either set to zero (for standard periodic dihedral; \varset{FTORS}{1}) or to $(\text{I} \bmod 2)\pi$ (for Fourier dihedrals; \varset{FTORS}{2})                                                                                    \\
+  \(2\)&optimize force constant and phase shift of (I,J)-th term                                                                                   \\ 
 \multicolumn{2}{l}{Matrix index targets:} \\ 
      \(I\)&I-th torsional type                                                                    \\ 
-     \(J\)&J-th summand of \autoref{eq:proper-standard-energy} or \autoref{eq:proper-rb-energy}                                                                                          \\ 
+     \(J\)&J-th summand of \autoref{eq:proper-standard-energy} or \autoref{eq:proper-fourier-energy}                                                                                          \\ 
 \end{tabular}
 \vspace{1ex}
 }
@@ -1873,10 +1957,9 @@ These types should follow the same order they are defined in the
 for $CS_6$ appearing just before the reference value for the
 corresponding $CS_{12}$.
 %
-After that, the reference values for the force constants (this
-includes the Ryckaert-Bellemans parameters) of each torsional type are
-listed, also following the order the types are defined in the
-\texttt{[~parameter\_optimization~]} block.
+After that, the reference values for the force constants of each
+torsional type are listed, also following the order the types are
+defined in the \texttt{[~parameter\_optimization~]} block.
 %
 After \textit{all} force constants, the reference values for the
 phase-shift parameters are listed.
@@ -2817,20 +2900,8 @@ less than \SI{1e-2}{\kJ\per\mole}).
 For a complete description of the output files, see the previous section on the
 optimization of atomtypes.
 
-\begin{thebibliography}{9}
-\bibitem{PAPER} Paper Profiler.
-  \bibitem{DEAP}
-    Fortin, F., Fran\c{c}ois-Michel De Rainville, Gardner, M., Parizeau, M. and Gagn\'e, C. DEAP: evolutionary algorithms made easy. Journal of Machine Learning Research, 13, 2171–2175 (2012). 
-\bibitem{GROMOS-doc} van Gunsteren, W. F., Billeter, S. R., Eising,
-  A. A., Hünenberger, P. H., Krüger, P., Mark, A. E., Scott,
-  W. R. P. and Tironi, I. G. Biomolecular Simulation: The GROMOS96
-  Manual and User Guide. Volume~2:~Algorithms and Formulae for
-  Modelling of Molecular Systems, Vdf Hochschulverlag AG an der ETH
-  Zürich, Zürich, Switzerland, 1996.
-\bibitem{GROMACS-doc} Abraham, M.~J., van~der~Spoel, D., Lindahl,~E.,
-  Hess,~B. and the GROMACS development team. GROMACS User Manual
-  version 2019. \url{http://www.gromacs.org}.
-\end{thebibliography}
+\bibliographystyle{plain}
+\bibliography{doc}
 
 \appendix
 \chapter{MIT License}
