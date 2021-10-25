@@ -9,19 +9,11 @@
 ; WTEMP
 0
 
-[ parameter_randomization ]
-; PINV
-    50
-; DIST[I]  MIN[I]    MAX[I]     MEAN[I]  STDDEV[I]
-        2       0        30        20.0        8.0
-        2       0         1        8e-3      24e-3
-        2       0         1        8e-6      24e-6
-
-[ evolutionary_strat ]
-; STRAT
-      1
-; POPSIZE    NGENS  
-       50       50
+[ lls_sc ]
+; ITER      DPAR
+    40   1.0e-04
+; SREG
+     0
 
 [ seed ]
     1485

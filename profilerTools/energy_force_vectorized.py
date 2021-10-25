@@ -27,7 +27,7 @@ import geometrypy as gp
 import numpy as np
 from .coordParser import wrapAngles
 from math import sqrt
-from sys import stderr
+from sys import stderr, stdout
 from copy import deepcopy
 from .configuration import *
 from .fastmath import fastCross
@@ -532,8 +532,10 @@ class generalizedOptDihedralTerms(object):
     def calcForConf(self, conf, forceConf, calcForce=True, minim=False):
         if (self.size == 0):
             return 0.0
+
         if (minim):
             self._prepareKminim()
+
         phi = np.radians(conf.getDihedrals(self.ai, self.aj, self.ak, self.al))
         argument = gp.einsum('i,j->ij', self.m, phi) - np.radians(self.phi)
         energies = gp.einsum('ij,ij->j', self.k, (1 + np.cos(argument)))
@@ -1416,7 +1418,7 @@ class MMCalculator(object):
         outputDict['total'] = []
         for conf in ens:
             thisMember = self.calcForConf(conf,
-                                          removeRestraintsFromTotal,
+                                          removeRestraintsFromTotal=removeRestraintsFromTotal,
                                           debug=debug,
                                           calcForce=calcForce)[0]
             for key in outputDict:
@@ -1435,7 +1437,7 @@ class MMCalculator(object):
                                      removeRestraints=True,
                                      saveOnlyTotal=True,
                                      debug=False):
-        data = self.calcForEnsemble(ens, shiftToZero, removeRestraints, debug)
+        data = self.calcForEnsemble(ens, shiftToZero=shiftToZero, removeRestraintsFromTotal=removeRestraints, debug=debug)
         if (saveOnlyTotal):
             np.savetxt(fn, data['total'])
         else:

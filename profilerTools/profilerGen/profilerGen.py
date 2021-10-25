@@ -54,7 +54,7 @@ def my_fill(text):
 
 def minimize_conf_with_profile(ensemble, out_prefix, stpData, refPhi,
                                restrConst, emAlgo, emDX0, emDXM, emDele,
-                               emSteps):
+                               emSteps, usePrevious):
     profile = Profile(stpData, None, refPhi, restrConst, emAlgo, emDX0, emDXM,
                       emDele, emSteps)
     if ensemble.size() <= 1:
@@ -62,7 +62,7 @@ def minimize_conf_with_profile(ensemble, out_prefix, stpData, refPhi,
         for i in range(nconfs - 1):
             ensemble.appendConf(ensemble[0])
     profile.replaceEnsemble(ensemble)
-    profile.minimizeProfile(ensemble.elements)
+    profile.minimizeProfile(ensemble.elements, usePrevious=usePrevious)
     return profile
 
 
@@ -298,12 +298,16 @@ class ProfilerGenRunner:
         profile = minimize_conf_with_profile(ens, args.out, stpdict, refPhi,
                                              restrConst, args.min_alg,
                                              args.min_dx0, args.min_dxm,
-                                             args.min_dele, args.min_nsteps)
+                                             args.min_dele, args.min_nsteps,
+                                             usePrevious=(ens.size() == 1))
 
         profile.ensemble.writeToFile(args.out + '.xyz', fmt='xyz')
 
         self.energies = profile.mmCalc.calcForEnsembleAndSaveToFile(
             profile.ensemble, "{}.dat".format(args.out))
+
+        self.energies = profile.mmCalc.calcForEnsembleAndSaveToFile(
+            profile.ensemble, "{}_full.dat".format(args.out), saveOnlyTotal=False)
 
         printfooter(stdout)
 

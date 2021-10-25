@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 import numpy as np
+from sys import stderr
 from .multiprofile import multiProfile
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_squared_error
@@ -198,7 +199,13 @@ class LinearParameterOptimizer:
 
         
     def _prepare_Ldiag(self, Y, reg_center):
-        return 1.0 / self._fixup_reg_center(Y, reg_center)
+        # Hack to avoid dealing with 1/zero
+        # All elements in the denominator that are zero are replaced
+        # by the minimum non-zero value.
+        a = self._fixup_reg_center(Y, reg_center)
+        a[a == 0] = 1e+23
+        a[a == 1e+23] = np.min(a)
+        return 1.0 / a
 
 
     def _add_reg_to_coefs(self, Y, reg_center):
@@ -219,7 +226,7 @@ class LinearParameterOptimizer:
         return self.coef_.flatten()[:-self.mp.getNumberOfSystems()]
 
     
-    def fit(self, target_data, wei=None, reg_center=None):
+    def fit(self, target_data, wei=None, reg_center=None, lamb=None):
         """Fits a linear (or Ridge) regression model to the target data,
         possibly using custom weights.
 
@@ -253,13 +260,16 @@ class LinearParameterOptimizer:
             self.model.fit(X=X, y=Y, sample_weight=wei)
         else:
             ldiag = self._prepare_Ldiag(Y, reg_center)
-            self.model.fit(X=X, y=Y, sample_weight=wei, reg=True, ldiag=ldiag)
+            if lamb is None:
+                self.model.fit(X=X, y=Y, sample_weight=wei, reg=True, ldiag=ldiag)
+            else:
+                self.model.fit(X=X, y=Y, sample_weight=wei, reg=True, ldiag=ldiag, lamb=lamb)
 
         self.coef_ = self.model.coef_
 
         self._add_reg_to_coefs(Y, reg_center)
 
-        
+
 class LLS_SC:
     """
     Class responsible for carrying out the self-consistent cycles of linear
@@ -288,7 +298,8 @@ class LLS_SC:
         self.logbook = self.LLS_SC_Logbook()
 
 
-    def run(self, max_cycles, max_dpar, target_data, wei=None, reg_center=None):
+    def run(self, max_cycles, max_dpar, target_data, wei=None, reg_center=None,
+            lamb=None):
         """Runs the self-consistent scheme for at most `max_cycles` or until the
         maximum relative change in the values of the parameters is at most
         `max_dpar`.
@@ -313,6 +324,8 @@ class LLS_SC:
                            regular linear regression, without regularization, is
                            carried out.
 
+        :param lamb: (float) Lambda in regularization function.
+
         :returns: `True` if the parameters converged before the maximum number
                   of cycles was reached; `False` otherwise.
 
@@ -328,7 +341,7 @@ class LLS_SC:
                (np.abs(np.max((curr_pars-prev_pars)/prev_pars)) >= max_dpar)):
             print(f"LLS-SC: Running cycle {cycles+1}... ", end="")
 
-            self.regressor.fit(target_data, wei, reg_center)
+            self.regressor.fit(target_data, wei, reg_center, lamb=lamb)
             
             prev_pars = np.copy(curr_pars)
             curr_pars = self.get_parameters()
@@ -336,7 +349,8 @@ class LLS_SC:
             self.mp.setOptimizableParameters(slice(npars), curr_pars)
 
             if self.mp.areThereUnphysicalParameters():
-                raise ValueError("Couldn't obtain physical parameters.")
+                #raise ValueError("Couldn't obtain physical parameters.")
+                print("Warning: Couldn't obtain physical parameters.", file=stderr)
 
             self.mp.minimizeProfiles()
             

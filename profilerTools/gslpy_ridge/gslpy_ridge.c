@@ -67,9 +67,7 @@ rglz_wksp * rglz_init(const double *Ldiag, const int p,
     /* Initialize the regularization weights Ldiag */
     rw->Ldiag = gsl_vector_alloc(p);
     for (int i = 0; i < p; i++)
-    {
-	gsl_vector_set(rw->Ldiag, i, Ldiag[i]);
-    }
+        gsl_vector_set(rw->Ldiag, i, Ldiag[i]);
 
     /* Convert the system to standard form */
     gsl_multifit_linear_wstdform1(rw->Ldiag, X, W, Y, rw->Xs, rw->Ys, lwksp);
@@ -92,10 +90,19 @@ void rglz_estimate_lambda(rglz_wksp *rw, const int lcsize)
     rw->lcurve.eta = gsl_vector_alloc(lcsize);
     /* Create Lcurve */
     gsl_multifit_linear_lcurve(rw->Y, rw->lcurve.reg_param, rw->lcurve.rho, rw->lcurve.eta, rw->lwksp);
+#ifdef PRINT_LCURVE
+    for (int i = 0; i < lcsize; i++)
+    {
+        printf("%12.4e%12.4e\n",
+                gsl_vector_get(rw->lcurve.rho, i),
+                gsl_vector_get(rw->lcurve.eta, i));
+    }
+#endif
     /* Estimate corner */
     gsl_multifit_linear_lcorner(rw->lcurve.rho, rw->lcurve.eta, &idx);
     /* Set lambda estimate */
     rw->lamb = gsl_vector_get(rw->lcurve.reg_param, idx);
+    fprintf(stdout, "From gslpy_ridge: lambda = %.4e\n", rw->lamb);
 }
 
 void rglz_solve(gsl_vector *c, double *rnorm, double *snorm, rglz_wksp *rw)

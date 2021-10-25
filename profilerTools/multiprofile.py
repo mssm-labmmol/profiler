@@ -375,9 +375,12 @@ class profile(object):
                         veryLargeEnergy=1.0e+05,
                         elements=None,
                         enerPrefix=None,
-                        trajPrefix=None):
+                        trajPrefix=None,
+                        usePrevious=False):
         self.enerProfile = []
         for k in range(self.calculateNumberOfConfigurations()):
+            if usePrevious and k > 0:
+                self.ensemble[k] = self.ensemble[k - 1].copy()
             # set all restraints
             for i, phi in enumerate(self.refPhi[:, k]):
                 self.mmCalc.pushDihedralRestraint(*self.refDihs[i],

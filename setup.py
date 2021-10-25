@@ -1,7 +1,5 @@
 from setuptools import setup, Extension, find_packages
 
-import numpy
-
 extended_numpy = Extension(
     'geometrypy',
     sources = [
@@ -24,6 +22,7 @@ setup (
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
+        ext_gsl_ridge,
     ],
     entry_points={
         'console_scripts': [
@@ -38,7 +37,6 @@ setup (
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
-        ext_gsl_ridge,
     ],
     entry_points={
         'console_scripts': [

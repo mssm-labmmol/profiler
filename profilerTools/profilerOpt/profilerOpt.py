@@ -330,10 +330,11 @@ class ProfilerOptRunner:
             lls_sc.run(llsOpts.max_cycles, llsOpts.max_dpar,
                        self.get_target_data(),
                        wei=self.get_weis(),
-                       reg_center=llsOpts.reg_center)
-            
+                       reg_center=llsOpts.reg_center,
+                       lamb=llsOpts.lamb)
+
             optind = mp
-            
+
         optind.saveProfile(cmdlineOpts.outPrefix)
         optind.saveTraj(cmdlineOpts.outPrefix, 'xyz')
 
@@ -348,10 +349,20 @@ class ProfilerOptRunner:
         optind.saveTraj(cmdlineOpts.outPrefix + '_minim', 'xyz')
         optind.saveProfile(cmdlineOpts.outPrefix + '_minim')
         print("Done.", file=stdout)
-        printfooter(stdout)
 
         # store best
         self.optind = optind
+
+        # save full data if requested
+        if args.emm:
+            for ip, profile in enumerate(self.optind):
+                profile.mmCalc.calcForEnsembleAndSaveToFile(
+                    profile.ensemble,
+                    "{}_full_{}.dat".format(args.out, ip+1),
+                    saveOnlyTotal=False)
+
+        printfooter(stdout)
+
 
     def get_optimal_parameters(self):
         return self.optind.getOptimizableParameters()

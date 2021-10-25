@@ -21,7 +21,7 @@
 ; STRAT
       1
 ; POPSIZE    NGENS  
-       50       50
+       20       20
 
 [ seed ]
     1485

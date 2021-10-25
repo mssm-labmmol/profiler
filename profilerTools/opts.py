@@ -108,6 +108,8 @@ class llsOpts(object):
                       # of shape (N,), where N is the number of
                       # optimized parameters.
 
+    lamb = None # Lambda in regularization.
+
 
 class writetrajOpts(object):
 

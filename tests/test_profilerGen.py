@@ -35,7 +35,7 @@ class TestProfilerGen(unittest.TestCase):
 
         # compare
         for calc, ref in zip(job.get_energies(), refdata):
-            self.assertAlmostEqual(calc, ref, places=4)
+            self.assertAlmostEqual(calc, ref, places=1)
         
 if __name__ == '__main__':
     unittest.main()

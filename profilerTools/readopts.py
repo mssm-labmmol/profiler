@@ -102,7 +102,7 @@ def read_PARAMETEROPTIMIZATION(blockdict):
             elif (nt == 1):
                 currKMask[i] = 1
                 optTorsMask[i] = 1
-                npars =+ 1
+                npars += 1
             elif (nt == 2):
                 currKMask[i] = 1
                 currPhiMask[i] = 1
@@ -147,29 +147,30 @@ def read_PARAMETEROPTIMIZATION(blockdict):
 
 def read_PARAMETERRANDOMIZATION(blockdict):
     blockname = 'parameter_randomization'
-    blocklist = blockdict[blockname]
-    randOpts.torsPinv = int(blocklist.pop(0))
-    if randOpts.torsPinv == 0:
-        raise Exception(
-            "The value of PINV must be non-zero to allow not"
-            " taking the phase constants into account; "
-            "read the documentation for more details."
-        )
-    randOpts.torsDist = int(blocklist.pop(0))
-    randOpts.torsMin = float(blocklist.pop(0))
-    randOpts.torsMax = float(blocklist.pop(0))
-    randOpts.torsMean = float(blocklist.pop(0))
-    randOpts.torsStddev = float(blocklist.pop(0))
-    randOpts.cs6Dist = int(blocklist.pop(0))
-    randOpts.cs6Min = float(blocklist.pop(0))
-    randOpts.cs6Max = float(blocklist.pop(0))
-    randOpts.cs6Mean = float(blocklist.pop(0))
-    randOpts.cs6Stddev = float(blocklist.pop(0))
-    randOpts.cs12Dist = int(blocklist.pop(0))
-    randOpts.cs12Min = float(blocklist.pop(0))
-    randOpts.cs12Max = float(blocklist.pop(0))
-    randOpts.cs12Mean = float(blocklist.pop(0))
-    randOpts.cs12Stddev = float(blocklist.pop(0))
+    if blockname in blockdict.keys():
+        blocklist = blockdict[blockname]
+        randOpts.torsPinv = int(blocklist.pop(0))
+        if randOpts.torsPinv == 0:
+            raise Exception(
+                "The value of PINV must be non-zero to allow not"
+                " taking the phase constants into account; "
+                "read the documentation for more details."
+            )
+        randOpts.torsDist = int(blocklist.pop(0))
+        randOpts.torsMin = float(blocklist.pop(0))
+        randOpts.torsMax = float(blocklist.pop(0))
+        randOpts.torsMean = float(blocklist.pop(0))
+        randOpts.torsStddev = float(blocklist.pop(0))
+        randOpts.cs6Dist = int(blocklist.pop(0))
+        randOpts.cs6Min = float(blocklist.pop(0))
+        randOpts.cs6Max = float(blocklist.pop(0))
+        randOpts.cs6Mean = float(blocklist.pop(0))
+        randOpts.cs6Stddev = float(blocklist.pop(0))
+        randOpts.cs12Dist = int(blocklist.pop(0))
+        randOpts.cs12Min = float(blocklist.pop(0))
+        randOpts.cs12Max = float(blocklist.pop(0))
+        randOpts.cs12Mean = float(blocklist.pop(0))
+        randOpts.cs12Stddev = float(blocklist.pop(0))
 
 
 def read_SEED(blockdict):
@@ -193,7 +194,6 @@ def read_EVOLUTIONARYSTRAT(blockdict):
         if (vbgaOpts.popSize <= 0):
             raise Exception("Population size must be a positive number.")
         vbgaOpts.nGens = int(blocklist.pop(0))
-    
 
 def read_LLSSC(blockdict, number_of_pars):
     blockname = 'lls_sc'
@@ -207,7 +207,10 @@ def read_LLSSC(blockdict, number_of_pars):
             for i in range(number_of_pars):
                 llsOpts.reg_center.append(float(blocklist.pop(0)))
             llsOpts.reg_center = np.array(llsOpts.reg_center)
-                
+            llsOpts.lamb = float(blocklist.pop(0))
+            if (llsOpts.lamb <= 0):
+                llsOpts.lamb = None
+
 
 def read_MINIMIZATION(blockdict):
     blockname = 'minimization'
@@ -287,8 +290,8 @@ def input2dict(fn):
 def readinput(fn):
     outdict = input2dict(fn)
     npars = read_PARAMETEROPTIMIZATION(outdict)
-    read_PARAMETERRANDOMIZATION(outdict)
     read_EVOLUTIONARYSTRAT(outdict)
+    read_PARAMETERRANDOMIZATION(outdict)
     read_LLSSC(outdict, npars)
     read_MINIMIZATION(outdict)
     read_TORSIONALSCAN(outdict)

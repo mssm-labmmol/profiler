@@ -37,15 +37,16 @@ CH3      9.6138020e-03       2.6646240e-05       6.8525280e-03       6.0308650e-
 [ dihedrals ]
 ; improper dihedrals
 
-[ optatoms ]
-; CH2
-1    2    4
+[ optpairs ]
+; CH2-CH3
+1   5
+2   3
 
-[ optatoms ]
-; CH3
-3    5
+[ optpairs ]
+; CH3-CH3 - empty
 
 [ optdihedrals ]
+; idxs
     3    1    4    2
     5	 2    4	   1
 
