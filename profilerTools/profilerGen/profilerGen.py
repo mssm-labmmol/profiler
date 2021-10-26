@@ -193,16 +193,16 @@ class ProfilerGenRunner:
             help=my_fill("Systematic-scan parameters for each type: "
                          "from RFRST to RLST with a RSTEP step."))
 
-        parser.add_argument(
-            '-min',
-            metavar='MALG',
-            dest='min_alg',
-            required=False,
-            type=int,
-            default=1,
-            help=my_fill(
-                "Minimization algorithm: steepest descents (1 - default) "
-                "or conjugate-gradient (2)."))
+        #parser.add_argument(
+        #    '-min',
+        #    metavar='MALG',
+        #    dest='min_alg',
+        #    required=False,
+        #    type=int,
+        #    default=1,
+        #    help=my_fill(
+        #        "Minimization algorithm: steepest descents (1 - default) "
+        #        "or conjugate-gradient (2)."))
 
         parser.add_argument('-dx0',
                             metavar='DX0',
@@ -296,7 +296,7 @@ class ProfilerGenRunner:
             refPhi = genRefDihedrals_ExternalFile(args.dih_spec)
 
         profile = minimize_conf_with_profile(ens, args.out, stpdict, refPhi,
-                                             restrConst, args.min_alg,
+                                             restrConst, 1, # 1 = steepest-descent
                                              args.min_dx0, args.min_dxm,
                                              args.min_dele, args.min_nsteps,
                                              usePrevious=(ens.size() == 1))

@@ -11,6 +11,7 @@
 \makeoddfoot{plain}{}{}{\thepage}
 \clearmark{section}
 \setsecnumdepth{subsection}
+\usepackage{awesomebox}
 \usepackage{bibentry}
 \nobibliography*
 \usepackage{siunitx}
@@ -593,10 +594,9 @@ form. The latter terms are listed below\cite{GROMOS-doc}:
 \section{Energy Minimization}
 \label{chap:minim}
 
-In this section, we briefly describe the energy minimization algorithms implemented in \profilertools{}, namely
-\textit{steepest-descents} and
-\textit{conjugate-gradients}.
-Both implementations are based on the descriptions supplied in the GROMOS user manual\cite{GROMOS-doc}.
+In this section, we briefly describe the energy minimization algorithm implemented in \profilertools{}, namely
+\textit{steepest-descents}.
+The implementation is based on the one described in the GROMOS user manual\cite{GROMOS-doc}.
 
 \subsection{Steepest-descents}
 \label{sec:steep}
@@ -617,67 +617,135 @@ If the energy decreases in a given step $n$, $\Delta x(t_{n+1}) = \min{\{1.2\cdo
 If the energy increases, $\Delta x(t_{n+1}) = 0.5\cdot\Delta x(t_{n})$.
 The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the (absolute) energy difference between successive steps is less than the one specified in the input variable DELE.
 
-\subsection{Conjugate-gradients}
-\label{sec:conjugate-gradients}
+% \subsection{Conjugate-gradients}
+% \label{sec:conjugate-gradients}
 
-In the conjugate-gradients energy minimization algorithm, one does not move strictly along the gradient of the potential energy over the configurational space.
-Instead, a search direction
-\begin{equation}
-  \label{eq:em-cg-search}
-   \mathbf{s}(t_n) = \mathbf{f}(t_n) + \mathbf{s}(t_{n-1}) \frac{\sum_{i=1}^{N}\fsub{i}(t_n)\cdot\fsub{i}(t_{n-1})}{\sum_{i=1}^{N}\fsub{i}(t_{n-1})\cdot\fsub{i}(t_{n-1})} 
-\end{equation}
-is defined for each step, with $\mathbf{s}(t_0) = \mathbf{f}(t_0)$.
-Let $V|_s(s;t_n) = V(\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n))$ be the restriction of the potential energy hypersurface to this search direction and
-\begin{equation*}
-  v(s;t_n) = - \sum_{i=1}^N \mathbf{f}_i(\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n)) \cdot \mathbf{s}_i(t_n) \quad , \quad \mathbf{s}(t_n) = (\mathbf{s}_1(t_n),\mathbf{s}_2(t_n) \ldots \mathbf{s}_N(t_n))
-\end{equation*}
-its derivative, where $\mathbf{f}_i(\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n))$ represents the forces on particle $i$ calculated for the configuration $\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n)$.
-In terms of these real functions, the $n$-th step of the algorithm involves two substeps:
-\begin{enumerate}
-\item Find a small interval $I(t_n)=(a(t_n), b(t_n)]$ which is guaranteed to contain a local minimum of $V|s(s;t_n)$.
-  \par
-  The existence of a minimum in $I(t_n)$ is ensured by any of the following pairs of conditions:
-  \begin{align*}
-    \left\{
-    \begin{array}{rcl}
-      v(a(t_n)) & < &0 \\
-     V|_s(b(t_n)) & \geq &V|_s(a(t_n))
-      \end{array}\right.
-               \quad\text{or}\quad
-      \left\{
-      \begin{array}{rcl}
-        v(a(t_n)) & < & 0 \\
-        v(b(t_n)) & \geq & 0
-      \end{array}\right.
-  \end{align*}
-  The loop below is used to select adequate values for $a(t_n)$ and $b(t_n)$.
+% In the conjugate-gradients energy minimization algorithm, one does not move strictly along the gradient of the potential energy over the configurational space.
+% Instead, a search direction
+% \begin{equation}
+%   \label{eq:em-cg-search}
+%    \mathbf{s}(t_n) = \mathbf{f}(t_n) + \mathbf{s}(t_{n-1}) \frac{\sum_{i=1}^{N}\fsub{i}(t_n)\cdot\fsub{i}(t_{n-1})}{\sum_{i=1}^{N}\fsub{i}(t_{n-1})\cdot\fsub{i}(t_{n-1})} 
+% \end{equation}
+% is defined for each step, with $\mathbf{s}(t_0) = \mathbf{f}(t_0)$.
+% Let $V|_s(s;t_n) = V(\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n))$ be the restriction of the potential energy hypersurface to this search direction and
+% \begin{equation*}
+%   v(s;t_n) = - \sum_{i=1}^N \mathbf{f}_i(\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n)) \cdot \mathbf{s}_i(t_n) \quad , \quad \mathbf{s}(t_n) = (\mathbf{s}_1(t_n),\mathbf{s}_2(t_n) \ldots \mathbf{s}_N(t_n))
+% \end{equation*}
+% its derivative, where $\mathbf{f}_i(\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n))$ represents the forces on particle $i$ calculated for the configuration $\mathbf{r}(t_n) + s\cdot\mathbf{s}(t_n)$.
+% In terms of these real functions, the $n$-th step of the algorithm involves two substeps:
+% \begin{enumerate}
+% \item Find a small interval $I(t_n)=(a(t_n), b(t_n)]$ which is guaranteed to contain a local minimum of $V|s(s;t_n)$.
+%   \par
+%   The existence of a minimum in $I(t_n)$ is ensured by any of the following pairs of conditions:
+%   \begin{align*}
+%     \left\{
+%     \begin{array}{rcl}
+%       v(a(t_n)) & < &0 \\
+%      V|_s(b(t_n)) & \geq &V|_s(a(t_n))
+%       \end{array}\right.
+%                \quad\text{or}\quad
+%       \left\{
+%       \begin{array}{rcl}
+%         v(a(t_n)) & < & 0 \\
+%         v(b(t_n)) & \geq & 0
+%       \end{array}\right.
+%   \end{align*}
+%   The loop below is used to select adequate values for $a(t_n)$ and $b(t_n)$.
   
-  Starting with $a_1(t_n) = 0$ and $b_1(t_n) = \Delta x\ (\sum_{i=1}^N \ssub{i}(t_n)\cdot\ssub{i}(t_n))^{-1/2}$, the $k$-th step is:
-  \begin{enumerate}
-  \item Compute the energies and forces for the configurations $\mathbf{r}(t_n) + a_k(t_n)\cdot\mathbf{s}(t_n)$ and $\mathbf{r}(t_n) + b_k(t_n)\cdot\mathbf{s}(t_n)$.
-  \item Verify the terminating conditions above. If none of them are satisfied, proceed with $a_{k+1}(t_n) = b_{k}(t_n)$ and $b_{k+1}(t_n)=2b_k(t_n)$.
-    Otherwise, $a(t_n) = a_k(t_n)$ and $b(t_n) = b_k(t_n)$.
-  \end{enumerate}
-  The step size $\Delta x$ is obtained from the input variable DX0.
-  The loop is terminated with an error if, at any step, $b_{k+1}(t_n) \geq \text{DXM}$, where DXM is an input variable.
-\item Obtain an estimate $s_{m}$ of the local minimum in $I(t_n)$ based on a cubic interpolation:
-  \begin{align}
-    \label{eq:em-cg-interp}
-    s_m & = b - \frac{(b(t_n) - a(t_n))[W-Z+v(b(t_n))]}{v(b(t_n)) - v(a(t_n)) + 2W} \quad ,\\ \nonumber
-    W & = \sqrt{Z^2-v(a(t_n))v(b(t_n))} \quad , \\ \nonumber
-    Z & = \frac{3[V|_s(a(t_n)) - V|_s(b(t_n))]}{b(t_n) - a(t_n)} + v(a(t_n)) + v(b(t_n)) \quad .
-  \end{align}
-  If $V|_s(s_{m}) < V|_s(a(t_n))$ and $V|_s(s_{m}) < V|_s(b(t_n))$, accept the estimate as the local minimum and proceed with
-  \begin{equation}
-    \label{eq:em-cg-step}
-    \mathbf{r}(t_{n+1}) = \mathbf{r}(t_n) + s_m \cdot \mathbf{s}(t_n) \quad ,
-  \end{equation}
-  updating the search direction with \autoref{eq:em-cg-search}.
-  Otherwise, repeat the interpolation setting $b(t_n) = s_m$ (if $v(s_m) \geq 0$) or $a(t_n) = s_m$ (if $v(s_m) <0$).
+%   Starting with $a_1(t_n) = 0$ and $b_1(t_n) = \Delta x\ (\sum_{i=1}^N \ssub{i}(t_n)\cdot\ssub{i}(t_n))^{-1/2}$, the $k$-th step is:
+%   \begin{enumerate}
+%   \item Compute the energies and forces for the configurations $\mathbf{r}(t_n) + a_k(t_n)\cdot\mathbf{s}(t_n)$ and $\mathbf{r}(t_n) + b_k(t_n)\cdot\mathbf{s}(t_n)$.
+%   \item Verify the terminating conditions above. If none of them are satisfied, proceed with $a_{k+1}(t_n) = b_{k}(t_n)$ and $b_{k+1}(t_n)=2b_k(t_n)$.
+%     Otherwise, $a(t_n) = a_k(t_n)$ and $b(t_n) = b_k(t_n)$.
+%   \end{enumerate}
+%   The step size $\Delta x$ is obtained from the input variable DX0.
+%   The loop is terminated with an error if, at any step, $b_{k+1}(t_n) \geq \text{DXM}$, where DXM is an input variable.
+% \item Obtain an estimate $s_{m}$ of the local minimum in $I(t_n)$ based on a cubic interpolation:
+%   \begin{align}
+%     \label{eq:em-cg-interp}
+%     s_m & = b - \frac{(b(t_n) - a(t_n))[W-Z+v(b(t_n))]}{v(b(t_n)) - v(a(t_n)) + 2W} \quad ,\\ \nonumber
+%     W & = \sqrt{Z^2-v(a(t_n))v(b(t_n))} \quad , \\ \nonumber
+%     Z & = \frac{3[V|_s(a(t_n)) - V|_s(b(t_n))]}{b(t_n) - a(t_n)} + v(a(t_n)) + v(b(t_n)) \quad .
+%   \end{align}
+%   If $V|_s(s_{m}) < V|_s(a(t_n))$ and $V|_s(s_{m}) < V|_s(b(t_n))$, accept the estimate as the local minimum and proceed with
+%   \begin{equation}
+%     \label{eq:em-cg-step}
+%     \mathbf{r}(t_{n+1}) = \mathbf{r}(t_n) + s_m \cdot \mathbf{s}(t_n) \quad ,
+%   \end{equation}
+%   updating the search direction with \autoref{eq:em-cg-search}.
+%   Otherwise, repeat the interpolation setting $b(t_n) = s_m$ (if $v(s_m) \geq 0$) or $a(t_n) = s_m$ (if $v(s_m) <0$).
 
-\end{enumerate}
+% \end{enumerate}
 
-The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the energy difference between successive steps is less than the value of the input variable DELE.
+% The algorithm is terminated if the number of steps reaches the value specified in the input variable NMAX or if the energy difference between successive steps is less than the value of the input variable DELE.
+
+
+\section{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}
+\item[---] Periodic boundary conditions are currently not taken into
+  account. Please make sure your systems fit entirely within the
+  central simulation box to avoid any problems.
+\item[---] The nonbonded interactions are computed explicitly
+  regardless of the distance between the interacting particles. No
+  other scheme for computing the nonbonded interactions is currently
+  supported.
+\item[---] For a given system, only one functional form is accepted
+  for each type of bonded interaction. For example, if one
+  bond-stretching degree of freedom of the system is described by the
+  harmonic form, then all of them also must be. The only exception is
+  for proper dihedral restraints, which can be defined along with any
+  other form of proper dihedral.
+\end{itemize}
+
+\chapter{Parameter Optimization}
+\label{chap:ga}
+
+% TODO:
+%
+% Right now, we only allow specification of the population, the number of
+% generations and the probabilities of cross-over and mutation. If the user is
+% interested in tweaking with details of the operators, we suggest taking a look
+% at the modules/deap_ga.py source file.
+%
+% The usage of operators that are implemented in the DEAP library is pretty
+% straightforward--one only has to use them appropriately in the initialization
+% of the DEAP_GA class. Usage of functools.partial is encouraged to freeze
+% arguments.
+%
+% To create your own operators, bear in mind that the Invidual class, as seen by
+% the GA, is the list of parameters in the following order: CS_6, CS_{12}, then
+% the force constants in order of increasing multiplicities. Terms that are not
+% being optimized are *NOT* considered in this list. For instance, it might
+% consist of only [CS_{12}, k_1, k_5]. 
+
+In this chapter, we describe the structure of the parameter
+optimization, which can be performed based on a genetic algorithm
+(GA), a covariance matrix adaptation evolution strategy (CMA-ES) or  
+the linear least-squares self-consistent method (LLS-SC) described in
+Ref.\cite{PAPER}.
+
+% It is instructive to think of the optimization in terms of three main
+% parts:
+% \begin{enumerate}
+% \item The definition of the boundary conditions of the generation of
+%   trial parameters, \textit{i.e} setting the functional form of the
+%   torsional and Lennard-Jones terms involved in the optimization algorithm
+%   (\autoref{sec:ga-bound}).
+% 
+% \item The application of these trial parameters in the modelling of
+%   the molecular systems of interest, whereby they acquire physical
+%   meaning as force-field parameters and their fitness can be assessed
+%   and used as feedback for the evolutionary process
+%   (\autoref{sec:ga-opt-control}, \autoref{sec:ga-fitness-wei}).
+%   
+% \item The generation and evolution of trial parameters, controlled by
+%   the details of the evolutionary algorithm (\textit{e.g.} crossover
+%   and mutation operators for GA) and carried out in conformity with
+%   the items above (\autoref{sec:ga}).
+% \end{enumerate}
+
 
 \section{Torsional-scan Energy Profiles}
 \label{sec:ga-tpes}
@@ -793,72 +861,6 @@ be set in three different ways:
 % - one is executed only after the Ga for the optimal parameters to refine the final torsional data
 % configurations for each one are controlled in adnajskd block
 % for example bla bla
-
-\section{Limitations}
-\label{sec:limitations}
-
-\begin{itemize}
-\item[---] Periodic boundary conditions are currently not taken into
-  account. Please make sure your systems fit entirely within the
-  central simulation box to avoid any problems.
-\item[---] The nonbonded interactions are computed explicitly
-  regardless of the distance between the interacting particles. No
-  other scheme for computing the nonbonded interactions is currently
-  supported.
-\item[---] For a given system, only one functional form is accepted
-  for each type of bonded interaction. For example, if one
-  bond-stretching degree of freedom of the system is described by the
-  harmonic form, then all of them also must be. The only exception is
-  for proper dihedral restraints, which can be defined along with any
-  other form of proper dihedral.
-\end{itemize}
-
-\chapter{Parameter Optimization}
-\label{chap:ga}
-
-% TODO:
-%
-% Right now, we only allow specification of the population, the number of
-% generations and the probabilities of cross-over and mutation. If the user is
-% interested in tweaking with details of the operators, we suggest taking a look
-% at the modules/deap_ga.py source file.
-%
-% The usage of operators that are implemented in the DEAP library is pretty
-% straightforward--one only has to use them appropriately in the initialization
-% of the DEAP_GA class. Usage of functools.partial is encouraged to freeze
-% arguments.
-%
-% To create your own operators, bear in mind that the Invidual class, as seen by
-% the GA, is the list of parameters in the following order: CS_6, CS_{12}, then
-% the force constants in order of increasing multiplicities. Terms that are not
-% being optimized are *NOT* considered in this list. For instance, it might
-% consist of only [CS_{12}, k_1, k_5]. 
-
-In this chapter, we describe the structure of the parameter
-optimization, which can be performed based on a genetic algorithm
-(GA), a covariance matrix adaptation evolution strategy (CMA-ES) or  
-the linear least-squares self-consistent method (LLS-SC) described in
-Ref.\cite{PAPER}.
-
-% It is instructive to think of the optimization in terms of three main
-% parts:
-% \begin{enumerate}
-% \item The definition of the boundary conditions of the generation of
-%   trial parameters, \textit{i.e} setting the functional form of the
-%   torsional and Lennard-Jones terms involved in the optimization algorithm
-%   (\autoref{sec:ga-bound}).
-% 
-% \item The application of these trial parameters in the modelling of
-%   the molecular systems of interest, whereby they acquire physical
-%   meaning as force-field parameters and their fitness can be assessed
-%   and used as feedback for the evolutionary process
-%   (\autoref{sec:ga-opt-control}, \autoref{sec:ga-fitness-wei}).
-%   
-% \item The generation and evolution of trial parameters, controlled by
-%   the details of the evolutionary algorithm (\textit{e.g.} crossover
-%   and mutation operators for GA) and carried out in conformity with
-%   the items above (\autoref{sec:ga}).
-% \end{enumerate}
 
 \section{Parameter Types}
 \label{sec:parameter-types}
@@ -1587,7 +1589,7 @@ separated by spaces. For consistency, every dihedral angle listed in
 these blocks must match one of the dihedral angles listed in a
 \texttt{[~dihedrals~]} block.  For \profileropt{} jobs involving many
 molecules, empty blocks can be used when there are torsional types
-under optimzation which do not apply to all molecules.
+under optimzation that do not apply to all molecules.
 
 % \begin{lstlisting}
 % [ optdihedrals ]
@@ -1738,6 +1740,11 @@ Positions of the variables:
 \end{tabular}
 \vspace{1ex}
 }
+
+\warningbox{ An entry of TORSNT that is 0 sets the
+  corresponding force constant to 0.0 kJ/mol. On the other hand, an
+  entry of LJNT that is 0 sets the corresponding
+  Lennard-Jones coefficient to the value specified in the topology.  }
 
 \subsubsection{\texttt{[~parameter\_randomization~]}}
 \label{sec:inp-parameter_randomization}
@@ -1994,7 +2001,7 @@ optimized; those that are not should be omitted from the enumeration.
 {
 \begin{tabular}{r@{ : }l}
 \label{descr:lreg}
-LREG&\textbf{(Integer)} Controls the value of $\lambda$ in regularization.                                                             \\ 
+LREG&\textbf{(Float)} Controls the value of $\lambda$ in regularization.                                                             \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
 \(\leq0\)& set $\lambda$ automatically \textit{via} corner of the $L$-curve \\ 
     \(>0\)& set $\lambda$ to LREG \\
@@ -2115,11 +2122,11 @@ reference-dihedral reference values.
 \label{descr:malg}
       MALG[I]&\textbf{(Array of Integers)} Controls types of the minimization algorithms.                                                                             \\ 
 \multicolumn{2}{l}{Allowed values:} \\ 
+     \(0\)&do not perform energy minimization \\
      \(1\)&steepest-descents (more robust, less prone to errors)                                                                                    \\ 
-     \(2\)&conjugate-gradients (less robust, more prone to errors)                                                                                  \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
-     \(1\)&minimization settings for all individuals and all generations \\
-     \(2\)&enhanced minimization settings for optimal individual at the end of the run \\
+     \(1\)&minimization settings for all individuals/all generations/all LLS-SC iterations \\
+     \(2\)&enhanced minimization settings for optimal parameters at the end of the run \\
 \end{tabular}
 \vspace{1ex}
 }
@@ -2131,7 +2138,7 @@ reference-dihedral reference values.
 \multicolumn{2}{l}{Allowed values:} \\ 
     \(>0\)&set DX0 of MALG[I] to DX0[I]                                                                         \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
-     \(1\)&minimization settings for all individuals and all generations \\
+     \(1\)&minimization settings for all individuals/all generations/all LLS-SC iterations \\
      \(2\)&enhanced minimization settings for optimal individual at the end of the run \\
 \end{tabular}
 \vspace{1ex}
@@ -2144,7 +2151,7 @@ reference-dihedral reference values.
 \multicolumn{2}{l}{Allowed values:} \\ 
   \(>0\)&set DXM of MALG[I] to DX0[I]                                                                         \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
-  \(1\)&minimization settings for all individuals and all generations \\
+     \(1\)&minimization settings for all individuals/all generations/all LLS-SC iterations \\
   \(2\)&enhanced minimization settings for optimal individual at the end of the run \\
 \end{tabular}
 \vspace{1ex}
@@ -2157,7 +2164,7 @@ reference-dihedral reference values.
 \multicolumn{2}{l}{Allowed values:} \\ 
     \(>0\)&set the maximum number of steps of MALG[I] to NMAX[I]                                                \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
-  \(1\)&minimization settings for all individuals and all generations \\
+     \(1\)&minimization settings for all individuals/all generations/all LLS-SC iterations \\
   \(2\)&enhanced minimization settings for optimal individual at the end of the run \\
 \end{tabular}
 \vspace{1ex}
@@ -2170,7 +2177,7 @@ reference-dihedral reference values.
 \multicolumn{2}{l}{Allowed values:} \\ 
     \(>0\)&set DELE of MALG[I] to DELE[I] \\ 
 \multicolumn{2}{l}{Array index targets:} \\ 
-  \(1\)&minimization settings for all individuals and all generations \\
+     \(1\)&minimization settings for all individuals/all generations/all LLS-SC iterations \\
   \(2\)&enhanced minimization settings for optimal individual at the end of the run \\
 \end{tabular}
 \vspace{1ex}
@@ -2851,7 +2858,7 @@ the summand of the torsional potential function\textemdash{}in this
 case, the optimized parameters are the force constant and the phase of
 the term with multiplicity 3.
 
-\begin{figure}[TB]
+\begin{figure}[tb]
   \centering
   \includegraphics[width=.8\textwidth]{opt-results}
   \caption{Optimization results for butane and pentane.}
