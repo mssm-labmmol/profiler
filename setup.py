@@ -1,5 +1,8 @@
 from setuptools import setup, Extension, find_packages
 
+with open("VERSION") as fp:
+    package_version = fp.read().strip()
+
 extended_numpy = Extension(
     'geometrypy',
     sources = [
@@ -19,6 +22,7 @@ ext_gsl_ridge = Extension(
 
 setup (
     name='profilerOpt',
+    version=package_version,
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
@@ -34,6 +38,7 @@ setup (
 
 setup (
     name='profilerGen',
+    version=package_version,
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
