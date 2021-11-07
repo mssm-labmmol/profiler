@@ -51,6 +51,11 @@ def calcAngle(x1, y1, z1, x2, y2, z2, x3, y3, z3):
         np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
     return out
 
+def calcAngleRadians(x1, y1, z1, x2, y2, z2, x3, y3, z3):
+    v1 = np.array([x1, y1, z1]) - np.array([x2, y2, z2])
+    v2 = np.array([x3, y3, z3]) - np.array([x2, y2, z2])
+    return np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+
 
 def calcCosine(x1, y1, z1, x2, y2, z2, x3, y3, z3):
     v1 = np.array([x1, y1, z1]) - np.array([x2, y2, z2])
@@ -91,6 +96,35 @@ def calcDihedral(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4):
     out = np.degrees(np.arctan2(y, x))
     return out
 
+def calcDihedralRadians(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4):
+    """Praxeolitic formula
+    1 sqrt, 1 cross product"""
+    p0 = np.array([x1, y1, z1])
+    p1 = np.array([x2, y2, z2])
+    p2 = np.array([x3, y3, z3])
+    p3 = np.array([x4, y4, z4])
+    b0 = -1.0 * (p1 - p0)
+    b1 = p2 - p1
+    b2 = p3 - p2
+    # normalize b1 so that it does not influence magnitude of vector
+    # rejections that come next
+    b1 /= sqrt(np.dot(b1, b1))
+    # vector rejections
+    # v = projection of b0 onto plane perpendicular to b1
+    #   = b0 minus component that aligns with b1
+    # w = projection of b2 onto plane perpendicular to b1
+    #   = b2 minus component that aligns with b1
+    v = b0 - np.dot(b0, b1) * b1
+    w = b2 - np.dot(b2, b1) * b1
+    # angle between v and w in a plane is the torsion angle
+    # v and w may not be normalized but that's fine since tan is y/x
+    x = np.dot(v, w)
+    y = np.dot(fastCross(np.array([
+        b1,
+    ]), np.array([
+        v,
+    ])), w)
+    return np.arctan2(y, x)
 
 # Same as dihedral -- a different function only for clarity.
 def calcImproper(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4):

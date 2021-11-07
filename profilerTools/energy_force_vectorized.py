@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 import warnings
-import geometrypy as gp
 import numpy as np
 from .coordParser import wrapAngles
 from math import sqrt
@@ -32,7 +31,7 @@ from copy import deepcopy
 from .configuration import *
 from .fastmath import fastCross
 from .opts import optOpts
-
+import profilerTools.geometrypy_wrapper as gp
 
 def c6c12_to_sigmaepsilon(c6, c12):
     return ((c12 / c6)**(1.0 / 6), 0.25 * (c6**2 / c12))

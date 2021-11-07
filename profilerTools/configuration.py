@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 import numpy as np
-import geometrypy as gp
+import profilerTools.geometrypy_wrapper as gp
 from math import sqrt
 
 from .G96parser import parseG96traj
