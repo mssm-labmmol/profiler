@@ -48,7 +48,7 @@ to run this command with administrative privileges.
 
 # Requirements
 
-* `python` (preferably >3.4)
+* `python` (>=3.6)
 * [numpy](https://github.com/numpy/numpy)
 * [DEAP](https://github.com/DEAP/deap)
 * [scikit-learn](https://github.com/scikit-learn/scikit-learn)

@@ -23,6 +23,7 @@ ext_gsl_ridge = Extension(
 setup (
     name='profilerOpt',
     version=package_version,
+    python_requires='>=3.6',
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
@@ -33,12 +34,13 @@ setup (
             'profilerOpt=profilerTools.profilerOpt.profilerOpt:main',
         ]
     },
-    install_requires=['numpy', 'deap', 'scikit-learn']
+    install_requires=['numpy', 'deap', 'scikit-learn'],
 )
 
 setup (
     name='profilerGen',
     version=package_version,
+    python_requires='>=3.6',
     packages=find_packages(),
     ext_modules=[
         extended_numpy,
@@ -48,5 +50,5 @@ setup (
             'profilerGen=profilerTools.profilerGen.profilerGen:main',
         ]
     },
-    install_requires=['numpy', 'deap', 'scikit-learn']
+    install_requires=['numpy', 'deap', 'scikit-learn'],
 )
