@@ -339,7 +339,7 @@ class LLS_SC:
         cycles = 0
         while ((cycles < max_cycles) and
                (np.abs(np.max((curr_pars-prev_pars)/prev_pars)) >= max_dpar)):
-            print(f"LLS-SC: Running cycle {cycles+1}... ", end="")
+            print(f"LLS-SC: Running iteration {cycles+1}... ", end="")
 
             self.regressor.fit(target_data, wei, reg_center, lamb=lamb)
             

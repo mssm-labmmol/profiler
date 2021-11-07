@@ -27,6 +27,7 @@
 
 import argparse
 import numpy as np
+import pkg_resources
 
 from datetime import datetime
 from platform import platform, python_version
@@ -65,7 +66,7 @@ def evolStratFactory(*args, **kargs):
 
 
 def printheader(fp):
-    version = '1.0'
+    version = pkg_resources.require("profilerOpt")[0].version
     prog = 'profilerOpt'
     bars = "-" * (len(prog) + len(version) + 6)
     string = "                         *** {0} (v. {1}) ***\n".format(

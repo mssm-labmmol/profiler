@@ -26,6 +26,7 @@
 
 import argparse
 import numpy as np
+import pkg_resources
 
 from sys import argv, stdout, stderr
 from datetime import datetime
@@ -67,7 +68,7 @@ def minimize_conf_with_profile(ensemble, out_prefix, stpData, refPhi,
 
 
 def printheader(fp):
-    version = '1.0'
+    version = pkg_resources.require("profilerGen")[0].version
     prog = 'profilerGen'
     bars = "-" * (len(prog) + len(version) + 6)
     string = "                         *** {0} (v. {1}) ***\n".format(
