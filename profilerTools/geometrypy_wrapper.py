@@ -77,10 +77,10 @@ except:
         return out
 
     def calculateSines(pos, ilist, jlist, klist):
-        return np.sin(np.radians(getAngles(pos, ilist, jlist, klist)))
+        return np.sin(getAngles(pos, ilist, jlist, klist))
 
     def calculateCosines(pos, ilist, jlist, klist):
-        return np.cos(np.radians(getAngles(pos, ilist, jlist, klist)))
+        return np.cos(getAngles(pos, ilist, jlist, klist))
 
     def calculateDihedrals(pos, ilist, jlist, klist, llist):
         n = len(ilist)
