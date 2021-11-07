@@ -17,16 +17,10 @@ the [documentation](./doc/src/doc.pdf).
 
 # Installation
 
-`profilerTools` depends on [numpy](https://github.com/numpy/numpy),
-[DEAP](https://github.com/DEAP/deap) and
-[scikit-learn](https://github.com/scikit-learn/scikit-learn), which
-should be automatically installed by `setuptools` when following the
-instructions below.
-
 ## Recommended Installation
 
-The recommended installation also requires the `numpy` C header files
-and the GNU Scientific Library (GSL) header files. Therefore, you will
+The recommended installation requires the `numpy` C header files and
+the GNU Scientific Library (GSL) header files. Therefore, you will
 face issues if you do not have GSL installed or if your `numpy`
 installation does not include the header files. For the APT package
 manager, this can be remedied with
@@ -71,10 +65,15 @@ recommended one are:
 # Requirements
 
 * `python` (>=3.6)
-* [numpy](https://github.com/numpy/numpy)
-* [DEAP](https://github.com/DEAP/deap)
+* [numpy](https://github.com/numpy/numpy) (automatically installed by
+    `setuptools`)
+* [DEAP](https://github.com/DEAP/deap) (automatically installed by
+    `setuptools`)
 * [scikit-learn](https://github.com/scikit-learn/scikit-learn)
+    (automatically installed by `setuptools`)
 * [GNU Scientific Library](https://www.gnu.org/software/gsl/)
+    (optional, must be manually installed)
+* the `numpy` header files (optional, must be manually installed)
 
 # Limitations
 
