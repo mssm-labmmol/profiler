@@ -3,7 +3,7 @@
 
 try:
     from geometrypy import *
-except ImportError:
+except:
     import numpy as np
     from math import sqrt
     from .slow_math_warning import slow_math_warning

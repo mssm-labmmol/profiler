@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 import numpy as np
-import profilerTools.geometrypy_wrapper as gp
 
 def fastCross(v1, v2):
+    import profilerTools.geometrypy_wrapper as gp
     return gp.crossProduct(v1, v2)
