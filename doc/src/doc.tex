@@ -1144,76 +1144,19 @@ $\mathcal{R}^{2}$, is used as the actual residual function.
 \subsection{Regularized Optimization}
 \label{sec:regularization}
 
-This section complements the description of the LLS-SC method and
-relies on notation defined both in the \profilertools{}
-paper\cite{PAPER} and in this document.
-
 The solution of the LLS problem by means of standard matrix techniques
 does not impose any conditions on the values of parameter estimates.
 %
-Consequently, it may yield unphysical results, where the
+Consequently, it may yield unphysical results, where \textit{e.g.} the
 third-neighbor parameters have negative values.
 %
 To avoid this outcome, a type of regularization term can be included
 in the residual function, designed to prevent the minimum of the
 residual function to stray too far away from some reference parameter
-vector
-$\mathbf{X}^0 \equiv (X^0_{\Omega_1,\alpha_1},\ldots,X^0_{\Omega_K,\alpha_K})$.
+vector.
 %
-
-Using $\mathcal{R}$ from \autoref{eq:ga-fitness-rmsd}, the regularized
-residual function is
-\begin{align}\label{eq:chisq-regularized}
-  \chi^2_\text{R}(\mathbf{X}) = \mathcal{R}^2(\mathbf{X}) + \lambda^2 \sum_{k=1}^{K} \left[ l_k^{-1}(X_{\Omega_k,\alpha_k}-X_{\Omega_k,\alpha_k}^0)\right]^2,
-\end{align}
-where $l_k$, with $t=1,\ldots,K$, controls the
-relative weights attributed to the deviations of each parameter with
-respect to its reference value, and the regularization parameter
-$\lambda$ quantifies the balance between minimizing the original
-residual function or the regularization term.
-%
-A reasonable strategy to choose the value of $l_t$ for one parameter
-is to set it to the expected distance between its value in the
-solution and in the reference parameter vector, in orders of
-magnitude. For example, one may set the $l_t$ factors to 1 \unitener{}
-for torsional parameters, $10^3$ \unitljattr{} for attractive
-Lennard-Jones parameters and $10^6$ \unitljrepl{} for repulsive
-Lennard-Jones parameters, based on typical values for these
-parameters.
-%
-Regarding $\lambda$, there are established methods for estimating a
-balanced value, such as picking the corner of the $L$-curve.
-
-We note that the regularization strategy proposed above is slightly
-different from the usual kind of regularization adopted in LLS
-problems.  Commonly, the residual function is used to control the
-\textit{norm} $\left\Vert{\mathbf{X}}\right\Vert^2_2$ of the solution,
-and not the \textit{distance} $\left\Vert\mathbf{X} -
-\mathbf{X}^{0}\right\Vert^2_2$ between the solution and a reference
-parameter vector $\mathbf{X}^0$.  This distance-based regularization,
-however, is easily achieved by first carrying out a change of
-variables where the origin is shifted to $\mathbf{X}^0$, and then
-solving the usual regularized regression.  With this caveat in mind,
-the optimization of the regularized residual function
-$\chi^2_\text{R}$ can be carried out by relying essentially on the
-same methods and tools as the optimization of the original residual
-function $\mathcal{R}^2$.
-%
-In particular, the regularized minimization is still a LLS problem,
-amenable to be solved by standard matrix techniques, such as SVD,
-implemented in commonly used scientific libraries (\eg{}, \texttt{GSL}
-for C/C++, and \texttt{numpy} for Python).
-
-%
-% Alternatively, for methods that support this feature, the use of
-% inequality constraints $X_{*,t} \geq 0$, $t=\mathcal{T},\ldots,\mathcal{T}+\mathcal{P}$ can be
-% considered as an option to avoid negative third-neighbor parameters as
-% output of the regression.
-
-In \profilertools{}, regularization is carried out based on the
-\texttt{GSL} library.  This is achieved by implementing a C extension
-to call the appropriate \texttt{GSL} functions to solve the regression
-problem within Python.
+This regularized optimization is described in the Supporting
+Information of the LLS-SC paper\cite{PAPER}.
 
 \chapter{Input and Output File Formats}
 \label{chap:file-formats}
