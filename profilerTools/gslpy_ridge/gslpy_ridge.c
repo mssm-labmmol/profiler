@@ -114,7 +114,7 @@ void rglz_solve(gsl_vector *c, double *rnorm, double *snorm, rglz_wksp *rw)
     return;
 }
 
-inline void rglz_set_lambda(rglz_wksp *rw, const int lamb)
+inline void rglz_set_lambda(rglz_wksp *rw, const double lamb)
 {
     rw->lamb = lamb;
 }
